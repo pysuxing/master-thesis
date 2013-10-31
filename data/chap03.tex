@@ -1,0 +1,357 @@
+\chapter{Rat语法设计}
+Rat语言语法设计的首要目标是为编程者提供易用的并行语言要素，可以简洁优雅地
+描述并行问题。
+
+Rat是一种函数式并行程序语言，它具备函数式语言的一般特性：高阶函数、恒值对象、
+纯函数特性等，抽象表达能力，问题描述简洁优雅；它面向科学与工程计算领域，强化
+数值计算，弱化符号计算，支持定长整数与浮点数类型，这不同于一般函数式语言；
+它是一种静态强类型语言，在编译期执行类型检查，运行时安全性较强，无动态类型
+检测开销；它提供了一组向量原语，可用来描述一大类数据并行操作；它被设计为一门
+辅助性程序语言，为与C语言交互设计了有简单易用的接口，编程者一般只使用Rat语言编写
+程序中的数据并行部分。
+
+本章的内容结构如下：
+%% 第\ref{sec:rat-overview}节对Rat语言做简单综述，
+第\ref{sec:type-system}节介绍Rat的类型系统,
+第\ref{sec:vector-primitives}节介绍Rat的核心并行语言要素---向量原语,
+第\ref{sec:functional-characters}节对Rat语言采用的函数式语言特性进行说明，
+并说明选取函数式语言设计的优势,
+第\ref{sec:c-interface}节介绍Rat程序与C语言的交互界面,
+第\ref{sec:n-body}节给出一个完整并行程序示例---n-body问题用以说明Rat语言的易用性。
+
+%% \section{Rat语言综述}\label{sec:rat-overview}
+
+\section{类型系统}\label{sec:type-system}
+\subsection{Rat支持的数据类型}
+在一般的程序语言中，数据与操作（函数、过程）是不同的概念，
+数据就是存储在计算机当中的“数”，而操作表示施加在数据上的程序行为。
+在函数式程序语言中，数据与函数的界限是模糊的，二者只不过具有不同的类型而已。
+Rat是函数式语言，采用类似于Haskell的类型系统，支持数据类型与函数类型。
+为了便于理解，在本节中，我们依旧区分“数据”与“函数”，下面分别予以介绍。
+
+\subsubsection{数据类型}
+Rat将数据分为两类：标量数据类型（scalar type）与向量类型（vector type）。
+其中向量类型是同质（homogeneous）标量类型的一维集合。表\ref{tbl:rat-datatype}列举了
+Rat的内建数据类型。
+
+标量类型包括内建数据类型（builtin type），元组类型(tuple)。内建数据类型是计算机能够表示的基本
+数据类型，包括定长整数与定长浮点数。而且，由于Rat语言面向科学计算领域，
+强化数值计算能力，弱化符号计算能力。所以，Rat内建的基本数据
+数据类型只包括定长整数类型与定长浮点数类型。
+
+元组类型也称结构类型（struct），允许不同类型的元素组合得到，Rat的元组类型允许嵌套定义。
+
+向量类型是一个同质数据集合，它包含的数据个体相同的类型，并且必须是标量类型。在Rat语言中
+使用方括号表示向量类型，如\texttt{[Int32]}表示一个32位整数向量类型。
+向量是一维数据集合，Rat在语法层面不支持高维数组，但通过定义元组及相应的函数可以轻松构建高维
+数组程序库。向量类型是Rat语言提供数据并行能力的数据基础，这一点将在第\ref{subsub:vector-primitives}
+中详细说明。
+
+\begin{table}[htbp]
+  \centering
+  \caption{Rat数据类型}
+  \label{tbl:rat-datatype}
+  \begin{tabularx}{\linewidth}{|l|l|l|X|}
+    \hline
+    \multirow{11}*{标量类型} &
+    \multirow{10}*{内建数据类型} & Int8 & 8 bit 有符号整数\\
+    \cline{3-4}
+    & & UInt8 & 8 bit 有符号整数\\
+    \cline{3-4}
+    & & Int16 & 16 bit 有符号整数\\
+    \cline{3-4}
+    & & UInt16 & 16 bit 有符号整数\\
+    \cline{3-4}
+    & & Int32 & 32 bit 有符号整数\\
+    \cline{3-4}
+    & & UInt32 & 32 bit 有符号整数\\
+    \cline{3-4}
+    & & Int64 & 64 bit 有符号整数\\
+    \cline{3-4}
+    & & UInt64 & 64 bit 有符号整数\\
+    \cline{3-4}
+    & & Float & 32 bit 单精度浮点数\\
+    \cline{3-4}
+    & & Double & 64 bit 双精度浮点数\\
+    \cline{2-4}
+    & 元组类型 & (a, b, ...) & 其中a, b是任何类型（非函数类型）\\
+    \hline
+    \multicolumn{2}{|l|}{向量类型} & [a] & 元素类型为a的向量类型，a为标量类型\\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\subsubsection{函数类型}
+Rat是函数式语言，支持高阶函数等函数式语言特性，这将在第\ref{sec:functional-characters}节
+详细介绍。这里只说明Rat函数的类型表示方法。
+
+一个函数的类型由其输入参数的类型与输出结果的类型唯一决定，下面举例说明。
+
+\begin{quotation}
+  \kai{
+    \texttt{dot}函数求两个单精度浮点向量的内积，它的类型声明如下：\\
+    \centering\texttt{dot :: [Float] -> [Float] -> Float}\\
+    其中，最后一个箭头右侧
+    的类型表示dot函数返回一个\texttt{Float}类型的结果，前面两个\texttt{[Float]}表示\texttt{dot}
+    函数以两个\texttt{[Float]}类型的单精度浮点向量作为输入参数。至于为什么\texttt{dot}的类型
+    声明中有多于一个箭头，这与柯里化相关，这部分内容请参见第\ref{sec:functional-characters}节。
+  }
+\end{quotation}
+%% 函数式程序语言的计算模型是lambda演算理论FIXME：citehere，是一种在功能上等价于但完全不同于
+%% 图灵机的计算模型。
+\subsection{静态强类型}
+Rat是一种静态强类型语言，在编译期执行严格的类型检查，保证数据类型与施加在数据上的函数类型
+严格匹配。采用静态强类型的类型系统可以获得两方面优势：
+\begin{itemize}
+  \item 安全性：强类型检查可以保证类型安全，从而避免一大类运行时错误。
+    强类型检查的内容包括，所有函数（数据）的类型皆在编译期确定；
+    任何函数（数据）的类型在生命周期中保持不变；
+    保证所有数据操作的有效性；不允许类型转换操作。
+    Rat语言采用的类型系统类似于Haskell，而使用过Haskell
+    的编程者都会有体会，那就是程序只要通过了编译，基本不会发生运行时错误。
+  \item 高效率：静态类型在运行时没有类型识别与检测的额外开销，可以提高执行效率，这与Rat面向
+    科学工程计算的设计初衷相符合。
+\end{itemize}
+
+\subsection{多态}
+采用静态强类型系统的一个缺点就是编程灵活性受到了限制，特定类型的函数只能作用于
+特定类型的数据。但本文认为，为了安全与性能承受灵活性方面的这一点代价是值得的。
+
+为了提高编程灵活性，Rat为函数多态提供了支持。多态是指
+同一种逻辑操作可以施加在多种不同类型的数据之上，如加法运算既适用于整型数，也
+适用于浮点数。
+
+多态技术可以为编程提供极大的灵活性。如果没有多态的支持，同样的加法运算就需要为不同类型
+分别定义，而多态允许“一次定义，多个实例”。多态技术的典型代表是C++ template，
+它定义函数或对象模板，以类型作为模板参数，使用时再根据不同的需求进行实例化。
+下面的代码片段展示了使用C++ template定义的多态加法函数。
+\begin{lstlisting}[language=C++]
+template <typename T>
+T add (T a, T b) {
+  return a+b;
+}
+\end{lstlisting}
+
+Rat支持多态的方式与Haskell相同，通过引入类型类（type class）的概念实现多态。
+一个类型类是一组类型的集合，这些类型具有某些相同的性质，支持某些相同的操作。
+如Num类型类是“数”类型的集合，他们都支持加减法运算。为了使用多态，
+编程者先定义一个类型类，声明属于该类型类的类型应该支持的方法，
+然后将某个类型实例化为该类型类的成员，下面的Rat代码说明了使用多态的方法。
+\begin{lstlisting}[language=Haskell]
+class Num a where
+  + :: a -> a -> a
+  - :: a -> a -> a
+
+instance Num Int32 where
+  + a b = addInt32 a b
+  - a b = substractInt32 a b
+\end{lstlisting}
+
+\section{向量原语}\label{sec:vector-primitives}
+Rat语言的定位是数据并行语言，采用一种数据并行编程模型。数据并行问
+题的特点是，将相同的操作施加到不同的数据上，不同数据操作之间的相关性较
+弱，可并行度高。数据并行模型是一种层次较高的并行编程模型，编程者只需要
+指出施加在数据上的操作以及该接受该操作的数据集就能实现程序的并行执行，
+因此，数据并行问题的描述具有简洁优雅的特点。同时，数据并行问题涵盖了一
+大类科学与工程计算问题，应用场景非常广阔。
+
+Rat提供了一组向量原语（Vector Primitive, VP），参见表\ref{tbl:vector-primitives}。
+每一个向量原语定义一种施加在一维向量上的并行操作。从表\ref{tbl:vector-primitives}
+中可以看出，Rat提供的这一组向量原语集合非常精简，一共只有六个，而仅仅通过组合使用这六种向量原语
+就方便地描述一大类数据并行问题。表\ref{tbl:derived-vector-operations}列举了一些在
+Rat向量原语基础上可以实现的常见向量操作。
+
+\begin{table}[htb]
+  \centering
+  \caption{Rat向量原语}
+  \label{tbl:vector-primitives}
+  \begin{tabular*}{\linewidth}{lp{10cm}}
+    \toprule[1.5pt]
+    \hei{向量原语} & \hei{类型声明} \\
+    \midrule[1pt]
+    map & (a -> b) -> [a] -> [b]\\
+    scan & ScanDirection -> InclusiveMode -> (a -> a -> a) -> [a] -> [a]\\
+    slice & Integral i => (i, i) -> [a] -> [a]\\
+    gpermute & Integral i => PermuteDirection -> (i -> i) -> [a] -> [a]\\
+    gcopy & Boolean b => [b] -> [a] -> [a]\\
+    sort & (a -> a -> Ording) -> [a] -> [a]\\
+    \bottomrule[1.5pt]
+  \end{tabular*}
+\end{table}
+
+\begin{table}[htb]
+  \centering
+  \caption{派生向量操作}
+  \label{tbl:derived-vector-operations}
+  \begin{tabular*}{\linewidth}{lp{10cm}}
+    \toprule[1.5pt]
+    \hei{向量原语} & \hei{类型声明} \\
+    \midrule[1pt]
+    fold & (a -> a -> a) -> [a] -> a\\
+    permute & Integral i =>（i -> i）-> [a] -> [a]\\
+    backpermute & Integral i =>（i -> i）->[a] -> [a]\\
+    scale & Integral i => ScaleType -> i -> [a] -> [a]\\
+    compact & Boolean b => [b] -> [a] -> [a]\\
+    sparse & Boolean b => [b] -> [a] -> [a]\\
+    filter & Boolean b => (a -> b) -> [a] -> [a]\\
+    reverse & [a] -> [a]\\
+    \bottomrule[1.5pt]
+  \end{tabular*}
+\end{table}
+
+下面分别对各个向量原语进行说明，给出他们的严格语义定义，
+图\ref{fig:vp-diagrams}是各向量原语的操作示意图。
+
+\subsection{map}
+map原语以一个标量操作与一个向量为输入参数，标量操作的类型与输入向量的类型
+严格匹配。map原语对向量中的所有数据个体施加同一操作，然后收集结果
+返回一个新的向量。
+\begin{definition}
+  map原语以一个一元函数$f$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入参数，
+  返回一个向量$$[f(a_0), f(a_1), \cdots, f(a_{n-1})]$$作为结果。
+\end{definition}
+
+图\ref{fig:map-diagram}给出map原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=4cm]{map}
+  \caption{map原语操作示意图}
+  \label{fig:map-diagram}
+\end{figure}
+
+\subsection{slice}
+slice原语对一个向量执行截断操作，他以一对整数\texttt{(i, j)}作为向量
+截断的起点与重点，截取输入向量的一段作为输出向量。\texttt{(i, j)}表示
+一个前闭后开区间，即$[i, j)$。图\ref{fig:slice-diagram}给出了slice原语的操作说明。
+\begin{definition}
+  slice原语以一对整数$(i, j)$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入参数，
+  其中$0\le{}i<j\le{}n-1$，返回一个向量$$[a_{i}, \cdots, a_{j-1}]$$作为结果。
+\end{definition}
+
+图\ref{fig:slice-diagram}给出slice原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=4cm]{slice}
+  \caption{slice原语操作示意图}
+  \label{fig:slice-diagram}
+\end{figure}
+
+\subsection{scan}
+scan原语又称为prefix-sum，它使用一个满足结合律的二元函数对输入向量做部分和累加操作。scan原语提供两个配置选项：
+累加方向\texttt{ScanDirection}与头部元素包含模式\texttt{InclusiveMode}。
+\begin{definition}
+  scan原语以一个满足结合律以$I$为幺元的二元函数$\oplus$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
+  根据两个配置参数  $ScanDirection, InclusiveMode$的取值返回一个部分和向量作为结果。
+  不同配置参数下的返回结果如下：\\
+  $[a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-1})]$\hfill{}Inclusive, Forward\\
+  $[(a_0\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}]$\hfill{}Inclusive, Backward\\
+  $[I, a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-2})]$\hfill{}Exclusive, Forward\\
+  $[(a_1\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}, I]$\hfill{}Exclusive, Backward\\
+  %% \begin{tabular}{|l|l|l|}
+  %%   \hline
+  %%   %% \backslashbox{ScanDirection}{InclusiveMode}
+  %%   & Inclusive & Exclusive\\
+  %%   \hline
+  %%   Forward & $[a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-1})]$ &
+  %%   $[I, a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-2})]$ \\
+  %%   \hline
+  %%   Backward & $[(a_0\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}]$ &
+  %%   $[(a_1\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}, I]$ \\
+  %%   \hline
+  %% \end{tabular}
+\end{definition}
+
+图\ref{fig:scan-diagram}给出scan原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \subfloat[Inclusive, Forward]{
+    \includegraphics[height=4cm]{scan-if}\hspace{2em}
+  }
+  \subfloat[Exclusive, Forward]{
+    \includegraphics[height=4cm]{scan-ef}\hspace{2em}
+  }
+  \\
+  \subfloat[Inclusive, Backward]{
+    \includegraphics[height=4cm]{scan-ib}\hspace{2em}
+  }
+  \subfloat[Exclusive, Backward]{
+    \includegraphics[height=4cm]{scan-eb}\hspace{2em}
+  }
+  \caption{scan原语操作示意图}
+  \label{fig:scan-diagram}
+\end{figure}
+
+\subsection{gpermute}
+gpermute对一个向量执行通用乱序操作，它以一个索引计算函数与一个向量为输入，接受一个配置参数PermuteDirection。
+\begin{definition}
+  gpermute原语以一个索引计算函数$g$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
+  根据配置参数  $PermuteDirection$的取值返回一个重排序的向量作为结果。
+  不同配置参数下的返回结果如下：\\
+  $[a_{g^{-1}(0)}, a_{g^{-1}(1)}, \cdots, a_{g^{-1}_{n-1}}]$\hfill{}Forward\\
+  $[a_{g(0)}, a_{g(1)}, \cdots, a_{g_{n-1}}]$\hfill{}Backward\\  
+\end{definition}
+
+图\ref{fig:gpermute-diagram}给出gpermute原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \subfloat[Forward]{
+    \includegraphics[height=4cm]{gpermute-f}
+  }
+  \\
+  \subfloat[Backward]{
+    \includegraphics[height=4cm]{gpermute-b}
+  }
+  \caption{gpermute原语操作示意图}
+  \label{fig:gpermute-diagram}
+\end{figure}
+
+\subsection{gcopy}
+gcopy原语以一个标志向量与一个数据向量为输入，根据标志向量中数据的真值确定是否对数据向量
+中相应位置的元素执行拷贝，将所有拷贝的数据收集起来得到结果。
+\begin{definition}
+  gcopy原语以一个标志向量$$[b_0, b_1, \cdots, b_{n-1}]$$与一个数据向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
+  返回一个向量$$[a_{n_1}, a_{n_2}, \cdots, a_{n_k}]$$作为结果，其中$0\le{}n_1<n_2<\cdots{}<n_k\le{}n-1$且
+  $b_{n_i}=true, i=1,2,\cdots,k$。
+\end{definition}
+
+图\ref{fig:gcopy-diagram}给出gcopy原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=4cm]{gcopy}
+  \caption{gcopy原语操作示意图}
+  \label{fig:gcopy-diagram}
+\end{figure}
+
+\subsection{sort}
+sort原语以一个比较函数与一个向量作为输入，返回一个结果向量，其中的元素皆来自输入向量，
+但任何一个元素都比位于它后面的元素“小”。
+\begin{definition}
+  sort原语以一个二元比较函数$\prec$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
+  返回一个结果向量$$[a_{n_1}, a_{n_2}, \cdots, a_{n_n}]$$，该向量是输入向量的一个重排，
+  并且对于任意$n_i\prec{}n_j$都有$a{n_i}\prec{}a{n_j}$。
+\end{definition}
+
+图\ref{fig:sort-diagram}给出sort原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=4cm]{sort}
+  \caption{sort原语操作示意图}
+  \label{fig:sort-diagram}
+\end{figure}
+
+%% 下面使用一个简单例子说明数据并行问题的特点。
+%% \begin{quotation}
+%%   求解两个向量$u, v$的内积FIXME:equation and font
+%%   $$d=u\cdot{}v=\sum_{k=1}^nu_kv_k$$
+%% \end{quotation}
+
+\section{函数式语言特性}\label{sec:functional-characters}
+\subsection{“一等公民”}
+\subsection{纯函数性质}
+\subsection{柯里化}
+\subsection{恒值对象}
+\subsection{函数式语言的优势}
+
+\section{C语言接口}\label{sec:c-interface}
+
+\section{Rat程序实例---n-body问题}\label{sec:n-body}
