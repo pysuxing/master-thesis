@@ -97,8 +97,7 @@ Rat是函数式语言，支持高阶函数等函数式语言特性，这将在�
     声明中有多于一个箭头，这与柯里化相关，这部分内容请参见第\ref{sec:functional-characters}节。
   }
 \end{quotation}
-%% 函数式程序语言的计算模型是lambda演算理论FIXME：citehere，是一种在功能上等价于但完全不同于
-%% 图灵机的计算模型。
+
 \subsection{静态强类型}
 Rat是一种静态强类型语言，在编译期执行严格的类型检查，保证数据类型与施加在数据上的函数类型
 严格匹配。采用静态强类型的类型系统可以获得两方面优势：
@@ -346,12 +345,217 @@ sort原语以一个比较函数与一个向量作为输入，返回一个结果�
 %% \end{quotation}
 
 \section{函数式语言特性}\label{sec:functional-characters}
-\subsection{“一等公民”}
-\subsection{纯函数性质}
+Rat采用了函数式语言设计，具备函数式程序语言的一般特点。在本章的后续各节中
+将分别介绍Rat采用的函数式语言特性，并在最后进行总结，说明采用函数式设计带来的优势。
+
+\subsection{函数“一等公民”}
+函数式程序语言采用的计算模型是$\lambda$演算（$\lambda$ Calculus）理论FIXME：citehere，是一种在功能上等价于
+图灵机的计算模型FIXME:citehere。Rat是一种强类型语言，
+它的理论基础是$\lambda$演算的一个扩展---类型$\lambda$演算（Typed $\lambda$ Calculus）。
+在$\lambda$演算的形式化系统中，所有公式都可以看作函数，也就是说，常量被看作0元函数。
+命令式语言区分“函数”与“数据”的界限在函数式语言中并不存在，函数与数据是等价的，
+函数式语言中函数是一等公民，下面给出其定义：
+
+\begin{definition}
+  当程序语言中的函数具备下列性质时，称函数为该语言的“一等公民”（first-class citizen）FIXME：citehere：
+  \begin{compactitem}
+    \item 函数可以作为参数传递给其他函数，即支持高阶函数；
+    \item 函数可以作为其他函数的返回值；
+    \item 允许匿名函数
+  \end{compactitem}
+\end{definition}
+
+
+\subsection{纯函数特性}
+纯函数特性（pure functional）也称为无副作用（side-effect free）。有无副作用
+描述的是程序语言中“函数”的一种性质，副作用是指，函数除了在返回某个值以外，
+还改变了某些全局状态，或与程序外部的世界发生了交互。副作用，是程序语言中“函数”与数学
+中“函数”的主要区别，数学函数单纯地使用输入参数计算一个返回值，而程序函数除了
+计算返回值以外，还可能执行IO操作、引起异常行为等。一般来说，副作用对于程序运行
+是必要的，甚至有些程序函数定义的目的就是为引起某些副作用大发生，如IO函数。
+
+而某些程序函数，如数学函数，在执行计算的同时不引起任何副作用。我们称这类函数
+为纯函数，其定义如下：
+\begin{definition}
+纯函数（pure function），指不引起任何副作用，
+计算结果只与输入参数相关，无论何时，只要给定相同输入，就保证返回相同结果的程序函数。
+\end{definition}
+
+Rat语言面向科学工程计算设计，它关注的核心任务是数学计算，而数学计算中
+使用的函数恰恰满足纯函数的特征。采用纯函数设计，不仅可以简化程序语言的
+语义分析，更为程序的自动并行化提供了巨大的便利，
+这将在第\ref{subsec:functional-advantages}节详细说明。
+
 \subsection{柯里化}
+柯里化（curried）也是程序函数的一种性质，它实质上是允许程序函数的形式参数
+部分实例化，得到的结果仍是一个函数，这个函数的形式参数就是原函数未被实例化
+的形式参数。下面仍以求解向量内积的例子说明。
+\begin{quotation}
+  \kai{
+    \texttt{dot}函数求两个单精度浮点向量的内积，它的类型声明如下：\\
+    \texttt{dot :: [Float] -> [Float] -> Float}\\
+    \texttt{dot}函数有两个形式参数，当按照如下方式调用\texttt{dot}函数时，
+    将可以得到两个向量\texttt{u}，\texttt{v}的内积：\\
+    \texttt{s = dot u v}\\
+    但如果只对一个形式参数实例化，即按照如下方式调用，
+    将得到一个一元函数\texttt{dotWithU}，
+    它有只有一个形式参数，当对这个形式参数实例化的时候，求解该实参与向量
+    \texttt{u}的内积：\\
+    \texttt{dotWithU = dot u}\\
+    \texttt{s = dotWithU v}
+  }
+\end{quotation}
+
+柯里化也可以从另一个视角理解，将所有函数都看作一元函数，一个n元函数可以看作
+一个返回值为n-1元函数的一元函数。即，在多元函数的类型声明中，箭头\texttt{->}
+是右结合的。这样，\texttt{dot}函数的类型声明可以看作：\\
+\texttt{dot:: [Float] -> ([Float] -> [Float])}
+
 \subsection{恒值对象}
-\subsection{函数式语言的优势}
+恒值对象也是函数式语言的重要特点。需要说明的是，这里的“对象”（object）
+不同与面向对象程序语言中的对象，而是函数式语言中唯一的实体类型---函数，
+之所以采用“恒值对象”而非“恒值函数”，是因为将“函数”与“赋值”联系起来
+不够自然。
+
+\begin{definition}
+  恒值对象，指对象只在其定义的时候被确定其值，在其后的生命周期中不允许再次赋值，
+  对象的值在整个生命周期中保持不变。
+\end{definition}
+
+Rat语言中的函数（函数与数据的总称）都是恒值对象，所以，严格来讲，Rat不支持
+“变量”的概念。
+
+恒值特性是与纯函数特性协调的，因为在现行的冯$\cdot$诺依曼计算机上，对象赋值
+就代表内存区域的改写，这必然引起副作用的发生。
+
+\subsection{函数式语言设计的优势}\label{subsec:functional-advantages}
+前面介绍了Rat语言采用的若干函数式设计，下面说明为什么要采用函数式语言设计，
+上述的函数式语言特性能带来什么优势。
+
+\subsubsection{抽象层次高}
+高阶函数与柯里化特性为编程提供了极大灵活性，编程者可以灵活地操作函数，
+使用已有的函数构建新函数；
+
+恒值对象将编程者从内存管理的工作中解脱出来，只需集中注意力在解决问题的逻辑
+之上，内存等硬件资源的有效利用由编译期与运行时系统负责。
+
+此外，高阶函数的使用大大增强了程序的表达能力，使得复杂的问题可以用
+非常简洁优雅的代码就可以描述，且程序代码逻辑性强，可读性强。
+
+\subsubsection{语义简单精确}
+纯函数特性与恒值对象使得程序的语义更加简单精确，大大降低了语义分析的难度，
+这样就使得编译器更容易掌握程序行为，同时也使得程序的高层优化更容易进行。
+
+\subsubsection{为程序并行化提供支持}
+函数式语言的理论基础是$\lambda$演算，程序的运行实质就是$lambda$演算理论中
+表达式求值的过程。表达式求值的基本形式是函数应用（function application），即
+通常所说的函数调用：将函数形式参数实例化，计算返回值。一个复杂表达式可能由
+多个子表达式构成，各个子表达式的求值先于整个表达式的求值。
+
+如果一个表达式中应用的函数都是纯函数，那么由$\lambda$演算理论中的
+Church-Rosser定理（也称为菱形性质）FIXME：citehere可以得到下面的定理：
+\begin{theorem}
+  一个表达式的求值结果与子表达式的求值顺序无关。
+\end{theorem}
+
+上述定理表明，纯函数特性为程序自动并行化提供了有力支持，一个复杂表达式的
+各个子表达式可以并行求值，同时保证得到正确的最终结果！
+
+\begin{quotation}
+  \kai{
+    考虑下面的表达式求值问题：\\
+    \texttt{dot (map f u) (scan g v)}\\
+    表达式求值过程可以以一棵求值树表示，树中每一个非叶结点表示一个函数应用，
+    叶结点表示函数或者数据，求值过程自下向上，最终得到根结点的值即为整个表达式的
+    求值结果。上述表达式的求值树如图\ref{fig:expression-tree}，其中以灰色结点为根
+    的子树代表的子表达式可以并行求值。
+  }
+\end{quotation}
+\begin{figure}
+  \centering
+  \includegraphics[height=5cm]{expression-tree}
+  \caption{表达式求值树}
+  \label{fig:expression-tree}
+\end{figure}
 
 \section{C语言接口}\label{sec:c-interface}
+正如第\ref{subsec:functional-advantages}节所说，纯函数特性是一种非常优良
+的语言特性，但副作用在程序设计中也是必不可少的，因为程序要解决问题，不光
+要做计算的工作，还必须与外部世界发生交互，如从外部存储器读取输入，向外部写入
+计算结果等等。
+
+如何在保留纯函数特性优势的前提下，允许副作用的发生呢？不同函数式语言有不同做法，
+Lisp系语言与ML系语言不是纯函数式的，允许副作用发生，Haskell采用一种MonadFIXME：citehere
+技术将程序的纯函数部分与副作用部分严格隔离开来，以便在纯函数部分仍旧能够利用
+纯函数特性带来的优良性质。
+
+Rat采用了一种不同的策略。Rat主要的设计目标是降低并行程序设计
+的难度，提供易用性强的并行编程工具，由于它是一种数据并行语言，面向
+科学与工程计算，所以程序的并行部分集中在计算过程，这部分程序是无副作用的。
+所以，Rat被设计用来与C语言协同工作，程序的副作用部分，一般也是串行部分（如IO操作等）
+使用C语言编写，计算的部分，一般也是并行性所在的部分，使用Rat语言编写。
+Rat提供简单易用的C语言交互接口，允许C语言调用Rat程序。实际上，Rat编译器
+就是一个源到源（source-to-source）编译器，它将Rat程序翻译成C函数供C程序调用。
+
+Rat的C语言交互接口非常简单，仅包含一个export语句。export语句的形式语法参见附录FIXME:refhere。
+通过export语句，Rat编译器将使用Rat语言定义的函数提供给C语言使用，C语言可以调用Rat函数完成
+计算任务。
+
+FIXME:有关数据类型映射的表格可以添加
+%% Rat的C语言交互接口包括两个语法：import语句与export语句。
+%% \begin{itemize}
+%%   \item import语法形式如下：\\
+%%     \texttt{import \textsl{<identifier> :: <type>}}\\
+%%     该语法从外部引入一块数据，以\texttt{\textsl{identifier}}作为引用名称，
+%%     其类型为\texttt{\textsl{type}}
+%% \end{itemize}
 
 \section{Rat程序实例---n-body问题}\label{sec:n-body}
+本节使用Rat语言解决一个实际问题---n-body问题，以此展示Rat语言强大的抽象能力与
+表达能力，同时展示Rat语言隐藏并行细节的能力。FIXME：font
+\begin{quotation}
+  \kai{
+    n-body问题是一个经典数据并行问题。问题描述如下：
+
+    在一个二维空间内存在$n$个粒子$[cell_1, cell_2, \cdots, cell_n]$，
+    粒子具有质量$m$，位置$(P^x,P^y)$，速度$(V^x, V^y)$三种属性，
+    粒子相互之间存在引力，粒子$i$与粒子$j$相互之间引力大小与他们的质量成正比，
+    与距离平方成反比，即$F=G\frac{m_im_j}{D}$，
+    其中$G$为引力常数，
+    $D=(p^x_i-p^x_j)^2+(P^y_i-P^y_j)^2$为两个粒子间的距离。
+    给定$n$个粒子的的质量$[m_1, m_2, \cdots, m_n]$，
+    初始位置$[(P^x_1, P^y_1), (P^x_2, P^y_2), \cdots, (P^x_n, P^y_n)]$，
+    与初始速度$[(V^x_1, V^y_1), (V^x_2, V^y_2), \cdots, (V^x_n, V^y_n)]$，
+    以$t$为时间步长，求解第$n$个粒子从$0$时刻起每个时间步长之后的位置。
+  }
+\end{quotation}
+
+n-body问题的Rat实现如下，下面对代码中的关键部分予以说明。
+\begin{compactitem}
+  \item 第1行的export语句表示，将\texttt{solveNBodyOneStep}函数
+    输出给C程序调用，生成的C函数类型与solveNBodyOneStep在Rat语言中的类型相对应。
+  \item 第3-10行定义需要使用的数据类型，这些数据类型都有对应的C语言结构类型。
+    其中位置\texttt{Position}与速度\texttt{Velocity}都由一对浮点数组成，
+    质量\texttt{Mass}是一个浮点数，例子\texttt{Cell}由它的三种属性构成。
+  \item 第12-13行定义了引力常数\texttt{g}
+  \item 第15-34行定义了完成计算功能的函数\texttt{solveNBodyOneStep}，
+    该函数以时间步长\texttt{t}与一组粒子\texttt{cells}为输入参数，计算\texttt{t}
+    时间后粒子状态。
+    \begin{compactitem}
+      \item 第19-27行定义了一些辅助函数与中间变量，
+        \texttt{positions}包含所有粒子的位置，\texttt{velocities}包含了所有粒子的初始速度，
+        \texttt{calcDistanceSqure}计算两个粒子距离的平方和，
+        \texttt{calcSingleAcc}计算单个粒子对给定粒子造成的加速度。
+      \item 第28-29行定义\texttt{calcAccelerate}计算所有粒子对给定粒子造成的加速度和，
+        使用了\texttt{fold}方法。
+      \item 第30行定义的\texttt{accelerates}包含所有粒子在当前状态下受力产生的加速度。
+      \item 第31-34行计算$t$时间后粒子的速度\texttt{newVelocities}与位置\texttt{newPositions}，
+        使用了\texttt{zipWith}方法。
+      \item 第17行根据计算得到的$t$时间后的粒子位置与速度生成新的粒子状态，
+        使用了\texttt{zipWith3}方法。
+    \end{compactitem}
+\end{compactitem}
+
+\lstinputlisting[language=Haskell]{listings/nbody.hs}
+
+14527321327

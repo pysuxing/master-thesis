@@ -1,0 +1,22 @@
+digraph G {
+        root[label=""];
+        dot;
+        t1[label="", style=filled, fillcolor=gray];
+        t2[label="", style=filled, fillcolor=gray];
+        map;
+        f;
+        u;
+        scan;
+        g;
+        v;
+
+        root -> dot;
+        root -> t1;
+        root -> t2;
+        t1 -> map;
+        t1 -> f;
+        t1 -> u;
+        t2 -> scan;
+        t2 -> g;
+        t2 -> v;
+}
