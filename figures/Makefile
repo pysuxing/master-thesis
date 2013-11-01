@@ -1,7 +1,7 @@
-all: *.png
+all: expression-tree.pdf
 
-%.png: %.dot
-	dot -Tpng -o $@ $^
+%.pdf: %.dot
+	dot -Tpdf -o $@ $^
 
 clean:
 	rm -v *~
