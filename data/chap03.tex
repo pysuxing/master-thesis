@@ -1,4 +1,4 @@
-\chapter{Rat语法设计}
+\chapter{Rat语法设计}\label{chap:frontend}
 Rat语言语法设计的首要目标是为编程者提供易用的并行语言要素，可以简洁优雅地
 描述并行问题。
 
@@ -162,9 +162,9 @@ Rat向量原语基础上可以实现的常见向量操作。
 
 \begin{table}[htb]
   \centering
-  \caption{Rat向量原语}
+  \caption{向量原语}
   \label{tbl:vector-primitives}
-  \begin{tabular*}{\linewidth}{lp{10cm}}
+  \begin{tabularx}{\linewidth}{p{10em}X}
     \toprule[1.5pt]
     \hei{向量原语} & \hei{类型声明} \\
     \midrule[1pt]
@@ -175,14 +175,14 @@ Rat向量原语基础上可以实现的常见向量操作。
     gcopy & Boolean b => [b] -> [a] -> [a]\\
     sort & (a -> a -> Ording) -> [a] -> [a]\\
     \bottomrule[1.5pt]
-  \end{tabular*}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[htb]
   \centering
   \caption{派生向量操作}
   \label{tbl:derived-vector-operations}
-  \begin{tabular*}{\linewidth}{lp{10cm}}
+  \begin{tabularx}{\linewidth}{p{10em}X}
     \toprule[1.5pt]
     \hei{向量原语} & \hei{类型声明} \\
     \midrule[1pt]
@@ -195,7 +195,7 @@ Rat向量原语基础上可以实现的常见向量操作。
     filter & Boolean b => (a -> b) -> [a] -> [a]\\
     reverse & [a] -> [a]\\
     \bottomrule[1.5pt]
-  \end{tabular*}
+  \end{tabularx}
 \end{table}
 
 下面分别对各个向量原语进行说明，给出他们的严格语义定义，
