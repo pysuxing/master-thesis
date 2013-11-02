@@ -467,8 +467,8 @@ Church-Rosser定理（也称为菱形性质）FIXME：citehere可以得到下面
     \texttt{dot (map f u) (scan g v)}\\
     表达式求值过程可以以一棵求值树表示，树中每一个非叶结点表示一个函数应用，
     叶结点表示函数或者数据，求值过程自下向上，最终得到根结点的值即为整个表达式的
-    求值结果。上述表达式的求值树如图\ref{fig:expression-tree}，其中以灰色结点为根
-    的子树代表的子表达式可以并行求值。
+    求值结果。上述表达式的求值树如图\ref{fig:expression-tree}，其中分别以
+    \texttt{t1}与\texttt{t2}为根的两棵子树代表的子表达式可以并行求值。
   }
 \end{quotation}
 \begin{figure}
