@@ -197,10 +197,10 @@ FIXME：提及附录。
     \midrule[1pt]
     map & $\surd$ & $\times$\\
     slice & $\surd$ & $\times$\\
-    scan & $\times$ & -\\
+    scan & $\times$ & --\\
     gpermute & $\surd$ & $\surd$\\
     gcopy & $\surd$ & $\surd$\\
-    sort & $\times$ & -\\
+    sort & $\times$ & --\\
     \bottomrule[1.5pt]
   \end{tabularx}
 \end{table}
@@ -214,58 +214,6 @@ FIXME：提及附录。
 %%     \REQUIRE 向量操作$vop$，其输入向量为$v_1, v_2, \cdots, v_n$
 %%   \end{algorithmic}
 %% \end{algorithm}
-
-\subsubsection{向量原语聚合}
-向量原语聚合（fusion）是指，在某些情况下，多个向量操作可以合并成单个向量操作，
-从而可以减少访存，节省存储器带宽，同时还能消除访问存储器造成的时延，提高执行速度。
-下面举例说明向量原语聚合的应用。
-\begin{quotation}
-  \kai{
-    考虑下面的表达式求值问题：\\
-    \texttt{map f (map g input)}\\
-    该表达式等价于：\\
-    \texttt{map (f . g) input}\\
-    两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-fusion}。从图\ref{fig:vp-fusion}
-    可以看出，第一个表达式比第二个表达式多引入一个中间向量，虽然
-    通过前一小节介绍的存储空间优化技术避免为这个中间向量分配新的的存储空间，但仍然会多引入
-    一次的向量读与一次向量写。此时，将两个\texttt{map}原语“聚合”成一次能够提高效率。
-  }
-\end{quotation}
-\begin{figure}
-  \centering
-  \subfloat[\texttt{map f (map g input)}]{
-    \includegraphics[height=4cm]{vp-fusion-1}
-  }
-  \\
-  \subfloat[\texttt{map (f . g) input}]{
-    \includegraphics[height=4cm]{vp-fusion-2}
-  }
-  \caption{向量原语聚合示例}
-  \label{fig:vp-fusion}
-\end{figure}
-
-向量原语之间的可聚合性参见表\ref{tbl:vp-fusion}。
-\begin{table}
-  \centering
-  \caption{向量原语可聚合性}\label{tbl:vp-fusion}
-  \begin{tabularx}{\linewidth}{|Z|Z|Z|Z|Z|Z|Z|}
-    \hline
-    & \texttt{map} & \texttt{slice} & \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
-    \hline
-    \texttt{map} & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
-    \hline
-    \texttt{slice} & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & $\surd$\\
-    \hline
-    \texttt{scan} & & & & & & \\
-    \hline
-    \texttt{gpermute} & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & $\surd$\\
-    \hline
-    \texttt{gcopy} & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
-    \hline
-    \texttt{sort} & & $\surd$ & & $\surd$ & & $\surd$\\
-    \hline
-  \end{tabularx}
-\end{table}
 
 \subsubsection{向量原语重排}
 向量原语重排（reorder）是指，在某些情况下，相邻的向量操作可以通过交换顺序
@@ -297,28 +245,84 @@ FIXME：提及附录。
 
 向量原语两两之间的可重排性参见表\ref{tbl:vp-reorder}，
 其中每个单元格对应的两个向量原语的执行顺序为“先左边，再上方”。
-标注$\surd$的单元格表示，该格对应的两个向量原语应该换序以提高执行效率；
-标注$--$的单元格表示该格对应的两个向量原语可以重排，但不会带来效率提升；
-标注$\times$的单元格表示该格对应的两个向量原语不应换序，换序会带来性能损失；
-空单元格表示该格对应的两个向量原语不能换序，换序会造成语义错误。
+标注$\surd$的单元格表示，该格对应的两个向量原语应该重排以提高执行效率；
+标注--的单元格表示该格对应的两个向量原语可以重排，但不会带来效率提升；
+标注$\times$的单元格表示该格对应的两个向量原语不应重排，重排会带来性能损失；
+空单元格表示该格对应的两个向量原语不能重排，重排会造成语义错误。
 \begin{table}
   \centering
-  \caption{向量原语可聚合性}\label{tbl:vp-reorder}
+  \caption{向量原语可重排性}\label{tbl:vp-reorder}
   \begin{tabularx}{\linewidth}{|Z|Z|Z|Z|Z|Z|Z|}
     \hline
     & \texttt{map} & \texttt{slice} & \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
     \hline
-    \texttt{map} & -- & \times & & -- & \times & \\
+    \texttt{map} & -- & $\surd$ & & -- & $\surd$ & \\
     \hline
-    \texttt{slice} & $\surd$ & & & & & $\surd$\\
+    \texttt{slice} & $\times$ & & & & & \\
+    \hline
+    \texttt{scan} & & & & & & \\
+    \hline
+    \texttt{gpermute} & -- & & & & & \\
+    \hline
+    \texttt{gcopy} & $\times$ & & & & & \\
+    \hline
+    \texttt{sort} & & & & & & \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\subsubsection{向量原语聚合}
+向量原语聚合（fusion）是指，在某些情况下，多个向量操作可以合并成单个向量操作，
+从而可以减少访存，节省存储器带宽，同时还能消除访问存储器造成的时延，提高执行速度。
+下面举例说明向量原语聚合的应用。
+\begin{quotation}
+  \kai{
+    考虑下面的表达式求值问题：\\
+    \texttt{map f (map g input)}\\
+    该表达式等价于：\\
+    \texttt{map (f . g) input}\\
+    两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-fusion}。从图\ref{fig:vp-fusion}
+    可以看出，第一个表达式比第二个表达式多引入一个中间向量，虽然
+    通过前一小节介绍的存储空间优化技术避免为这个中间向量分配新的的存储空间，但仍然会多引入
+    一次的向量读与一次向量写。此时，将两个\texttt{map}原语“聚合”成一次能够提高效率。
+  }
+\end{quotation}
+\begin{figure}
+  \centering
+  \subfloat[\texttt{map f (map g input)}]{
+    \includegraphics[height=4cm]{vp-fusion-1}
+  }
+  \\
+  \subfloat[\texttt{map (f . g) input}]{
+    \includegraphics[height=4cm]{vp-fusion-2}
+  }
+  \caption{向量原语聚合示例}
+  \label{fig:vp-fusion}
+\end{figure}
+
+向量原语之间的可聚合性参见表\ref{tbl:vp-fusion}。
+其中每个单元格对应的两个向量原语的执行顺序为“先左边，再上方”。
+标注$\surd$的单元格表示，该格对应的两个向量原语应该聚合以提高执行效率；
+标注--的单元格表示该格对应的两个向量原语已经经过重排，所以该组合不会出现；
+空单元格表示该格对应的两个向量原语不能聚合，聚合会造成语义错误。
+\begin{table}
+  \centering
+  \caption{向量原语可聚合性}\label{tbl:vp-fusion}
+  \begin{tabularx}{\linewidth}{|Z|Z|Z|Z|Z|Z|Z|}
+    \hline
+    & \texttt{map} & \texttt{slice} & \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
+    \hline
+    \texttt{map} & $\surd$ & -- & & $\surd$ & -- & \\
+    \hline
+    \texttt{slice} & $\surd$ & $\surd$ & & $\surd$ & & $\surd$\\
     \hline
     \texttt{scan} & & & & & & \\
     \hline
     \texttt{gpermute} & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & $\surd$\\
     \hline
-    \texttt{gcopy} & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
+    \texttt{gcopy} & $\surd$ & & & $\surd$ &  & \\
     \hline
-    \texttt{sort} & & $\surd$ & & $\surd$ & & $\surd$\\
+    \texttt{sort} & & & & & & \\
     \hline
   \end{tabularx}
 \end{table}
