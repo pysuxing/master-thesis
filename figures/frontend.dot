@@ -1,0 +1,46 @@
+digraph G {
+        {
+                rank = same;
+                rankdir=LR;
+                src;
+                lp;
+                l1;
+                t1;
+                l2;
+                t2;
+        }
+        {
+                rank = same;
+                rankdir=LR;
+                core1;
+                opt;
+                core2;
+                cgen;
+                ccode;
+        }
+                
+        node[shape=ellipse];
+
+        src[label="Rat\nSource"];
+        lp[label="Lexer &\nParser", shape=box];
+        l1[label="Level-1\nAST"];
+        t1[label="L1\nTranformer", shape=box];
+        l2[label="Level-2\nAST"];
+        t2[label="L2\nTranformer", shape=box];
+        core1[label="Core\nAST"];
+        opt[label="Optimization", shape=box];
+        core2[label="Core\nAST"];
+        cgen[label="Code\nGenerator", shape=box];
+        ccode[label="C\nSource"];
+
+        src -> lp;
+        lp -> l1;
+        l1 -> t1;
+        t1 -> l2;
+        l2 -> t2;
+        t2 -> core1;
+        ccode -> cgen[dir=back];
+        cgen -> core2[dir=back];
+        core2 -> opt[dir=back];
+        opt -> core1[dir=back];
+}

@@ -1,8 +1,8 @@
 digraph G {
-        root[label=""];
+        root[label="result"];
         dot;
-        t1[label="", style=filled, fillcolor=gray];
-        t2[label="", style=filled, fillcolor=gray];
+        t1;
+        t2;
         map;
         f;
         u;

@@ -1,0 +1,12 @@
+digraph g {
+        rankdir=LR;
+
+        node[shape=box];
+
+        input[shape=record, label="<p0> input[0] | input[1] | ... | input[n]"];
+        map[label="g . f"];
+        output[shape=record, label="<p0> output[0] | output[1] | ... | output[n]"];
+
+        input:p0 -> map;
+        map -> output:p0;
+}

@@ -1,0 +1,18 @@
+digraph g {
+        rankdir=LR;
+
+        node[shape=record];
+
+        input[shape=record, label="input[0] | ... | <p0> input[m] | ... | <p1> input[n] | ..."];
+        slice[label="slice\n(m, n)"];
+        temp[shape=record, label="<p0> input[m] | ... | <p1> input[n]"];
+        map[label="f"];
+        output[shape=record, label="<p0> output[0] | ... | output[n-m]"];
+
+        input:p0 -> slice;
+        input:p1 -> slice;
+        slice -> temp:p0;
+        slice -> temp:p1;
+        temp:p0 -> map;
+        map -> output:p0;
+}
