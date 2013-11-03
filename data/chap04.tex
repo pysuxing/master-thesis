@@ -96,10 +96,14 @@ CoreVM是一个抽象层次较高的虚拟机，它有下面两个特点：
 这样，只需要在不同的并行硬件上实现CoreVM，就可以保证Rat程序
 在不同硬件上的可移植性。
 
+第\ref{subsec:core-language}先介绍Core语言，它是并行虚拟机CoreVM运行的指令集，
+然后第\ref{subsec:core-optimization}节介绍几种执行Core语言层面执行的优化技术，
+%% 最后第\ref{subsec:}给出
+
+\subsection{Core语言}\label{subsec:core-language}
 CoreVM上运行Core语言，Core语言是一种结构简单的语言，容易分析，
 并且支持若干高层优化技术。
 
-\subsection{Core语言}
 Core语言的指令集庞大，但结构相对简单，只包含两类指令能够：向量原语与标量原语。
 其中向量原语一共只有六条，在第\ref{sec:vector-primitives}节中已经
 作出详细说明，表\ref{tbl:vector-primitives}中每一个向量原语在Core语言中一条同名向量原语与之对应；
@@ -136,14 +140,20 @@ FIXME：提及附录。
 实施，实质上是一些Core语法树到Core语法树的变换。下面分别介绍这三种优化技术。
 
 \subsubsection{存储空间优化}
-根据第\ref{subsec:immutable-object}节中的介绍，Rat语言中的所有对象在整个
+第\ref{subsec:immutable-object}节已经指出，Rat语言中的所有对象在整个
 生命周期中是不可改写的，称为恒值对象。也就是说，每当一个数据操作（标量操作
 或向量操作）被施加到一个对象上时，逻辑上都会产生一个新的对象，编程者可以认为
 新的对象与原有对象使用不同的存储空间。
 
 恒值对象简化了程序语义，但如果在具体实现中，
 为每一个对象都分配新的存储空间显然是不经济的，
-因为很多对象都是临时的中间对象，他们在整个生命周期中也许只被引用一次，
+在Rat的实现中，采用了三种存储空间优化技术，可以在
+保持程序高层语义简洁的同时提高存储空间利用率。
+这三种技术分别是：向量内存即时回收（vector memory collection）、向量原语原地执行（execute in-place）、
+写时拷贝（copy-on-write）。
+
+首先介绍向量内存即时回收技术。一段程序中往往存在许多的中间对象，
+他们在整个生命周期中只被引用一次，作用相当于临时变量。
 当对一个对象的最后一次引用结束之后，即使该对象的生命周期还没结束，
 但它的存储空间已经可以被回收利用而不影响程序的正确性。也就是说，
 在物理实现中，对象占用分配给它的存储空间的时间可以短于它的逻辑生命周期。
@@ -176,8 +186,8 @@ FIXME：提及附录。
 \end{figure}
 
 在上例给出的存储空间优化分析中，还有存在另一种优化可能性，那就是有些向量原语可以
-原地执行（execute inplace）。所谓原地执行，就是向量操作直接在输入向量的内存空间上
-写入输出向量。原地执行必须满足一个条件，就是输入向量在本次向量操作之后引用计数变为0，
+原地执行。所谓原地执行，就是向量操作直接在输入向量的内存空间上
+写入输出向量，不许要申请新的存储空间。原地执行必须满足一个条件，就是输入向量在本次向量操作之后引用计数变为0，
 即在本次向量操作中输入向量是最后一次被引用。
 \begin{quotation}
   \kai{
@@ -187,7 +197,7 @@ FIXME：提及附录。
   }
 \end{quotation}
 
-表\ref{tbl:inplace-vp}给除了向量原语对原地执行的支持状况，某些向量原语需要同步操作才能完成原地执行。
+表\ref{tbl:inplace-vp}给出了向量原语对原地执行的支持状况，某些向量原语需要同步操作才能完成原地执行。
 \begin{table}
   \centering
   \caption{向量原语的原地执行支持}\label{tbl:inplace-vp}
@@ -196,11 +206,40 @@ FIXME：提及附录。
     \hei{向量原语} & \hei{是否支持原地执行} & \hei{是否需要同步}\\
     \midrule[1pt]
     map & $\surd$ & $\times$\\
-    slice & $\surd$ & $\times$\\
+    slice & $\times$ & --\\
     scan & $\times$ & --\\
     gpermute & $\surd$ & $\surd$\\
     gcopy & $\surd$ & $\surd$\\
     sort & $\times$ & --\\
+    zip & $\surd$ & $\times$\\
+    concat & $\times$ & --\\
+    \bottomrule[1.5pt]
+  \end{tabularx}
+\end{table}
+
+
+写时拷贝也称为零拷贝（zero-copy），指某些向量操作虽然逻辑上定义了新的向量，但实际上没有对输入向量进行任何处理，
+得到的新向量与原向量内容相同或部分相同，这时新向量就可以直接指向输入向量的内存空间。
+这时，逻辑上可能有多个向量指向同一块存储空间。因为前面提到的两种内存优化技术可能
+需要改写向量存储空间（指向该空间的某个向量引用计数变为0或有向量原语试图原地执行），
+这时视开销情况执行内存拷贝动作或是为改写动作分配新内存。
+
+向量原语对写时拷贝的支持情况参见表\ref{tbl:copy-on-write}。
+\begin{table}
+  \centering
+  \caption{向量原语的写时拷贝支持}\label{tbl:copy-on-write}
+  \begin{tabularx}{\linewidth}{ZZ}
+    \toprule[1.5pt]
+    \hei{向量原语} & \hei{是否支持写时拷贝}\\
+    \midrule[1pt]
+    map & $\times$\\
+    slice & $\surd$ \\
+    scan & $\times$\\
+    gpermute & $\surd$\\
+    gcopy & $\times$\\
+    sort & $\times$\\
+    zip & $\surd$\\
+    concat & $\surd$\\
     \bottomrule[1.5pt]
   \end{tabularx}
 \end{table}
@@ -252,21 +291,26 @@ FIXME：提及附录。
 \begin{table}
   \centering
   \caption{向量原语可重排性}\label{tbl:vp-reorder}
-  \begin{tabularx}{\linewidth}{|Z|Z|Z|Z|Z|Z|Z|}
+  \begin{tabularx}{\linewidth}{|c|Z|Z|Z|Z|Z|c|Z|Z|}
     \hline
-    & \texttt{map} & \texttt{slice} & \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
+    & \texttt{map} & \texttt{slice} & \texttt{concat} & \texttt{zip} &
+    \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
     \hline
-    \texttt{map} & -- & $\surd$ & & -- & $\surd$ & \\
+    \texttt{map} & -- & $\surd$ & & & & -- & $\surd$ & \\
     \hline
-    \texttt{slice} & $\times$ & & & & & \\
+    \texttt{slice} & $\times$ & & & & & & & \\
     \hline
-    \texttt{scan} & & & & & & \\
+    \texttt{concat} & & & & & & & &\\
     \hline
-    \texttt{gpermute} & -- & & & & & \\
+    \texttt{zip} & & & & & & & &\\
     \hline
-    \texttt{gcopy} & $\times$ & & & & & \\
+    \texttt{scan} & & & & & & & &\\
     \hline
-    \texttt{sort} & & & & & & \\
+    \texttt{gpermute} & -- & & & & & & & \\
+    \hline
+    \texttt{gcopy} & $\times$ & & & & & & & \\
+    \hline
+    \texttt{sort} & & & & & & & &\\
     \hline
   \end{tabularx}
 \end{table}
@@ -303,35 +347,73 @@ FIXME：提及附录。
 向量原语之间的可聚合性参见表\ref{tbl:vp-fusion}。
 其中每个单元格对应的两个向量原语的执行顺序为“先左边，再上方”。
 标注$\surd$的单元格表示，该格对应的两个向量原语应该聚合以提高执行效率；
-标注--的单元格表示该格对应的两个向量原语已经经过重排，所以该组合不会出现；
+%% 标注--的单元格表示该格对应的两个向量原语已经经过重排，所以该组合不会出现；
 空单元格表示该格对应的两个向量原语不能聚合，聚合会造成语义错误。
 \begin{table}
   \centering
   \caption{向量原语可聚合性}\label{tbl:vp-fusion}
-  \begin{tabularx}{\linewidth}{|Z|Z|Z|Z|Z|Z|Z|}
+  \begin{tabularx}{\linewidth}{|c|Z|Z|Z|Z|Z|c|Z|Z|}
     \hline
-    & \texttt{map} & \texttt{slice} & \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
+    & \texttt{map} & \texttt{slice} & \texttt{concat} & \texttt{zip} &
+    \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
     \hline
-    \texttt{map} & $\surd$ & -- & & $\surd$ & -- & \\
+    \texttt{map} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
     \hline
-    \texttt{slice} & $\surd$ & $\surd$ & & $\surd$ & & $\surd$\\
+    \texttt{slice} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & & $\surd$\\
     \hline
-    \texttt{scan} & & & & & & \\
+    \texttt{concat} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
     \hline
-    \texttt{gpermute} & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & $\surd$\\
+    \texttt{zip} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$\\
     \hline
-    \texttt{gcopy} & $\surd$ & & & $\surd$ &  & \\
+    \texttt{scan} & & & & $\surd$ & & & &\\
     \hline
-    \texttt{sort} & & & & & & \\
+    \texttt{gpermute} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & $\surd$\\
+    \hline
+    \texttt{gcopy} & $\surd$ & & $\surd$ & $\surd$ & & $\surd$ &  & \\
+    \hline
+    \texttt{sort} & & & $\surd$ & $\surd$ & & & &\\
     \hline
   \end{tabularx}
 \end{table}
 
 \section{自动并行化技术}\label{sec:auto-parallelization}
+正如第\ref{sec:parallel-vm}节所说，Rat的并行虚拟机CoreVM被设计为在多种
+并行硬件上都能够高效实现，这实现了本章开始提出的三个目标中的第一个。
+Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行硬件，
+在实现任务自动并行化的时候着力与完成另外两个目标，即充分发掘GPU的并行计算能力与
+有效协调CPU与GPU并行工作。
 
-\subsection{硬件资源管理器}
+第\ref{subsec:stream-detection}节将首先介绍流探测（stream detection）算法，该算法是一种静态算法，
+在编译期执行，搜索向量操作序列中的可并行任务，实施上一节中提出的高层优化技术。
+然后第\ref{subsec:runtime-system}节介绍Rat的运行时系统，该系统根据流探测算法
+的探测结果，对硬件资源实施管理，在CPU与GPU两端动态地调度并行任务。
 
-\subsection{并行任务调度器}
+\subsection{流探测算法}\label{subsec:stream-detection}
+任务的自动并行化一直是一个难题，因为并行问题的固有特征导致不同问题可发掘的并行潜力各不相同，
+这使得对与并行问题的求解没有通用的最优化方案。CoreVM的设计使得数据并行问题被分解成
+一个个向量操作组成的序列，而这个将并行问题序列化为向量操作的过程，
+消除了问题本身的固有特性，同时序列化的向量操作成为一种“通用”的并行问题描述形式，
+这为发现问题无关的并行性提供了可能。
+
+流探测算法的功能就是将并行程序转化成向量操作序列，我们将连续的向量操作称之为”流“，
+其定义如下：
+\begin{definition}
+  称施加在某个数据向量上的向量操作序列为程序中任务流，由这个向量操作序列生成的向量数据序列
+  称为程序中的向量流。
+\end{definition}
+
+在给出流探测算法的正规描述之前，仍以一个并行问题实例进行说明。
+\begin{quotation}
+  \kai{
+    以第\ref{sec:n-body}节中的n-body问题为例，该问题的Core语法树见图\ref{fig:n-body-core}，
+    （为清晰起见，该图进行了一定的简化，原始的Core语法树规模更为庞大）。
+  }
+\end{quotation}
+
+\subsection{运行时系统}\label{subsec:runtime-system}
+\subsubsection{硬件资源管理器}
+
+\subsubsection{并行任务调度器}
 
 \section{GPU端优化技术}\label{sec:gpu-optimization}
 

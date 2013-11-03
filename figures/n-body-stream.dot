@@ -1,0 +1,29 @@
+digraph G {
+        newCells;
+        masses;
+        newVelocities;
+        newPositions;
+        velocities;
+        positions;
+        accelerates;
+        singleAcc;
+        otherAccs;
+        cells;
+
+        edge[dir=back];
+        
+        newCells -> masses[label="zipWith3 Cell"];
+        newCells -> newVelocities[label="zipWith3 Cell"];
+        newCells -> newPositions[label=zipWith3 Cell];
+        masses -> cells[label="map cellMass"];
+        newVelocities -> velocities[label="zipWith f"];
+        newVelocities -> accelerates[label="zipWith f"];
+        newPositions -> velocities[label="zipWith g"];
+        newPositions -> positions[label="zipWith g"];
+        velocities -> cells[label="map cellVelocity"];
+        positions -> cells[label="map cellPosition"];
+        accelerates -> cells[label="map calcSingleAcc"];
+        accelerates -> singleAcc[style=dashed];
+        singleAcc -> otherAccs[label="fold +"];
+        otherAccs -> cells;
+}
