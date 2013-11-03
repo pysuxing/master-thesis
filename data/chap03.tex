@@ -156,8 +156,8 @@ Rat语言的定位是数据并行语言，采用一种数据并行编程模型�
 
 Rat提供了一组向量原语（Vector Primitive, VP），参见表\ref{tbl:vector-primitives}。
 每一个向量原语定义一种施加在一维向量上的并行操作。从表\ref{tbl:vector-primitives}
-中可以看出，Rat提供的这一组向量原语集合非常精简，一共只有六个，而仅仅通过组合使用这六种向量原语
-就方便地描述一大类数据并行问题。表\ref{tbl:derived-vector-operations}列举了一些在
+中可以看出，Rat提供的这一组向量原语集合非常精简，一共只有八个，而仅仅通过组合使用这八个向量原语
+就可以方便地描述一大类数据并行问题。表\ref{tbl:derived-vector-operations}列举了一些在
 Rat向量原语基础上可以实现的常见向量操作。
 
 \begin{table}[htb]
@@ -171,6 +171,8 @@ Rat向量原语基础上可以实现的常见向量操作。
     map & (a -> b) -> [a] -> [b]\\
     scan & ScanDirection -> InclusiveMode -> (a -> a -> a) -> [a] -> [a]\\
     slice & Integral i => (i, i) -> [a] -> [a]\\
+    concat & [a] -> [a] -> [a]\\
+    zip & [a] -> [b] -> [(a, b)]\\
     gpermute & Integral i => PermuteDirection -> (i -> i) -> [a] -> [a]\\
     gcopy & Boolean b => [b] -> [a] -> [a]\\
     sort & (a -> a -> Ording) -> [a] -> [a]\\
@@ -233,6 +235,40 @@ slice原语对一个向量执行截断操作，他以一对整数\texttt{(i, j)}
   \includegraphics[height=4cm]{slice}
   \caption{slice原语操作示意图}
   \label{fig:slice-diagram}
+\end{figure}
+
+\subsection{concat}
+concat原语对向量执行拼接操作，他以两个同类型的向量作为输入，
+将第二个向量拼接到第一个向量末尾作为输出向量，输出向量的长度等于
+两个输入向量长度的和。图\ref{fig:concat-diagram}给出了concat原语的操作说明。
+\begin{definition}
+  concat原语以两个同类型向量$$[a_0, a_1, \cdots, a_{n-1}]$$ $$[b_0, b_1, \cdots, b_{m-1}]$$作为输入参数，
+  返回一个向量$$[a_1, a_2 \cdots, a_{n-1}, b_0, b_1, \cdots, b_{m-1}]$$作为结果。
+\end{definition}
+
+图\ref{fig:concat-diagram}给出concat原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=4cm]{concat}
+  \caption{concat原语操作示意图}
+  \label{fig:concat-diagram}
+\end{figure}
+
+\subsection{zip}
+zip原语对向量执行逐元素合并操作，他以等长两个向量作为输入，
+将分属两个向量的处于相同位置的元素合并成一个二元组，最后输出一个二元组向量。
+图\ref{fig:zip-diagram}给出了zip原语的操作说明。
+\begin{definition}
+  zip原语以两个等长向量$$[a_0, a_1, \cdots, a_{n-1}]$$ $$[b_0, b_1, \cdots, b_{n-1}]$$作为输入参数，
+  返回一个向量$$[(a_0, b_0), (a_1, b_1), \cdots, (a_{n-1}, b_{n-1})]$$作为结果。
+\end{definition}
+
+图\ref{fig:zip-diagram}给出zip原语的操作说明。
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=4cm]{zip}
+  \caption{zip原语操作示意图}
+  \label{fig:zip-diagram}
 \end{figure}
 
 \subsection{scan}
