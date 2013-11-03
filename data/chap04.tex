@@ -407,8 +407,28 @@ Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行�
   \kai{
     以第\ref{sec:n-body}节中的n-body问题为例，该问题的Core语法树见图\ref{fig:n-body-core}，
     （为清晰起见，该图进行了一定的简化，原始的Core语法树规模更为庞大）。
+    从图中可以看出，输入向量\texttt{Cells}（图中用矩形表示）一共被引用了五次，
+    从\texttt{Cells}出发，经过一些向量原语的操作，生成了若干个中间变量（图中用椭圆形表示）
+    如\texttt{positions}与\texttt{velocities}等。
+
+    通过流探测算法生成的向量流如图\ref{fig:n-body-data-flow}，图中每一个结点
+    表示一个向量，每一条边代表某种向量操作。图\ref{fig:n-body-stream}的
+    对偶图即为任务流图。
   }
 \end{quotation}
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.7]{n-body-core}
+  \caption{n-body问题Core语法树}
+  \label{fig:n-body-core}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.7]{n-body-stream}
+  \caption{n-body问题的向量流图}
+  \label{fig:n-body--stream}
+\end{figure}
+
 
 \subsection{运行时系统}\label{subsec:runtime-system}
 \subsubsection{硬件资源管理器}

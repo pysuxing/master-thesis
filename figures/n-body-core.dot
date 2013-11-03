@@ -1,0 +1,73 @@
+digraph G {
+	size="8.2, 11.6";
+	ratio="compressed";
+	
+	result[label="result"];
+	zipwith3[label="zipWith3", shape=plaintext];
+	Cell[shape=plaintext];
+	masses;
+	newVelocities;
+	newPositions;
+	result -> zipwith3;
+	result -> Cell;
+	result -> masses;
+	result -> newVelocities;
+	result -> newPositions;
+
+	msmap[label="map", shape=plaintext];
+	cellMass[shape=plaintext];
+	mscells[label="cells", shape=box];
+	masses -> msmap;
+	masses -> cellMass;
+	masses -> mscells;
+
+	nvzipwith[label="zipWith", shape=plaintext];
+	f[shape=plaintext];
+	accelerates;
+	velocities;
+	newVelocities -> nvzipwith;
+	newVelocities -> f;
+	newVelocities -> accelerates;
+	newVelocities -> velocities;
+	
+	npzipwith[label="zipWith", shape=plaintext];
+	g[shape=plaintext];
+	positions;
+	newPositions -> npzipwith;
+	newPositions -> g;
+	newPositions -> velocities;
+	newPositions -> positions;
+
+	asmap[label="map", shape=plaintext];
+	calcAccelerate[shape=plaintext];
+	ascells[label="cells", shape=box];
+	fold[shape=plaintext];
+	plus[label="+", shape=plaintext];
+	t1[label=""];
+	t1map[label="map", shape=plaintext];
+	calcSingleAcc[shape=plaintext];
+	t1cells[label="cells", shape=box];
+	accelerates -> asmap;
+	accelerates -> calcAccelerate;
+	accelerates -> ascells;
+	calcAccelerate -> fold;
+	calcAccelerate -> plus;
+	calcAccelerate -> t1;
+	t1 -> t1map;
+	t1 -> calcSingleAcc;
+	t1 -> t1cells;
+
+	vsmap[label="map", shape=plaintext];
+	cellVelocity[shape=plaintext];
+	vscells[label="cells", shape=box];
+	velocities -> vsmap;
+	velocities -> cellVelocity;
+	velocities -> vscells;
+
+	psmap[label="map", shape=plaintext];
+	cellPosition[shape=plaintext];
+	pscells[label="cells", shape=box];
+	positions -> psmap;
+	positions -> cellPosition;
+	positions -> pscells;
+}
