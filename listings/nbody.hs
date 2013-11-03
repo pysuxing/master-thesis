@@ -19,15 +19,11 @@ solveNBodyOneStep t cells =
     masses = map cellMass cells         -- original masses
     positions = map cellPosition cells  -- original positions
     velocities = map cellVelocity cells -- original velocity
-    calcDistanceSqure c1 c2 =   -- square of euclidean distance
-      pow xD 2 + pow yD 2
+    calcSingleAcc c1 c2 = vec * norm
       where
-        getXPos = xPosition . cellPosition
-        getYPos = yPosition . cellPosition
-        xD = getXPos c1 - getXPos c2
-        yD = getYPos c1 - getYPos c2
-    calcSingleAcc c1 c2 =
-      (g * mass c2) / calcDistanceSquare c1 c2
+        vec = cellPosition c2 - cellPosition c1
+        dis = uncurry hypot vec
+        norm = g * mass c2 / pow dis 3
     calcAccelerate cell = 
       fold + (map (calcSingleAcc cell) cells)
     accelerates = map calcAccelerate cells -- accelerate

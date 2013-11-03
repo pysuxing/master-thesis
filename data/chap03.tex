@@ -566,7 +566,7 @@ FIXME:有关数据类型映射的表格可以添加
   }
 \end{quotation}
 
-n-body问题的Rat实现如下，下面对代码中的关键部分予以说明。
+这里给出n-body问题的Rat代码实现，并代码中的关键部分予以说明。
 \begin{compactitem}
   \item 第1行的export语句表示，将\texttt{solveNBodyOneStep}函数
     输出给C程序调用，生成的C函数类型与solveNBodyOneStep在Rat语言中的类型相对应。
@@ -594,4 +594,7 @@ n-body问题的Rat实现如下，下面对代码中的关键部分予以说明�
 
 \lstinputlisting[language=Haskell]{listings/nbody.hs}
 
-14527321327
+观察上面的代码可以发现，使用Rat编写数据并行程序，编程者只需集中精力于问题本身的逻辑，
+即书写算法，实现计算功能，程序就可以并行地运行，
+而完全不用考虑内存如何分配、线程如何管理，管理并行细节的任务已经Rat编译期与运行时系统完成。
+而有关Rat如何实现这一功能，将在下一章给出详细说明。
