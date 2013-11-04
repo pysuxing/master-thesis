@@ -14,11 +14,11 @@
 本章的内容结构如下：
 第\ref{sec:backend-overview}节介绍Rat语言编译实现的总体方案，展现Rat实现技术采用
 的层次化软件设计。
-第\ref{sec:parallel-vm}节给出了并行虚拟机CoreVM的设计，并提出了若干高层优化技术。
-CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的，这样，Rat在不同不同
+第\ref{sec:parallel-vm}节给出了并行虚拟机CoreVM的设计，并提出了若干高层优化技术，
+CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的，这样，Rat在不同
 并行硬件上的移植只需要在这些硬件上实现CoreVM即可，同时高层的优化措施也具有硬件无关特性。
 第\ref{sec:auto-parallelization}节提出了一种自动并行化方案，该方案可以有效地管理
-可用硬件资源，实现任务的动态划分与调度，使CPU与GPU可以并行工作。
+可用硬件资源，实现任务的自动划分与调度，使CPU与GPU并行工作。
 第\ref{sec:gpu-optimization}节介绍了针对GPU硬件结构采用的若干优化方法，以提高并行原语
 在GPU上的执行效率。
 
@@ -29,11 +29,11 @@ CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的�
 \begin{enumerate}
   \item Rat代码经过词法分析器与语法分析器，形成L1语法树。
     L1语法树是Rat代码的直接表示，它包含的结点类型参见表\ref{tbl:l1-ast}。
-  \item L1语法树经过L1变换得到L2语法树，L2语法树结构更加简单，包含的结点类型
+  \item L1语法树经过L1变换得到L2语法树。L2语法树结构更加简单，包含的结点类型
     更少，参见表\ref{tbl:l2-ast}。
-  \item L2语法树经过L2变换得到Core语法树，Core语法树是Core语言的树状表示，而
+  \item L2语法树经过L2变换得到Core语法树。Core语法树是Core语言的树状表示，而
     Core语言是Rat并行虚拟机CoreVM的语言。Core语法树的结点类型同L2语法树，但对
-    L2语法树中的结点做了反柯里化处理。
+    L2语法树中的函数应用结点做了反柯里化处理。
   \item 在Core语言层面实施若干高层优化技术。
   \item Core语言最后被翻译成C语言程序。
 \end{enumerate}
@@ -48,7 +48,7 @@ CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的�
 \begin{table}[tbh]
   \centering
   \caption{L1语法树结点类型}\label{tbl:l1-ast}
-  \begin{tabularx}{\linewidth}{XX}
+  \begin{tabularx}{\linewidth}{ZZ}
       \toprule[1.5pt]
       {\hei 结点类型} & {\hei 描述} \\
       \midrule[1pt]
@@ -71,7 +71,7 @@ CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的�
 \begin{table}[tbh]
   \centering
   \caption{L2语法树与Core语法树结点类型}\label{tbl:l2-ast}
-  \begin{tabularx}{\linewidth}{XX}
+  \begin{tabularx}{\linewidth}{ZZ}
       \toprule[1.5pt]
       {\hei 结点类型} & {\hei 描述} \\
       \midrule[1pt]
@@ -93,11 +93,11 @@ CoreVM是一个抽象层次较高的虚拟机，它有下面两个特点：
   \item CoreVM在保持高抽象层次的同时也能够很好地描述并行硬件,
     原理上可以在多核处理器以及GPU等不同并行硬件上高效实现。
 \end{compactitem}
-这样，只需要在不同的并行硬件上实现CoreVM，就可以保证Rat程序
-在不同硬件上的可移植性。
+这样，只需要在不同的并行硬件上实现CoreVM，就可以完成Rat程序
+在不同硬件上的移植。
 
 第\ref{subsec:core-language}先介绍Core语言，它是并行虚拟机CoreVM运行的指令集，
-然后第\ref{subsec:core-optimization}节介绍几种执行Core语言层面执行的优化技术，
+然后第\ref{subsec:high-level-optimization}节介绍几种执行Core语言层面执行的优化技术，
 %% 最后第\ref{subsec:}给出
 
 \subsection{Core语言}\label{subsec:core-language}
@@ -105,7 +105,7 @@ CoreVM上运行Core语言，Core语言是一种结构简单的语言，容易分
 并且支持若干高层优化技术。
 
 Core语言的指令集庞大，但结构相对简单，只包含两类指令能够：向量原语与标量原语。
-其中向量原语一共只有六条，在第\ref{sec:vector-primitives}节中已经
+其中向量原语一共只有八条，在第\ref{sec:vector-primitives}节中已经
 作出详细说明，表\ref{tbl:vector-primitives}中每一个向量原语在Core语言中一条同名向量原语与之对应；
 Core语言提供了数量众多的标量原语，功能为基本的算数逻辑运算与常用数学函数，
 选取的数学函数集囊括了标准C数学库定义的数学函数。
@@ -135,7 +135,7 @@ FIXME：提及附录。
 %%   \end{tabularx}
 %% \end{table}
 
-\subsection{高层优化技术}
+\subsection{高层优化技术}\label{subsec:high-level-optimization}
 在Rat语言的实现过程中，采用了三种高层优化技术。这些优化技术在Core语言的层面
 实施，实质上是一些Core语法树到Core语法树的变换。下面分别介绍这三种优化技术。
 
@@ -383,37 +383,60 @@ Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行�
 在实现任务自动并行化的时候着力与完成另外两个目标，即充分发掘GPU的并行计算能力与
 有效协调CPU与GPU并行工作。
 
-第\ref{subsec:stream-detection}节将首先介绍流探测（stream detection）算法，该算法是一种静态算法，
-在编译期执行，搜索向量操作序列中的可并行任务，实施上一节中提出的高层优化技术。
-然后第\ref{subsec:runtime-system}节介绍Rat的运行时系统，该系统根据流探测算法
-的探测结果，对硬件资源实施管理，在CPU与GPU两端动态地调度并行任务。
+Rat实现的整体后端结构如图\ref{fig:backend}，从图中可以看出，
+CoreVM的实现构建在在运行时系统（Runtime System）与向量原语驱动（VP Driver）之上。
+\begin{figure}
+  \centering
+  \includegraphics[height=5cm]{backend}
+  \caption{Rat后端}
+  \label{fig:backend}
+\end{figure}
 
-\subsection{流探测算法}\label{subsec:stream-detection}
+第\ref{subsec:automated-parallelization}节将首先介绍自动并行化技术总体方案：
+流探测（stream detection）算法，并行任务生成（task generation）
+以及嵌套并行的一维分解（nested parallellism decomposition）。
+第\ref{subsec:runtime-system}节介绍Rat的运行时系统，该系统根据流探测算法
+的探测结果，对硬件资源实施管理，在CPU与GPU两端动态地调度并行任务。
+向量原语驱动在具体硬件上实现数据并行操作，在GPU上实现向量原语的技术最后在第\ref{subsec:vp-driver}节
+予以介绍。
+
+\subsection{自动并行化总体方案}\label{subsec:automated-parallelization}
 任务的自动并行化一直是一个难题，因为并行问题的固有特征导致不同问题可发掘的并行潜力各不相同，
 这使得对与并行问题的求解没有通用的最优化方案。CoreVM的设计使得数据并行问题被分解成
 一个个向量操作组成的序列，而这个将并行问题序列化为向量操作的过程，
-消除了问题本身的固有特性，同时序列化的向量操作成为一种“通用”的并行问题描述形式，
+消除了问题本身的固有特性，这时，序列化的向量操作成为一种“通用”的并行问题描述形式，
 这为发现问题无关的并行性提供了可能。
 
-流探测算法的功能就是将并行程序转化成向量操作序列，我们将连续的向量操作称之为”流“，
-其定义如下：
+本节介绍Core程序自动并行化方案，包括流探测算法与嵌套并行的一维分解技术。
+
+\subsubsection{流探测算法}
+流探测算法根据程序的Core表达式树构建
+出向量流图，从向量流图中可以获取可并行任务，
+同时在单一流上可以实施上一节中提出的高层优化技术提供。
+嵌套数据并行分解算法将嵌套数据并行任务分解为一维数据并行任务。
+
+流探测算法的功能就是将并行程序转化成向量操作序列，我们将连续的向量操作序列与这些操作
+输出的向量序列称之为”流“，其定义如下：
 \begin{definition}
   称施加在某个数据向量上的向量操作序列为程序中任务流，由这个向量操作序列生成的向量数据序列
   称为程序中的向量流。
 \end{definition}
 
-在给出流探测算法的正规描述之前，仍以一个并行问题实例进行说明。
+在给出流探测算法的正规描述之前，先结合并行问题实例进行说明。
 \begin{quotation}
   \kai{
     以第\ref{sec:n-body}节中的n-body问题为例，该问题的Core语法树见图\ref{fig:n-body-core}，
     （为清晰起见，该图进行了一定的简化，原始的Core语法树规模更为庞大）。
     从图中可以看出，输入向量\texttt{Cells}（图中用矩形表示）一共被引用了五次，
-    从\texttt{Cells}出发，经过一些向量原语的操作，生成了若干个中间变量（图中用椭圆形表示）
-    如\texttt{positions}与\texttt{velocities}等。
+    从\texttt{Cells}出发，经过一些向量原语的操作，生成了若干个中间变量（图中用椭圆形表示），
+    如\texttt{positions}与\texttt{velocities}等，这些中间变量再通过其他向量操作最后生成了
+    输出结果。
 
-    通过流探测算法生成的向量流如图\ref{fig:n-body-data-flow}，图中每一个结点
-    表示一个向量，每一条边代表某种向量操作。图\ref{fig:n-body-stream}的
-    对偶图即为任务流图。
+    通过流探测算法生成的向量流如图\ref{fig:n-body-stream}。该图清晰地表示出数据的流动过程，
+    图中每一个结点表示一个向量，每一条边代表某种向量操作。
+    每一条有向路径代表了一条向量流。当某个向量结点\texttt{v}有多于一条入边时，称这些边所在的
+    向量流在\texttt{v}处汇合FIXME：字体强调，当某个向量结点u有多于一条出边时，称输入\texttt{u}
+    的向量流在\texttt{u}处分支。
   }
 \end{quotation}
 \begin{figure}
@@ -426,14 +449,138 @@ Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行�
   \centering
   \includegraphics[scale=0.7]{n-body-stream}
   \caption{n-body问题的向量流图}
-  \label{fig:n-body--stream}
+  \label{fig:n-body-stream}
 \end{figure}
 
+图\ref{fig:n-body-stream}的对偶图FIXME：citehere即为任务流图。此处约定，后文中主要以向量流为分析对象，
+如无特别说明，文中提及的“流”即为向量流。
+
+对比观察\ref{fig:n-body-core}与
+图\ref{fig:n-body-stream}可以发现，两个图都可以反映整个表达式的求值过程，只不过表达式树采用
+自顶向下的求值逻辑，其含义是：如果想要求解某个表达式的值，那么要先求解它依赖的子表达式的值。
+而向量流图采用了流驱动（data-flow driven）方式FIXME：citehere，其含义是：一旦某条流中的某个结点值可用，那么从该结点
+分支出去的所有流都可以继续向前计算。
+
+第\ref{subsec:functional-advantages}节中提到，纯函数特性使得表达式的求值结果与子表达式求值顺序无关，
+用树的形式表示，就是整个表达式树的求值结果与各个子树的求值顺序无关，这个特性反映在向量流图中，
+就是不同流的计算过程可以独立执行，他们的执行顺序不影响最终结果。
+同时，将流的概念抽象出来，也应用第\ref{subsec:high-level-optimization}节提出的三种高层优化技术
+创造了条件，一条独立的流上相邻的向量操作可以进行重排与聚合。
+
+综上，将程序中的流抽象出来有两方面作用：
+\begin{compactitem}
+  \item 不同流的计算可以独立并行执行；
+  \item 在流上可以实施存储空间优化、向量原语重排、向量原语聚合三种优化技术。
+\end{compactitem}
+
+算法\ref{alg:stream-detection}给出了流探测算法的正规描述。流探测算法是一个以
+树的深度优先遍历FIXME：citehere为基础的递归算法，根据Core语法树不同结点类型做不同处理，
+Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-detection}中只列出了
+流探测算法的主干，该算法在探测流的同时还可以完成向量对象的引用计数统计等一些列标记工作，
+这些静态执行的标记工作将被Rat的运行时系统用来管理程序运行期的行为。
+\begin{algorithm}[htbp]
+  \caption{流探测算法}
+  \label{alg:stream-detection}
+  \begin{algorithmic}[1]
+    \Require 待求值表达式Core语法树$T$
+    \Ensure 待求值表达式的向量流图$V$
+
+    \Function{detect-stream}{$T$}
+      \State $V \leftarrow \left\{ T \right\}$
+      \State \Return \Call{detect-stream-rec}{$T, V$}
+    \EndFunction
+
+    \Function{detect-stream-rec}{$n, V$}
+      \If{$nodetype(n) = OBJECT\_REF \ \&\  is-detected(n) = FALSE$}
+      \State $V \leftarrow$ \Call{detect-stream-rec}{$ref(n), V$}
+      \ElsIf{$nodetype(n) = LITERAL$}
+      \State $donothing$
+      \ElsIf{$nodetype(n) = FUNCTION\_APP$}
+      \State $operator \leftarrow get\_operator(T)$
+      \State $V \leftarrow$ \Call{detect-stream-rec}{$operator, E$}
+      \For{$operand$ in $get\_operands(n)$} {
+        \If{$is\_vector(operand)$}
+        \State $operand.add\_child(n)$
+        \State $operand.set\_op\_(n, operator)$
+        \State $V \leftarrow V \cup \left\{ operand \right\}$
+        \EndIf
+      }
+      \EndFor
+      \ElsIf{$nodetype(n) = LAMBDA\_EXP$}
+      \State $V \leftarrow$ \Call{detect-stream-rec}{$get\_return\_value(n)$}
+      \ElsIf{$nodetype(n) = CONDITIONAL$}
+      \For{$branch$ in $get\_branches(n)$} {
+        \If{$is\_vector(branch)$}
+        \State $branch.add\_child(n)$
+        \State $branch.set\_flag\_(n, CONDITIONAL)$
+        \State $V \leftarrow V \cup \left\{ branch \right\}$
+        \EndIf
+      }
+      \EndFor
+      \EndIf
+      \State \Return $V$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{并行任务生成}
+Rat编译期最终的输出形式是一个C程序，在这段C程序中，首先是一个任务初始化函数，
+这个函数包括了将所有编译期产生的任务输送到运行时系统的代码，将程序中所有的任务
+装载到任务调度器，之后启动任务调度器，各个任务并行地执行最终得到程序结果。
+
+通过流探测算法得到一个程序的向量流图之后，就可以根据图中流的分布静态地产生
+任务。任务（task）是CoreVM执行计算的粒度单元，一个任务包含一个向量原语操作。
+因为程序中每一个向量原语操作都对应了向量流图中的一条边，所以只需要将向量流图
+中每一条边代表的向量操作封装成任务即可。
+
+一个任务具有下列性质：
+\begin{compactitem}
+  \item 输入向量
+  \item 输出向量
+  \item 向量操作
+\end{compactitem}
+
+封装成C语言结构如下：
+\lstinputlisting[language=C]{listings/task.c}
+
+并行任务的静态生成算法的策略比较简单，从程序的输入向量为出发结点集合，
+对向量流图执行一次宽度优先遍历，每发现一条边，就将改边代表的向量操作封装成
+一个任务，最后图中所有边代表的向量操作都会被封装成任务，并以宽度优先序
+排列。
+
+\subsubsection{嵌套并行分解}
+第FIXME：修改前文节中已经提及，虽然Rat只提供了一维向量原语，但由于支持高阶函数，
+编程者可以使用一维向量原语表达高维的并行操作，即支持嵌套并行。
+
+简而言之，嵌套并行是因为在一个标量操作的内部逻辑中引入了向量操作。
+一维并行与嵌套并行的关系类似于串行语言中单层循环与嵌套循环的关系，
+如果将一维并行操作看作单层循环的并行版本，那么嵌套并行就是嵌套循环
+的并行版本。
+\begin{quotation}
+  \kai{
+    在\texttt{n-body}问题的向量流图\ref{fig:n-body-stream}中，有一条用虚线绘制的有向边，
+    该边从\texttt{calcAccelerate}结点指向\texttt{accelerates}结点。
+    这实际上是因为\texttt{calcAccelerate}并不是一个向量数据，而是一个函数，
+    是一个由\texttt{map}施加在\texttt{cells}之上的标量操作。
+    它之所以出现在向量流图中，是因为它的内部引用了两个向量操作\texttt{map}
+    与\texttt{fold}。也就是说，虽然从类型声明上看，\texttt{calcAccelerate}的输入输出
+    都是标量，但它并不是一个“真正”的标量操作。图\ref{fig:n-body-stream}中采用
+    虚线标识出这两个结点的关系正是因为这条边并不能构成一条真正的流。
+  }
+\end{quotation}
+
+嵌套并行分解就是将嵌套并行操作分解为多个一维并行操作，这样，
+整个任务就可以完全使用一维并行原语实现。
 
 \subsection{运行时系统}\label{subsec:runtime-system}
-\subsubsection{硬件资源管理器}
+本节介绍Rat的运行时系统。该运行时系统运行在CPU端，负责管理可用的硬件资源，
+将CoreVM的指令动态地调度到GPU端并行执行。
 
 \subsubsection{并行任务调度器}
+
+\subsubsection{硬件资源管理器}
+
+\subsection{向量原语驱动}\label{subsec:vp-driver}
 
 \section{GPU端优化技术}\label{sec:gpu-optimization}
 

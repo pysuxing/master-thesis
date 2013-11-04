@@ -5,15 +5,15 @@ digraph G {
         scheduler[label="Task Scheduler"];
         rm[label="Resource Manager"];
         driver[label="VP Driver"];
-        cpu[label="Multi-processor\nMulti-core"];
         gpu[label="GPU"];
-        others[label="Other\nAccelerators"];
+        cpu[label="Multi-processor\nMulti-core", style=dashed];
+        others[label="Other\nAccelerators", style=dashed];
 
         vm -> rt;
         vm -> driver;
         rt -> scheduler;
         rt -> rm;
-        driver -> cpu;
         driver -> gpu;
-        driver -> others;
+        driver -> cpu[style=dashed];
+        driver -> others[style=dashed];
 }
