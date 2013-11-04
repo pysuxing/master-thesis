@@ -398,37 +398,37 @@ $$
 不妨称为源异常信号，而如前所述，源异常信号与异常信号依赖矩阵$\mathbf{S_a}$的全零列是存在一一对应的关系的。因此，我们只要获得了$\mathbf{S_a}$的全零列的相关信息，
 也就获得了源异常信号的信息，从而能进一步找到故障源。
 通过以上分析，我们构造算法\ref{alg53}，用于实现非回路故障诊断。
-\begin{algorithm}[htbp]
-  \caption{非回路故障诊断算法}
-  \label{alg53}
-  \begin{algorithmic}[1]
-    \REQUIRE 信号--部件依赖矩阵$\mathbf{A}$，信号依赖矩阵$\mathbf{S}$，信号状态向量$\alpha$
-    \ENSURE 部件状态向量$\gamma$
-    \STATE $\mathbf{P}\leftarrow\left(<\alpha>\right)$
-    \STATE $\mathbf{S_{a}}\leftarrow\mathbf{P^T}\mathbf{S}\mathbf{P}$
-    \FOR{$i=1$ to $S_a$的阶数$m$}
-    \STATE $s_i\leftarrow s_i$的第$i$个行向量
-    \ENDFOR
-    \STATE $\beta_a\leftarrow\lnot \left(s_1\lor s_2\lor \cdots\lor s_m\right)^T$
-    \STATE $\beta\leftarrow\mathbf{P}\beta_a$
-    \STATE $\gamma\leftarrow\mathbf{A}\beta$
-  \end{algorithmic}
-\end{algorithm}
+%% \begin{algorithm}[htbp]
+%%   \caption{非回路故障诊断算法}
+%%   \label{alg53}
+%%   \begin{algorithmic}[1]
+%%     \REQUIRE 信号--部件依赖矩阵$\mathbf{A}$，信号依赖矩阵$\mathbf{S}$，信号状态向量$\alpha$
+%%     \ENSURE 部件状态向量$\gamma$
+%%     \STATE $\mathbf{P}\leftarrow\left(<\alpha>\right)$
+%%     \STATE $\mathbf{S_{a}}\leftarrow\mathbf{P^T}\mathbf{S}\mathbf{P}$
+%%     \FOR{$i=1$ to $S_a$的阶数$m$}
+%%     \STATE $s_i\leftarrow s_i$的第$i$个行向量
+%%     \ENDFOR
+%%     \STATE $\beta_a\leftarrow\lnot \left(s_1\lor s_2\lor \cdots\lor s_m\right)^T$
+%%     \STATE $\beta\leftarrow\mathbf{P}\beta_a$
+%%     \STATE $\gamma\leftarrow\mathbf{A}\beta$
+%%   \end{algorithmic}
+%% \end{algorithm}
 
 第一类故障回路推理与非回路故障推理是算法基本相同，稍微不同的是$\beta_a$的计算。因为第一类故障回路中的信号全部可能是源异常信号，因此我们不必计算
 $\beta_a=\lnot \left(\left[s_1\lor s_2\lor \cdots\lor s_m\right]^T\right)$，而直接取$\beta_a=\underbrace{\left[\begin{array}{cccc}1&1&\cdots&1\end{array}\right]^T}_m$，将$\beta_a$代入
 算法\ref{alg53}，有
 \[\beta=\mathbf{P}\beta_a=\mathbf{P}\underbrace{\left[\begin{array}{cccc}1&1&\cdots&1\end{array}\right]^T}_m=\alpha\]
 因此一类故障回路的推理算法变得相当简单，例如算法\ref{alg54}
-\begin{algorithm}[htbp]
-  \caption{第一类故障回路诊断算法}
-  \label{alg54}
-  \begin{algorithmic}[1]
-    \REQUIRE 信号--部件依赖矩阵$\mathbf{A}$，信号状态向量$\alpha$
-    \ENSURE 部件状态向量$\gamma$
-    \STATE $\gamma\leftarrow\mathbf{A}\alpha$
-  \end{algorithmic}
-\end{algorithm}
+%% \begin{algorithm}[htbp]
+%%   \caption{第一类故障回路诊断算法}
+%%   \label{alg54}
+%%   \begin{algorithmic}[1]
+%%     \REQUIRE 信号--部件依赖矩阵$\mathbf{A}$，信号状态向量$\alpha$
+%%     \ENSURE 部件状态向量$\gamma$
+%%     \STATE $\gamma\leftarrow\mathbf{A}\alpha$
+%%   \end{algorithmic}
+%% \end{algorithm}
 
 \section{参考文献}
 \label{sec:bib}
