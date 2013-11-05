@@ -25,7 +25,7 @@ digraph G {
         newPositions -> positions[label="zipWith"];
         velocities -> cells[label="map"];
         positions -> cells[label="map"];
-        accelerates -> cells[label="map"];
+        accelerates -> cells[label="map", style=dashed];
         accelerates -> singleAcc[style=dashed];
         singleAcc -> otherAccs[label="fold"];
         otherAccs -> cells[label="map"];

@@ -3,26 +3,27 @@
 良好的编程界面，解决了并行编程工具的易用性问题。那么另一方面，
 高效性要依靠语言的编译实现技术解决。
 
-这一章将详细说明Rat语言的编译实现技术。Rat语言编译实现方案的设计，
-着力于实现以下几个目标：
+本章将详细说明Rat语言的编译实现技术。Rat语言编译实现方案的设计，
+主要作出了以下两点贡献：
 \begin{compactitem}
-  \item 采用层次化软件设计，提高Rat实现在不同的硬件系统上的可移植性；
-  \item 有效开发异构硬件系统的效能，使CPU与GPU并行工作；
-  \item 发挥GPU的在数据并行计算方面的硬件优势。
+  \item 设计了并行虚拟机CoreVM，保证了Rat实现在不同的硬件系统上的可移植性；
+  \item 提出了基于流的自动并行化方案，挖掘程序中存在的并行潜力，具有较强的
+    通用性。
 \end{compactitem}
 
 本章的内容结构如下：
-第\ref{sec:backend-overview}节介绍Rat语言编译实现的总体方案，展现Rat实现技术采用
+第\ref{sec:compiler-overview}节介绍Rat语言编译实现的总体方案，展现Rat实现技术采用
 的层次化软件设计。
 第\ref{sec:parallel-vm}节给出了并行虚拟机CoreVM的设计，并提出了若干高层优化技术，
 CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的，这样，Rat在不同
 并行硬件上的移植只需要在这些硬件上实现CoreVM即可，同时高层的优化措施也具有硬件无关特性。
-第\ref{sec:auto-parallelization}节提出了一种自动并行化方案，该方案可以有效地管理
-可用硬件资源，实现任务的自动划分与调度，使CPU与GPU并行工作。
-第\ref{sec:gpu-optimization}节介绍了针对GPU硬件结构采用的若干优化方法，以提高并行原语
-在GPU上的执行效率。
+第\ref{sec:auto-parallelization}节描述了Rat编译器自动并行化方案，该方案使用流的方式描述
+数据并行问题，可以将并行问题分解成一个个向量处理任务，发掘程序中存在的并行潜力。
+第\ref{sec:code-generation}节说明将Rat程序翻译成C程序的过程。
+%% 第\ref{sec:gpu-optimization}节介绍了针对GPU硬件结构采用的若干优化方法，以提高并行原语
+%% 在GPU上的执行效率。
 
-\section{编译实现总体方案}\label{sec:backend-overview}
+\section{编译实现总体方案}\label{sec:compiler-overview}
 第\ref{sec:c-interface}节已经提到，Rat编译器是一个源到源编译期，
 最终产生C语言代码，将Rat函数转换成合适类型的C语言函数供C程序调用。
 图\ref{fig:frontend}给出了从Rat代码到C代码的翻译流程，步骤如下：
@@ -97,7 +98,7 @@ CoreVM是一个抽象层次较高的虚拟机，它有下面两个特点：
 在不同硬件上的移植。
 
 第\ref{subsec:core-language}先介绍Core语言，它是并行虚拟机CoreVM运行的指令集，
-然后第\ref{subsec:high-level-optimization}节介绍几种执行Core语言层面执行的优化技术，
+然后第\ref{subsec:high-level-optimization}节介绍几种执行在Core语言层面执行的优化技术，
 %% 最后第\ref{subsec:}给出
 
 \subsection{Core语言}\label{subsec:core-language}
@@ -377,43 +378,28 @@ FIXME：提及附录。
 \end{table}
 
 \section{自动并行化技术}\label{sec:auto-parallelization}
-正如第\ref{sec:parallel-vm}节所说，Rat的并行虚拟机CoreVM被设计为在多种
-并行硬件上都能够高效实现，这实现了本章开始提出的三个目标中的第一个。
-Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行硬件，
-在实现任务自动并行化的时候着力与完成另外两个目标，即充分发掘GPU的并行计算能力与
-有效协调CPU与GPU并行工作。
-
-Rat实现的整体后端结构如图\ref{fig:backend}，从图中可以看出，
-CoreVM的实现构建在在运行时系统（Runtime System）与向量原语驱动（VP Driver）之上。
-\begin{figure}
-  \centering
-  \includegraphics[height=5cm]{backend}
-  \caption{Rat后端}
-  \label{fig:backend}
-\end{figure}
-
-第\ref{subsec:automated-parallelization}节将首先介绍自动并行化技术总体方案：
-流探测（stream detection）算法，并行任务生成（task generation）
-以及嵌套并行的一维分解（nested parallellism decomposition）。
-第\ref{subsec:runtime-system}节介绍Rat的运行时系统，该系统根据流探测算法
-的探测结果，对硬件资源实施管理，在CPU与GPU两端动态地调度并行任务。
-向量原语驱动在具体硬件上实现数据并行操作，在GPU上实现向量原语的技术最后在第\ref{subsec:vp-driver}节
-予以介绍。
-
-\subsection{自动并行化总体方案}\label{subsec:automated-parallelization}
+%% 正如第\ref{sec:parallel-vm}节所说，Rat的并行虚拟机CoreVM被设计为在多种
+%% 并行硬件上都能够高效实现，这实现了本章开始提出的三个目标中的第一个。
+%% Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行硬件，
+%% 在实现任务自动并行化的时候着力与完成另外两个目标，即充分发掘GPU的并行计算能力与
+%% 有效协调CPU与GPU并行工作。
 任务的自动并行化一直是一个难题，因为并行问题的固有特征导致不同问题可发掘的并行潜力各不相同，
 这使得对与并行问题的求解没有通用的最优化方案。CoreVM的设计使得数据并行问题被分解成
 一个个向量操作组成的序列，而这个将并行问题序列化为向量操作的过程，
 消除了问题本身的固有特性，这时，序列化的向量操作成为一种“通用”的并行问题描述形式，
 这为发现问题无关的并行性提供了可能。
 
-本节介绍Core程序自动并行化方案，包括流探测算法与嵌套并行的一维分解技术。
+本节介绍Core程序自动并行化方案，内容安排如下：
+第\ref{subsec:stream-detection}节将首先介绍
+流探测（stream detection）算法，该算法将并行问题转化成流的描述形式，
+为发现问题中的可并行任务做前期准备工作。
+第\ref{subsec:np-decomposition}节说明嵌套并行的分解（decomposition）技术，
+这种技术用于处理嵌套并行操作，将嵌套并行转化为一维向量操作。
 
-\subsubsection{流探测算法}
+\subsection{流探测算法}\label{subsec:stream-detection}
 流探测算法根据程序的Core表达式树构建
 出向量流图，从向量流图中可以获取可并行任务，
-同时在单一流上可以实施上一节中提出的高层优化技术提供。
-嵌套数据并行分解算法将嵌套数据并行任务分解为一维数据并行任务。
+同时在单一流上可以实施上一节中提出的高层优化技术。
 
 流探测算法的功能就是将并行程序转化成向量操作序列，我们将连续的向量操作序列与这些操作
 输出的向量序列称之为”流“，其定义如下：
@@ -491,7 +477,7 @@ Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-de
     \EndFunction
 
     \Function{detect-stream-rec}{$n, V$}
-      \If{$nodetype(n) = OBJECT\_REF \ \&\  is-detected(n) = FALSE$}
+      \If{$nodetype(n) = OBJECT\_REF \ \&\  is\_detected(n) = FALSE$}
       \State $V \leftarrow$ \Call{detect-stream-rec}{$ref(n), V$}
       \ElsIf{$nodetype(n) = LITERAL$}
       \State $donothing$
@@ -523,32 +509,8 @@ Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-de
   \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{并行任务生成}
-Rat编译期最终的输出形式是一个C程序，在这段C程序中，首先是一个任务初始化函数，
-这个函数包括了将所有编译期产生的任务输送到运行时系统的代码，将程序中所有的任务
-装载到任务调度器，之后启动任务调度器，各个任务并行地执行最终得到程序结果。
 
-通过流探测算法得到一个程序的向量流图之后，就可以根据图中流的分布静态地产生
-任务。任务（task）是CoreVM执行计算的粒度单元，一个任务包含一个向量原语操作。
-因为程序中每一个向量原语操作都对应了向量流图中的一条边，所以只需要将向量流图
-中每一条边代表的向量操作封装成任务即可。
-
-一个任务具有下列性质：
-\begin{compactitem}
-  \item 输入向量
-  \item 输出向量
-  \item 向量操作
-\end{compactitem}
-
-封装成C语言结构如下：
-\lstinputlisting[language=C]{listings/task.c}
-
-并行任务的静态生成算法的策略比较简单，从程序的输入向量为出发结点集合，
-对向量流图执行一次宽度优先遍历，每发现一条边，就将改边代表的向量操作封装成
-一个任务，最后图中所有边代表的向量操作都会被封装成任务，并以宽度优先序
-排列。
-
-\subsubsection{嵌套并行分解}
+\subsection{嵌套并行分解}\label{subsec:np-decomposition}
 第FIXME：修改前文节中已经提及，虽然Rat只提供了一维向量原语，但由于支持高阶函数，
 编程者可以使用一维向量原语表达高维的并行操作，即支持嵌套并行。
 
@@ -560,7 +522,8 @@ Rat编译期最终的输出形式是一个C程序，在这段C程序中，首先
   \kai{
     在\texttt{n-body}问题的向量流图\ref{fig:n-body-stream}中，有一条用虚线绘制的有向边，
     该边从\texttt{calcAccelerate}结点指向\texttt{accelerates}结点。
-    这实际上是因为\texttt{calcAccelerate}并不是一个向量数据，而是一个函数，
+    \texttt{accelerates}结点的求值表达式为\texttt{map (calcSingleAcc cell) cells}，
+    因为\texttt{calcAccelerate}并不是一个向量数据，而是一个函数，
     是一个由\texttt{map}施加在\texttt{cells}之上的标量操作。
     它之所以出现在向量流图中，是因为它的内部引用了两个向量操作\texttt{map}
     与\texttt{fold}。也就是说，虽然从类型声明上看，\texttt{calcAccelerate}的输入输出
@@ -572,20 +535,107 @@ Rat编译期最终的输出形式是一个C程序，在这段C程序中，首先
 嵌套并行分解就是将嵌套并行操作分解为多个一维并行操作，这样，
 整个任务就可以完全使用一维并行原语实现。
 
-\subsection{运行时系统}\label{subsec:runtime-system}
-本节介绍Rat的运行时系统。该运行时系统运行在CPU端，负责管理可用的硬件资源，
-将CoreVM的指令动态地调度到GPU端并行执行。
+回顾表\ref{tbl:vector-primitives}列出
+的八个向量原语，其中\texttt{map}，\texttt{scan}，\texttt{gpermute}，\texttt{sort}
+在参数中引入了标量操作，从而可能引起嵌套并行的出现，而在实践当中，
+一般只有\texttt{map}原语引用的标量操作会在内部会包含向量操作，造成嵌套并行，
+因而，下面我们只分解考虑\texttt{map}原语引入嵌套并行。
 
-\subsubsection{并行任务调度器}
+在将程序最终翻译成C程序的时候，向量流图中每一个向量操作都会被封装成一个任务结构发送给任务调度器，
+对于\texttt{map}原语引入的嵌套并行操作，最简单的策略是，将这个\texttt{map}
+操作翻译成一个循环体，其迭代次数为\texttt{map}原语目标向量的长度，循环体内部
+为目标向量的每一个元素都生成一个任务发送到任务调度器。这种处理策略的好处是
+思路简单，而且支持任意多层嵌套并行的处理，嵌套并行最终被转化成一批等规模的一维向量操作，
+规模等于最内层向量操作的规模。算法\ref{alg:np-decomposition}给出了
+这种简单嵌套并行分解算法的正规描述。
+\begin{algorithm}
+  \caption{简单的嵌套并行分解算法}
+  \label{alg:np-decomposition}
+  \begin{algorithmic}[1]
+    \Require 向量流图中\texttt{map}原语指向的结点$V$
+    \Ensure 由\texttt{map}原语生成$V$的操作中包含的任务组成的队列$TQ$
+    \Function{np-decompsite}{$V, TQ$}
+    \State $sop \leftarrow get\_scalar\_op(v)$
+    \If{$contain\_vp(sop) = TRUE$}
+    \For{$element$ in $get\_source\_vector(V)$}
+    \State $TQ \leftarrow$ \Call{np-decompsite}{$make\_node(sop, element), TQ$}
+    \EndFor
+    \Else
+    \State $TQ \leftarrow$ \Call{generate-task}{$V$}
+    \EndIf
+    \State \Return{$TQ$}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
 
-\subsubsection{硬件资源管理器}
+\begin{quotation}
+  经过嵌套并行分解处理，n-body问题中包含嵌套并行操作的表达式\texttt{map (calcSingleAcc cell) cells}
+  实际上被翻译成一组数量为\texttt{cells}长度的一维向量操作，如图\ref{fig:np-decomposition}。
+  从图中可以看出，嵌套并行分解生成了一组新的流，这些流的结构相同，仅存在一些参数上的差异，
+  这种参数差异反映了内层并行操作对外层向量数据不同位置元素的引用。
+\end{quotation}
+\begin{figure}
+  \centering
+  \includegraphics[height=5cm]{np-decomposition}
+  \caption{嵌套并行分解操作}
+  \label{fig:np-decomposition}
+\end{figure}
 
-\subsection{向量原语驱动}\label{subsec:vp-driver}
+%% \subsection{嵌套并行平坦化}\label{subsec:np-flattening}
+%% 嵌套并行的分解算法思路直观，实现简单，但是有可能会造成一些性能上的问题。
+%% 当嵌套循环的最内层向量操作规模不够大的时候，会造成大批量的细粒度任务，
+%% 这不仅有可能造成并行硬件的计算能力得不到充分利用，还可能会显著提高
+%% 任务调度器的调度开销在整个程序中所占的比例。
 
-\section{GPU端优化技术}\label{sec:gpu-optimization}
+%% 为解决上述问题，这里提出了嵌套并行平坦化技术作为嵌套并行分解的辅助措施。
+%% 图\ref{fig:np-decomposition}中表示的一组流结构相同，仅存在一些参数上的差异。
+%% 可以看出，结构相同是因为嵌套并行中对每一个外层向量数据，内层并行操作都
+%% 保持相同的计算逻辑，参数不同是因为每一次内层向量操作引用了外层向量不同位置的元素，
+%% 所以，区别这些流的参数是一个整型数，代表外层向量中被引用元素的位置。
 
-\subsection{寄存器优化}
+\section{代码生成}\label{sec:code-generation}
+通过流探测算法得到一个程序的向量流图之后，
+在借助嵌套并行分解技术，就可以根据图中流的分布静态地产生
+任务。任务（task）是CoreVM执行计算的粒度单元，一个任务包含一个向量原语操作。
+任务由下列三个要素构成：
+\begin{compactitem}
+  \item 输入向量
+  \item 输出向量
+  \item 向量操作
+\end{compactitem}
+在向量流图中，每一组汇入同一结点的有向边都表示一个向量原语操作，即一个任务，
+这组边的起始结点集表示该任务的数据依赖，汇入结点表示该任务的输出结果。
 
-\subsection{全局存储器优化}
+Rat编译期最终的输出形式是一个C程序，在这段C程序中，首先是一个任务初始化函数，
+这个函数包括了将所有编译期产生的任务输送到运行时系统的代码，将程序中所有的任务
+装载到任务调度器，之后启动任务调度器，各个任务并行地执行最终得到程序结果。
 
-\subsection{共享存储器优化}
+封装成C语言任务结构如下：
+\lstinputlisting[language=C]{listings/task.c}
+
+因为从同一结点出发的各条边代表的向量操作可以并行执行，所以编译期任务生成
+采用了一种简单策略，即对向量流图中的任务采用宽度优先序排列：
+从程序的输入向量为出发结点集合，
+对向量流图执行一次宽度优先遍历，每发现一条边，就将改边代表的向量操作封装成
+一个任务，提交给任务调度器。
+
+任务的宽度优先序只是静态产生的“推荐”调度顺序，在这个任务排序中，相邻的任务
+能够并行执行的“可能性”较高。但在程序的运行期，所有添加到调度器的任务是被
+动态调度的，这将在下一章中详细说明。
+%% \subsection{运行时系统}\label{subsec:runtime-system}
+%% 本节介绍Rat的运行时系统。该运行时系统运行在CPU端，负责管理可用的硬件资源，
+%% 将CoreVM的指令动态地调度到GPU端并行执行。
+
+%% \subsubsection{并行任务调度器}
+
+%% \subsubsection{硬件资源管理器}
+
+%% \subsection{向量原语驱动}\label{subsec:vp-driver}
+
+%% \section{GPU端优化技术}\label{sec:gpu-optimization}
+
+%% \subsection{寄存器优化}
+
+%% \subsection{全局存储器优化}
+
+%% \subsection{共享存储器优化}
