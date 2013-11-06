@@ -1,0 +1,287 @@
+digraph G {
+        // page="8.26, 11.7";
+        // size="8.26, 11.6!";
+        // ratio="compressed";
+
+        subgraph vars {
+                rankdir=LR;
+                node[shape=octagon, style=filled, fillcolor=gray];
+                varscells[label="cells"];
+                varsmasses[label="masses"];
+                varspositions[label="positions"];
+                varsvelocities[label="velocities"];
+                varsaccelerates[label="accelerates"];
+                varsnewvelocities[label="newVelocities"];
+                varsnewpositions[label="newPositions"];
+                varst[label="t"];
+                varsg[label="g"];
+                varscsa[label="calcSingleAcc", style=filled, fillcolor=gray];
+                varsca[label="calcAccelerate", style=filled, fillcolor=gray];
+                varscds[label="calcDistanceSquare", style=filled, fillcolor=gray];
+        }
+
+        subgraph ncs {
+                ncsroot[label="result", shape=ellipse];
+                ncszw3[label="zipWith3", shape=plaintext];
+                ncsmkc[label="Cell", shape=plaintext];
+                ncsms[label="masses", shape=box];
+                ncsnvs[label="newVelocities", shape=box];
+                ncsnps[label="newPositions", shape=box];
+                ncsroot -> ncszw3;
+                ncsroot -> ncsmkc;
+                ncsroot -> ncsms;
+                ncsroot -> ncsnps;
+                ncsroot -> ncsnvs;
+        }
+
+        subgraph ms {
+                msroot[label="masses", shape=ellipse];
+                msmap[label="map", shape=plaintext];
+                msmass[label="mass", shape=plaintext];
+                mscells[label="cells", shape=box];
+                msroot -> msmap;
+                msroot -> msmass;
+                msroot -> mscells;
+        }
+        subgraph ps {
+                psroot[label="positions", shape=ellipse];
+                psmap[label="map", shape=plaintext];
+                psposition[label="position", shape=plaintext];
+                pscells[label="cells", shape=box];
+                psroot -> psmap;
+                psroot -> psposition;
+                psroot -> pscells;
+        }
+        subgraph vs {
+                vsroot[label="velocities", shape=ellipse];
+                vsmap[label="map", shape=plaintext];
+                vsvelocity[label="velocity", shape=plaintext];
+                vscells[label="cells", shape=box];
+                vsroot -> vsmap;
+                vsroot -> vsvelocity;
+                vsroot -> vscells;
+        }
+        subgraph cds {
+                node[shape=point];
+                cdsroot[label="<p> calcDistanceSquare | c1 | c2 | <gx> getXPos | <gy> getYPos | <xd> xD | <yd> yD ",
+                        shape=record];
+                cdsplus[label="+", shape=plaintext];
+                cdst1;
+                cdst2;
+                cdspow1[label="pow", shape=plaintext];
+                cdsxd[label="xD", shape=box];
+                cdsl1[label="2", shape=doublecircle];
+                cdspow2[label="pow", shape=plaintext];
+                cdsyd[label="yD", shape=box];
+                cdsl2[label="2", shape=doublecircle];
+                
+                cdsroot:p -> cdsplus;
+                cdsroot:p -> cdst1;
+                cdsroot:p -> cdst2;
+                cdst1 -> cdspow1;
+                cdst1 -> cdsxd;
+                cdst1 -> cdsl1;
+                cdst2 -> cdspow2;
+                cdst2 -> cdsyd;
+                cdst2 -> cdsl2;
+
+                cdsroot:gx -> cdsgx;
+                cdsroot:gy -> cdsgy;
+                
+                cdsgx[label="<p> getXPos | p1", shape=record];
+                cdsgxxp[label="xPosition", shape=plaintext];
+                cdsgxt1;
+                cdsgxcp[label="cellPosition", shape=plaintext];
+                cdsgxp1[label="p1", shape=box];
+                cdsgx:p -> cdsgxxp;
+                cdsgx:p -> cdsgxt1;
+                cdsgxt1 -> cdsgxcp;
+                cdsgxt1 -> cdsgxp1;
+
+                cdsgy[label="<p> getYPos | p1", shape=record];
+                cdsgyyp[label="yPosition", shape=plaintext];
+                cdsgyt1;
+                cdsgycp[label="cellPosition", shape=plaintext];
+                cdsgyp1[label="p1", shape=box];
+                cdsgy:p -> cdsgyyp;
+                cdsgy:p -> cdsgyt1;
+                cdsgyt1 -> cdsgycp;
+                cdsgyt1 -> cdsgyp1;
+
+                cdsroot:xd -> cdsxdt;
+                cdsroot:yd -> cdsydt;
+                
+                cdsxdt;
+                cdsxdtminus[label="-", shape=plaintext];
+                cdsxdtt1;
+                cdsxdtt2;
+                cdsxdtgx1[label="getXPos", shape=box];
+                cdsxdtgx2[label="getXPos", shape=box];
+                cdsxdtc1[label="c1", shape=box];
+                cdsxdtc2[label="c2", shape=box];
+                cdsxdt -> cdsxdtminus;
+                cdsxdt -> cdsxdtt1;
+                cdsxdt -> cdsxdtt2;
+                cdsxdtt1 -> cdsxdtgx1;
+                cdsxdtt1 -> cdsxdtc1;
+                cdsxdtt2 -> cdsxdtgx2;
+                cdsxdtt2 -> cdsxdtc2;
+
+                cdsydt;
+                cdsydtminus[label="-", shape=plaintext];
+                cdsydtt1;
+                cdsydtt2;
+                cdsydtgy1[label="getYPos", shape=box];
+                cdsydtgy2[label="getYPos", shape=box];
+                cdsydtc1[label="c1", shape=box];
+                cdsydtc2[label="c2", shape=box];
+                cdsydt -> cdsydtminus;
+                cdsydt -> cdsydtt1;
+                cdsydt -> cdsydtt2;
+                cdsydtt1 -> cdsydtgy1;
+                cdsydtt1 -> cdsydtc1;
+                cdsydtt2 -> cdsydtgy2;
+                cdsydtt2 -> cdsydtc2;
+        }
+        subgraph csa {
+                node[shape=point];
+                csaroot[label="<p> calcSingleAcc | c1 | c2", shape=record];
+                csadiv[label="/", shape=plaintext];
+                csat1[label=""];
+                csamul[label="*", shape=plaintext];
+                csag[label="g", shape=box];
+                csat3[label=""];
+                csamass[label="mass", shape=plaintext];
+                csac21[label="c2", shape=box];
+                csat2[label=""];
+                csacds[label="calcDistanceSquare", shape=plaintext];
+                csac1[label="c1", shape=box];
+                csac22[label="c2", shape=box];
+                csaroot:p -> csadiv;
+                csaroot:p -> csat1;
+                csaroot:p -> csat2;
+                csat1 -> csamul;
+                csat1 -> csag;
+                csat1 -> csat3;
+                csat3 -> csamass;
+                csat3 -> csac21;
+                csat2 -> csacds;
+                csat2 -> csac1;
+                csat2 -> csac22;
+        }
+        subgraph ca {
+                caroot[label="<p> calcAccelerate | cell", shape=record];
+                cafold[label="fold", shape=plaintext];
+                caplus[label="+", shape=plaintext];
+                cat1[label="", shape=point];
+                camap[label="map", shape=plaintext];
+                cat2[label="", shape=point];
+                cacsa[label="calcSingleAcc", shape=plaintext];
+                cacell[label="cell", shape=box];
+                cacells[label="cells", shape=box];
+                caroot:p -> cafold;
+                caroot:p -> caplus;
+                caroot:p -> cat1;
+                cat1 -> camap;
+                cat1 -> cat2;
+                cat1 -> cacells;
+                cat2 -> cacsa;
+                cat2 -> cacell;
+        }
+        subgraph as {
+                asroot[label="accelerates", shape=ellipse];
+                asmap[label="map", shape=plaintext];
+                asca[label="calcAccelerate", shape=plaintext];
+                ascells[label="cells", shape=box];
+                asroot -> asmap;
+                asroot -> asca;
+                asroot -> ascells;
+        }
+        subgraph nvs {
+                nvsroot[label="newVelocities", shape=ellipse];
+                nvszw[label="zipWith", shape=plaintext];
+                subgraph nvslbd1 {
+                        nvslbd1root[label="<p> | v | a", shape=record];
+                        nvslbd1plus[label="+", shape=plaintext];
+                        nvslbd1v[label="v", shape=box];
+                        nvslbd1t1[label="", shape=point];
+                        nvslbd1mul[label="*", shape=plaintext];
+                        nvslbd1a[label="a", shape=box];
+                        nvslbd1t[label="t", shape=box];
+                        nvslbd1root:p -> nvslbd1plus;
+                        nvslbd1root:p -> nvslbd1v;
+                        nvslbd1root:p -> nvslbd1t1;
+                        nvslbd1t1 -> nvslbd1mul;
+                        nvslbd1t1 -> nvslbd1a;
+                        nvslbd1t1 -> nvslbd1t;
+                }
+                nvsvelocities[label="velocities", shape=box];
+                nvsaccelerates[label="accelerates", shape=box];
+                nvsroot -> nvszw;
+                nvsroot -> nvslbd1root:p;
+                nvsroot -> nvsvelocities;
+                nvsroot -> nvsaccelerates;
+        }
+        subgraph nps {
+                npsroot[label="newPositions", shape=ellipse];
+                npszw[label="zipWith", shape=plaintext];
+                subgraph npslbd1 {
+                        npslbd1root[label="<p> | p | v", shape=record];
+                        npslbd1plus[label="+", shape=plaintext];
+                        npslbd1p[label="p", shape=box];
+                        npslbd1t1[label="", shape=point];
+                        npslbd1mul[label="*", shape=plaintext];
+                        npslbd1v[label="v", shape=box];
+                        npslbd1t[label="t", shape=box];
+                        npslbd1root:p -> npslbd1plus;
+                        npslbd1root:p -> npslbd1p;
+                        npslbd1root:p -> npslbd1t1;
+                        npslbd1t1 -> npslbd1mul;
+                        npslbd1t1 -> npslbd1v;
+                        npslbd1t1 -> npslbd1t;
+                }
+                npspositions[label="positions", shape=box];
+                npsvelocities[label="velocities", shape=box];
+                npsroot -> npszw;
+                npsroot -> npslbd1root:p;
+                npsroot -> npspositions;
+                npsroot -> npsvelocities;
+        }
+
+        ncsms -> varsmasses[style=dashed];
+        ncsnps -> varsnewpositions[style=dashed];
+        ncsnvs -> varsnewvelocities[style=dashed];
+
+        varsmasses -> msroot;
+        varsnewvelocities -> nvsroot;
+        varsnewpositions -> npsroot;
+
+        npspositions -> varspositions[style=dashed];
+        npsvelocities -> varsvelocities[style=dashed];
+        nvsvelocities -> varsvelocities[style=dashed];
+        nvsaccelerates -> varsaccelerates[style=dashed];
+        
+        varspositions -> psroot;
+        varsvelocities -> vsroot;
+        varsaccelerates -> asroot;
+        varscsa -> csaroot:p;
+        varsca -> caroot:p;
+        varscds -> cdsroot:p;
+
+        asca -> varsca[style=dashed];
+        // cacsa -> varscsa[style=dashed];
+        varscsa -> cacsa [style=dashed, dir=back]; // tricky here
+        csacds -> varscds[style=dashed];
+
+        // position ajustment
+        {
+                rank = same;
+                nvslbd1root;
+                varsvelocities;
+        }
+        {
+                rank=same;
+                varscsa;
+                caroot;
+        }
+}

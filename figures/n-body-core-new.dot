@@ -1,0 +1,95 @@
+digraph G {
+	// size="8.2, 11.6";
+	// ratio="compressed";
+	
+	res[label="newCells"];
+        resmap[label="map", shape=plaintext];
+	Cell[shape=plaintext];
+        t1[label=""];
+        res -> resmap;
+        res -> Cell;
+        res -> t1;
+
+        t1zip[label="zip", shape=plaintext];
+        ms[label="masses"];
+        nvs[label="newVelocities"];
+        nps[label="newPositions"];
+        t1 -> t1zip;
+        t1 -> ms;
+        t1 -> nvs;
+        t1 -> nps;
+
+        msmap[label="map", shape=plaintext];
+        cellMass[shape=plaintext];
+        mscells[label="cells", shape=box];
+        ms -> msmap;
+        ms -> cellMass;
+        ms -> mscells;
+
+        nvsmap[label="map", shape=plaintext];
+        nvslbd[label="lambda1", shape=plaintext];
+        t2[label=""];
+        nvs -> nvsmap;
+        nvs -> nvslbd;
+        nvs -> t2;
+
+        t2zip[label="zip", shape=plaintext];
+        vs[label="velocities"];
+        as[label="accelerates"];
+        t2 -> t2zip;
+        t2 -> vs;
+        t2 -> as;
+
+        npsmap[label="map", shape=plaintext];
+        npslbd[label="lambda2", shape=plaintext];
+        t3[label=""];
+        nps -> npsmap;
+        nps -> npslbd;
+        nps -> t3;
+
+        t3zip[label="zip", shape=plaintext];
+        ps[label="positions"];
+        t3 -> t3zip;
+        t3 -> vs;
+        t3 -> ps;
+
+        vsmap[label="map", shape=plaintext];
+        cellVelocity[shape=plaintext];
+        vscells[label="cells", shape=box];
+        vs -> vsmap;
+        vs -> cellVelocity;
+        vs -> vscells;
+        
+        psmap[label="map", shape=plaintext];
+        cellPosition[shape=plaintext];
+        pscells[label="cells", shape=box];
+        ps -> psmap;
+        ps -> cellPosition;
+        ps -> pscells;
+
+        asmap[label="map", shape=plaintext];
+        ca[shape=record, label="calcAccelerate | cell"];
+        ascells[label="cells", shape=box];
+        as -> asmap;
+        as -> ca;
+        as -> ascells;
+                
+        cascan[label="scan", shape=plaintext];
+        caplus[label="+", shape=plaintext];
+        t4[label=""];
+        ca -> cascan;
+        ca -> caplus;
+        ca -> t4;
+
+        t4map[label="map", shape=plaintext];
+        t5[label=""];
+        t4cells[label="cells", shape=box];
+        t4 -> t4map;
+        t4 -> t5;
+        t4 -> t4cells;
+
+        csa[label=calcSingleAcc, shape=plaintext];
+        csacell[label="cell", shape=diamond];
+        t5 -> csa;
+        t5 -> csacell;
+}

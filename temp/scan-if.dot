@@ -1,0 +1,22 @@
+digraph G {
+        node [shape=record];
+        edge [label="",splines=line];
+
+        in[label="<p0> a[0] | <p1> a[1] | <p2> a[2] | <p3> a[3] | <p4> a[4]"];
+        out[label="<p0> a[0] | <p1> a[1] | <p2> a[2] | <p3> a[3] | <p4> a[4]"];
+        in:p0 -> out:p0;
+        in:p0 -> out:p1;
+        in:p0 -> out:p2;
+        in:p0 -> out:p3;
+        in:p0 -> out:p4;
+        in:p1 -> out:p1;
+        in:p1 -> out:p2;
+        in:p1 -> out:p3;
+        in:p1 -> out:p4;
+        in:p2 -> out:p2;
+        in:p2 -> out:p3;
+        in:p2 -> out:p4;
+        in:p3 -> out:p3;
+        in:p3 -> out:p4;
+        in:p4 -> out:p4;
+}

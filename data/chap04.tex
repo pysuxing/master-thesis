@@ -3,25 +3,16 @@
 良好的编程界面，解决了并行编程工具的易用性问题。那么另一方面，
 高效性要依靠语言的编译实现技术解决。
 
-本章将详细说明Rat语言的编译实现技术。Rat语言编译实现方案的设计，
-主要作出了以下两点贡献：
-\begin{compactitem}
-  \item 设计了并行虚拟机CoreVM，保证了Rat实现在不同的硬件系统上的可移植性；
-  \item 提出了基于流的自动并行化方案，挖掘程序中存在的并行潜力，具有较强的
-    通用性。
-\end{compactitem}
-
-本章的内容结构如下：
-第\ref{sec:compiler-overview}节介绍Rat语言编译实现的总体方案，展现Rat实现技术采用
-的层次化软件设计。
-第\ref{sec:parallel-vm}节给出了并行虚拟机CoreVM的设计，并提出了若干高层优化技术，
-CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的，这样，Rat在不同
-并行硬件上的移植只需要在这些硬件上实现CoreVM即可，同时高层的优化措施也具有硬件无关特性。
-第\ref{sec:auto-parallelization}节描述了Rat编译器自动并行化方案，该方案使用流的方式描述
-数据并行问题，可以将并行问题分解成一个个向量处理任务，发掘程序中存在的并行潜力。
-第\ref{sec:code-generation}节说明将Rat程序翻译成C程序的过程。
-%% 第\ref{sec:gpu-optimization}节介绍了针对GPU硬件结构采用的若干优化方法，以提高并行原语
-%% 在GPU上的执行效率。
+本章将详细说明Rat语言的编译实现技术，内容结构安排如下：
+第\ref{sec:compiler-overview}节介绍Rat语言编译实现的总体方案，总览Rat程序的编译流程。
+第\ref{sec:core-language}节给出了Core语言的设计，Core语言为Rat提供了数值计算能力与
+数据并行能力，它提供的向量原语是可以在多种并行硬件上高效实现的。
+第\ref{sec:stream-detection}节说明流探测算法，该算法是Rat编译实现中最为关键的算法，
+是并行任务生成的基础。
+第\ref{sec:np-decomposition}节说明嵌套并行的分解技术，它的功能是将嵌套并行操作分解
+为一维并行操作序列。
+第\ref{sec:stream-optimization}节介绍若干高层优化技术，这些高层优化技术运行在
+CoreVM层面。
 
 \section{编译实现总体方案}\label{sec:compiler-overview}
 第\ref{sec:c-interface}节已经提到，Rat编译器是一个源到源编译期，
@@ -32,13 +23,12 @@ CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的�
     L1语法树是Rat代码的直接表示，它包含的结点类型参见表\ref{tbl:l1-ast}。
   \item L1语法树经过L1变换得到L2语法树。L2语法树结构更加简单，包含的结点类型
     更少，参见表\ref{tbl:l2-ast}。
-  \item L2语法树经过L2变换得到Core语法树。Core语法树是Core语言的树状表示，而
-    Core语言是Rat并行虚拟机CoreVM的语言。Core语法树的结点类型同L2语法树，但对
-    L2语法树中的函数应用结点做了反柯里化处理。
+  \item L2语法树经过L2变换得到Core语法树。Core语法树是Core语言的树状表示，
+    Core语法树的结点类型同L2语法树。
   \item 在Core语言层面实施若干高层优化技术。
-  \item Core语言最后被翻译成C语言程序。
+  \item Core语言最后被翻译成C语言程序，该C程序是对Rat运行时系统的API调用，
+    运行时系统将在下一章介绍。
 \end{enumerate}
-
 \begin{figure}[tbh]
   \centering
   \includegraphics[height=5cm]{frontend}
@@ -68,7 +58,6 @@ CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的�
       \bottomrule[1.5pt]
     \end{tabularx}
 \end{table}
-
 \begin{table}[tbh]
   \centering
   \caption{L2语法树与Core语法树结点类型}\label{tbl:l2-ast}
@@ -85,321 +74,78 @@ CoreVM是硬件无关的，也是在多种并行硬件上能够高效实现的�
     \end{tabularx}
 \end{table}
 
-\section{并行虚拟机设计}\label{sec:parallel-vm}
-%% Rat的并行计算能力由向量原语提供，向量原语在多核处理器与GPU上都可以高效实现。
-Rat实现方案采用了层次化软件设计，并行虚拟机CoreVM就是这个层次化设计的关键。
-CoreVM是一个抽象层次较高的虚拟机，它有下面两个特点：
-\begin{compactitem}
-  \item CoreVM独立于具体的并行硬件结构设计；
-  \item CoreVM在保持高抽象层次的同时也能够很好地描述并行硬件,
-    原理上可以在多核处理器以及GPU等不同并行硬件上高效实现。
-\end{compactitem}
-这样，只需要在不同的并行硬件上实现CoreVM，就可以完成Rat程序
-在不同硬件上的移植。
-
-第\ref{subsec:core-language}先介绍Core语言，它是并行虚拟机CoreVM运行的指令集，
-然后第\ref{subsec:high-level-optimization}节介绍几种执行在Core语言层面执行的优化技术，
-%% 最后第\ref{subsec:}给出
-
-\subsection{Core语言}\label{subsec:core-language}
-CoreVM上运行Core语言，Core语言是一种结构简单的语言，容易分析，
-并且支持若干高层优化技术。
+\section{Core语言}\label{sec:core-language}
+Core语言是一种结构简单的语言，容易分析，并且支持若干高层优化技术。
 
 Core语言的指令集庞大，但结构相对简单，只包含两类指令能够：向量原语与标量原语。
-其中向量原语一共只有八条，在第\ref{sec:vector-primitives}节中已经
-作出详细说明，表\ref{tbl:vector-primitives}中每一个向量原语在Core语言中一条同名向量原语与之对应；
-Core语言提供了数量众多的标量原语，功能为基本的算数逻辑运算与常用数学函数，
-选取的数学函数集囊括了标准C数学库定义的数学函数。
-FIXME：提及附录。
-
-从Core语言指令集的设计不难看出，标量原语提供了数值计算能力，
+其中，标量原语提供了数值计算能力，
 而向量原语提供了数据并行能力。两类指令构成了一种简单而强大
 的计算模型，非常适合表达实际的数据并行问题。
 
-同时，Core语言的设计使得CoreVM可以很容易地在现有并行硬件上实现。
-以多核处理器与GPU为例，标量原语可以直接翻译成C语言的库函数，
-向量原语在多核处理器上可以通过多线程技术实现，
-在GPU上的实现则更加直观，因为向量原语本身就是对GPU STMD计算模型的直接抽象。
-
-%% 表\ref{tbl:scalar-primitives}给出了一些常用的标量原语。
-%% \begin{table}
-%%   \centering
-%%   \caption{标量原语}
-%%   \label{tbl:scalar-primitives}
-%%   \begin{tabularx}{\linewidth}{cX}
-%%     \toprule[1.5pt]
-%%     \hei{操作元数} & \hei{标量原语}\\
-%%     \midrule[1pt]
-%%     一元标量原语 & \par{\texttt{sqrt cbrt exp exp2 exp10 log log2 log10}}\\
-%%     二元标量原语 & \par{ }\\
-%%     \bottomrule[1.5pt]
-%%   \end{tabularx}
-%% \end{table}
-
-\subsection{高层优化技术}\label{subsec:high-level-optimization}
-在Rat语言的实现过程中，采用了三种高层优化技术。这些优化技术在Core语言的层面
-实施，实质上是一些Core语法树到Core语法树的变换。下面分别介绍这三种优化技术。
-
-%% \subsubsection{存储空间优化}
-%% 第\ref{subsec:immutable-object}节已经指出，Rat语言中的所有对象在整个
-%% 生命周期中是不可改写的，称为恒值对象。也就是说，每当一个数据操作（标量操作
-%% 或向量操作）被施加到一个对象上时，逻辑上都会产生一个新的对象，编程者可以认为
-%% 新的对象与原有对象使用不同的存储空间。
-
-%% 恒值对象简化了程序语义，但如果在具体实现中，
-%% 为每一个对象都分配新的存储空间显然是不经济的，
-%% 在Rat的实现中，采用了三种存储空间优化技术，可以在
-%% 保持程序高层语义简洁的同时提高存储空间利用率。
-%% 这三种技术分别是：向量内存即时回收（vector memory collection）、向量原语原地执行（execute in-place）、
-%% 写时拷贝（copy-on-write）。
-
-%% 首先介绍向量内存即时回收技术。一段程序中往往存在许多的中间对象，
-%% 他们在整个生命周期中只被引用一次，作用相当于临时变量。
-%% 当对一个对象的最后一次引用结束之后，即使该对象的生命周期还没结束，
-%% 但它的存储空间已经可以被回收利用而不影响程序的正确性。也就是说，
-%% 在物理实现中，对象占用分配给它的存储空间的时间可以短于它的逻辑生命周期。
-%% 重用存储空间意义重大，对存储空间开销很大的长向量数据执行内存回收重用尤其重要。
-%% %% 图\ref{fig:object-lifetime}给出了一个例子说明。
-%% \begin{quotation}
-%%     \kai{
-%%     仍以\ref{subsec:functional-advantages}节中表达式求值问题为例：\\
-%%     \texttt{dot (map f u) (scan g v)}\\
-
-%%     上述表达式的求值树参见图\ref{fig:expression-tree}。整个计算过程涉及5个向量数据，
-%%     分别是两个输入向量\texttt{u}与\texttt{v}，两个中间向量\texttt{t1}与\texttt{t2}，
-%%     最终结果向量\texttt{result}。其中\texttt{u}与\texttt{v}分别
-%%     在计算\texttt{t1}与\texttt{t2}的时候被引用一次，之后不再被引用，\texttt{t1}与
-%%     \texttt{t2}在计算最终结果\texttt{result}的时候被引用一次，之后不再被引用。
-%%     5个向量的的逻辑生命周期见图\ref{fig:object-lifetime}，图中还给出了各向量
-%%     引用计数随时间的变化情况（以红色标识）以及他们实际占用内存空间的时间区间（以蓝色标识）。
-    
-%%     从图\ref{fig:object-lifetime}可以看出，\texttt{result}与\texttt{u}，\texttt{v}的
-%%     存储空间占用时间区间不存在重合，且在\texttt{result}实际占用存储空间的时间段内
-%%     \texttt{u}、\texttt{v}的引用计数都为0。在这种情况下，\texttt{u}、\texttt{v}占用
-%%     的内存空间就可以回收由\texttt{result}重用。
-%%   }
-%% \end{quotation}
-%% \begin{figure}
-%%   \centering
-%%   \includegraphics[scale=0.8]{object-lifetime}
-%%   \caption{对象生命周期与存储空间占用示意图}
-%%   \label{fig:object-lifetime}
-%% \end{figure}
-
-%% 在上例给出的存储空间优化分析中，还有存在另一种优化可能性，那就是有些向量原语可以
-%% 原地执行。所谓原地执行，就是向量操作直接在输入向量的内存空间上
-%% 写入输出向量，不许要申请新的存储空间。原地执行必须满足一个条件，就是输入向量在本次向量操作之后引用计数变为0，
-%% 即在本次向量操作中输入向量是最后一次被引用。
-%% \begin{quotation}
-%%   \kai{
-%%     在图\ref{fig:object-lifetime}所示的生命周期中与存储空间占用情况中，虽然\texttt{t1}与\texttt{u}
-%%     的存储空间占用时间区间存在重合，但由于\texttt{u}在\texttt{map}操作中是最后一次被引用，
-%%     同时，\texttt{map}原语支持原地执行，这时，\texttt{t1}可以直接回收利用\texttt{u}的存储空间。
-%%   }
-%% \end{quotation}
-
-%% 表\ref{tbl:inplace-vp}给出了向量原语对原地执行的支持状况，某些向量原语需要同步操作才能完成原地执行。
-%% \begin{table}
-%%   \centering
-%%   \caption{向量原语的原地执行支持}\label{tbl:inplace-vp}
-%%   \begin{tabularx}{\linewidth}{ZZZ}
-%%     \toprule[1.5pt]
-%%     \hei{向量原语} & \hei{是否支持原地执行} & \hei{是否需要同步}\\
-%%     \midrule[1pt]
-%%     map & $\surd$ & $\times$\\
-%%     slice & $\times$ & --\\
-%%     scan & $\times$ & --\\
-%%     gpermute & $\surd$ & $\surd$\\
-%%     gcopy & $\surd$ & $\surd$\\
-%%     sort & $\times$ & --\\
-%%     zip & $\surd$ & $\times$\\
-%%     concat & $\times$ & --\\
-%%     \bottomrule[1.5pt]
-%%   \end{tabularx}
-%% \end{table}
-
-
-%% 写时拷贝也称为零拷贝（zero-copy），指某些向量操作虽然逻辑上定义了新的向量，但实际上没有对输入向量进行任何处理，
-%% 得到的新向量与原向量内容相同或部分相同，这时新向量就可以直接指向输入向量的内存空间。
-%% 这时，逻辑上可能有多个向量指向同一块存储空间。因为前面提到的两种内存优化技术可能
-%% 需要改写向量存储空间（指向该空间的某个向量引用计数变为0或有向量原语试图原地执行），
-%% 这时视开销情况执行内存拷贝动作或是为改写动作分配新内存。
-
-%% 向量原语对写时拷贝的支持情况参见表\ref{tbl:copy-on-write}。
-%% \begin{table}
-%%   \centering
-%%   \caption{向量原语的写时拷贝支持}\label{tbl:copy-on-write}
-%%   \begin{tabularx}{\linewidth}{ZZ}
-%%     \toprule[1.5pt]
-%%     \hei{向量原语} & \hei{是否支持写时拷贝}\\
-%%     \midrule[1pt]
-%%     map & $\times$\\
-%%     slice & $\surd$ \\
-%%     scan & $\times$\\
-%%     gpermute & $\surd$\\
-%%     gcopy & $\times$\\
-%%     sort & $\times$\\
-%%     zip & $\surd$\\
-%%     concat & $\surd$\\
-%%     \bottomrule[1.5pt]
-%%   \end{tabularx}
-%% \end{table}
-
-%% 上面举例说明了两种存储空间优化技术，下面给出存储空间静态优化算法\ref{alg:memory-optimization}。
-%% 算法\ref{alg:memory-optimization}是一种静态优化算法，在编译期完成。
-%% \begin{algorithm}
-%%   \caption{CoreVM存储空间优化算法}
-%%   \label{alg:memory-optimization}
-%%   \begin{algorithmic}
-%%     \REQUIRE 向量操作$vop$，其输入向量为$v_1, v_2, \cdots, v_n$
-%%   \end{algorithmic}
-%% \end{algorithm}
-
-\subsubsection{向量原语重排}
-向量原语重排（reorder）是指，在某些情况下，相邻的向量操作可以通过交换顺序
-减少需要处理的数据总量，从而达到降低线程资源、存储器空间、访存次数等方面的开销，
-下面举例说明向量原语重排的应用。
-\begin{quotation}
-  \kai{
-    考虑下面的表达式求值问题：\\
-    \texttt{slice (m, n) (map f input)}\\
-    该表达式等价于：\\
-    \texttt{map f (slice (m, n) input)}\\
-    两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-reorder}。从图\ref{fig:vp-reorder}
-    可以看出，第二个表达式要比第少个表达式多处理一部分数据，这样就能减少需要的线程资源，节省
-    存储器带宽，即通过将\texttt{map}原语与\texttt{slice}“重排”执行能够提高效率。
-  }
-\end{quotation}
-\begin{figure}
+\subsection{向量原语}\label{subsec:vector-primitives}
+Core语言提供了一个非常精简的并行数据操作集，它包括了一些最为基本的向量操作，这些操作
+最为重要的特点是非常适合并行实现，第\ref{sec:vp-driver}节将介绍他们在GPU上的实现技术。
+事实上，正是这组原语为Rat提供了强大的数据并行能力。
+表\ref{tbl:vector-primitives}列出了所有向量原语。
+\begin{table}[htb]
   \centering
-  \subfloat[\texttt{slice (m, n) (map f input)}]{
-    \includegraphics[height=4cm]{vp-reorder-1}
-  }
-  \\
-  \subfloat[\texttt{map f (slice (m, n) input)}]{
-    \includegraphics[height=4cm]{vp-reorder-2}
-  }
-  \caption{向量原语重排示例}
-  \label{fig:vp-reorder}
-\end{figure}
-
-向量原语两两之间的可重排性参见表\ref{tbl:vp-reorder}，
-其中每个单元格对应的两个向量原语的执行顺序为“先左边，再上方”。
-标注$\surd$的单元格表示，该格对应的两个向量原语应该重排以提高执行效率；
-标注--的单元格表示该格对应的两个向量原语可以重排，但不会带来效率提升；
-标注$\times$的单元格表示该格对应的两个向量原语不应重排，重排会带来性能损失；
-空单元格表示该格对应的两个向量原语不能重排，重排会造成语义错误。
-\begin{table}
-  \centering
-  \caption{向量原语可重排性}\label{tbl:vp-reorder}
-  \begin{tabularx}{\linewidth}{|c|Z|Z|Z|Z|Z|c|Z|Z|}
-    \hline
-    & \texttt{map} & \texttt{slice} & \texttt{concat} & \texttt{zip} &
-    \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
-    \hline
-    \texttt{map} & -- & $\surd$ & & & & -- & $\surd$ & \\
-    \hline
-    \texttt{slice} & $\times$ & & & & & & & \\
-    \hline
-    \texttt{concat} & & & & & & & &\\
-    \hline
-    \texttt{zip} & & & & & & & &\\
-    \hline
-    \texttt{scan} & & & & & & & &\\
-    \hline
-    \texttt{gpermute} & -- & & & & & & & \\
-    \hline
-    \texttt{gcopy} & $\times$ & & & & & & & \\
-    \hline
-    \texttt{sort} & & & & & & & &\\
-    \hline
+  \caption{向量原语}
+  \label{tbl:vector-primitives}
+  \begin{tabularx}{\linewidth}{p{10em}X}
+    \toprule[1.5pt]
+    \hei{向量原语} & \hei{功能说明} \\
+    \midrule[1pt]
+    map & 给定一元操作，对一个向量中所有元素施加同一操作\\
+    scan & 给定满足结合律的二元操作，求一个向量中元素的部分和\\
+    gpermute & 对向量中的元素重排\\
+    gcopy & 对向量中的元素采取特定步长复制\\
+    shrink & 对给定向量采取紧缩复制\\
+    sort & 给定排序函数，对向量中的元素进行排序\\
+    random & 产生随机向量\\
+    zip & 将多个向量中的元素逐位置组成元组\\
+    collect & 将多个同类型数据组合成一个向量\\
+    \bottomrule[1.5pt]
   \end{tabularx}
 \end{table}
 
-\subsubsection{向量原语聚合}
-向量原语聚合（fusion）是指，在某些情况下，多个向量操作可以合并成单个向量操作，
-从而可以减少访存，节省存储器带宽，同时还能消除访问存储器造成的时延，提高执行速度。
-下面举例说明向量原语聚合的应用。
-\begin{quotation}
-  \kai{
-    考虑下面的表达式求值问题：\\
-    \texttt{map f (map g input)}\\
-    该表达式等价于：\\
-    \texttt{map (f . g) input}\\
-    两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-fusion}。从图\ref{fig:vp-fusion}
-    可以看出，第一个表达式比第二个表达式多引入一个中间向量，虽然
-    通过前一小节介绍的存储空间优化技术避免为这个中间向量分配新的的存储空间，但仍然会多引入
-    一次的向量读与一次向量写。此时，将两个\texttt{map}原语“聚合”成一次能够提高效率。
-  }
-\end{quotation}
-\begin{figure}
-  \centering
-  \subfloat[\texttt{map f (map g input)}]{
-    \includegraphics[height=4cm]{vp-fusion-1}
-  }
-  \\
-  \subfloat[\texttt{map (f . g) input}]{
-    \includegraphics[height=4cm]{vp-fusion-2}
-  }
-  \caption{向量原语聚合示例}
-  \label{fig:vp-fusion}
-\end{figure}
+这组原语存在于典型的函数式语言中，但一般是针对表（List）定义的，其语义也是串行的，
+但Core语言的向量原语从实现上是并行的，这是不同于一般函数式语言的。
+这组原语的选取也受到了MapReduce的启发FIXME：citehere。
+使用这组精简的原语集足够构建更多更为复杂的向量操作，FIXME：提及第三章中的向量操作。
 
-向量原语之间的可聚合性参见表\ref{tbl:vp-fusion}。
-其中每个单元格对应的两个向量原语的执行顺序为“先左边，再上方”。
-标注$\surd$的单元格表示，该格对应的两个向量原语应该聚合以提高执行效率；
-%% 标注--的单元格表示该格对应的两个向量原语已经经过重排，所以该组合不会出现；
-空单元格表示该格对应的两个向量原语不能聚合，聚合会造成语义错误。
+\subsection{标量原语}\label{subsec:scalar-primitives}
+Core语言提供了数量众多的标量原语，功能为基本的算数逻辑运算与常用数学函数，
+这其中囊括了标准C数学库定义的所有数学函数。FIXME：提及附录。
+
+标量原语中有一类需要注意，即某些满足结合律同时存在幺元的操作，
+如加法运算、乘法运算、布尔数求与、布尔数求或等。
+从代数学的角度上讲，这种运算可以与某种数据类型构成一个幺半群。
+
+对于向量原语\texttt{scan}，只有当传递给它的二元操作满足上述性质时，
+\texttt{scan}才可以并行执行，所以，只有满足该性质的标量原语可以作为
+参数传递给\texttt{scan}。表\ref{tbl:monoid-scalar-primitives}列出了所有满足这种性质
+的标量原语。
 \begin{table}
   \centering
-  \caption{向量原语可聚合性}\label{tbl:vp-fusion}
-  \begin{tabularx}{\linewidth}{|c|Z|Z|Z|Z|Z|c|Z|Z|}
-    \hline
-    & \texttt{map} & \texttt{slice} & \texttt{concat} & \texttt{zip} &
-    \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
-    \hline
-    \texttt{map} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
-    \hline
-    \texttt{slice} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & & $\surd$\\
-    \hline
-    \texttt{concat} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
-    \hline
-    \texttt{zip} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$\\
-    \hline
-    \texttt{scan} & & & & $\surd$ & & & &\\
-    \hline
-    \texttt{gpermute} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & $\surd$\\
-    \hline
-    \texttt{gcopy} & $\surd$ & & $\surd$ & $\surd$ & & $\surd$ &  & \\
-    \hline
-    \texttt{sort} & & & $\surd$ & $\surd$ & & & &\\
-    \hline
+  \caption{满足结合律的标量原语}
+  \label{tbl:monoid-scalar-primitives}
+  \begin{tabularx}{\linewidth}{ccXX}
+    \toprule[1.5pt]
+    \hei{标量原语} & \hei{功能说明} & \hei{幺半群类型} & \hei{幺元}\\
+    \midrule[1pt]
+    \texttt{+} & 加法 & 所有数值类型 & 0\\
+    \texttt{*} & 乘法 & 所有数值类型 & 1\\
+    \texttt{and} & 逻辑与 & 整数类型 & \texttt{true}\\
+    \texttt{or} & 逻辑或 & 整数类型 & \texttt{false}\\
+    \texttt{max} & 最大值 & 所有数值类型 & 该类型可表示的极大值\\
+    \texttt{min} & 最小值 & 所有数值类型 & 该类型可表示的极小值\\
+    \bottomrule[1.5pt]
   \end{tabularx}
 \end{table}
 
-\section{自动并行化技术}\label{sec:auto-parallelization}
-%% 正如第\ref{sec:parallel-vm}节所说，Rat的并行虚拟机CoreVM被设计为在多种
-%% 并行硬件上都能够高效实现，这实现了本章开始提出的三个目标中的第一个。
-%% Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行硬件，
-%% 在实现任务自动并行化的时候着力与完成另外两个目标，即充分发掘GPU的并行计算能力与
-%% 有效协调CPU与GPU并行工作。
-任务的自动并行化一直是一个难题，因为并行问题的固有特征导致不同问题可发掘的并行潜力各不相同，
-这使得对与并行问题的求解没有通用的最优化方案。CoreVM的设计使得数据并行问题被分解成
-一个个向量操作组成的序列，而这个将并行问题序列化为向量操作的过程，
-消除了问题本身的固有特性，这时，序列化的向量操作成为一种“通用”的并行问题描述形式，
-这为发现问题无关的并行性提供了可能。
-
-本节介绍Core程序自动并行化方案，内容安排如下：
-第\ref{subsec:stream-detection}节将首先介绍
-流探测（stream detection）算法，该算法将并行问题转化成流的描述形式，
-为发现问题中的可并行任务做前期准备工作。
-第\ref{subsec:np-decomposition}节说明嵌套并行的分解（decomposition）技术，
-这种技术用于处理嵌套并行操作，将嵌套并行转化为一维向量操作。
-
-\subsection{流探测算法}\label{subsec:stream-detection}
-流探测算法根据程序的Core表达式树构建
-出向量流图，从向量流图中可以获取可并行任务，
-同时在单一流上可以实施上一节中提出的高层优化技术。
+\section{流探测算法}\label{sec:stream-detection}
+流探测算法根据程序的Core语法树构建出向量流图。
+进而从向量流图中可以搜索可并行任务，同时在单一流上可以实施上一节中提出的高层优化技术。
 
 流探测算法的功能就是将并行程序转化成向量操作序列，我们将连续的向量操作序列与这些操作
 输出的向量序列称之为”流“，其定义如下：
@@ -420,23 +166,25 @@ FIXME：提及附录。
 
     通过流探测算法生成的向量流如图\ref{fig:n-body-stream}。该图清晰地表示出数据的流动过程，
     图中每一个结点表示一个向量，每一条边代表某种向量操作。
-    每一条有向路径代表了一条向量流。当某个向量结点\texttt{v}有多于一条入边时，称这些边所在的
-    向量流在\texttt{v}处汇合FIXME：字体强调，当某个向量结点u有多于一条出边时，称输入\texttt{u}
-    的向量流在\texttt{u}处分支。
   }
 \end{quotation}
 \begin{figure}
   \centering
-  \includegraphics[scale=0.7]{n-body-core}
+  \includegraphics[width=\linewidth]{n-body-core-new}
   \caption{n-body问题Core语法树}
   \label{fig:n-body-core}
 \end{figure}
 \begin{figure}
   \centering
-  \includegraphics[scale=0.7]{n-body-stream}
+  \includegraphics[width=\linewidth]{n-body-stream-new}
   \caption{n-body问题的向量流图}
   \label{fig:n-body-stream}
 \end{figure}
+
+向量流图中每一条有向路径代表了一条向量流。当某个向量结点\texttt{v}有多于一条入边时，称这些边所在的
+向量流在\texttt{v}处\emph{汇合}，当某个向量结点u有多于一条出边时，称输入\texttt{u}
+的向量流在\texttt{u}处\emph{分支}，汇合操作是由\texttt{zip}与\texttt{collect}原语引起的，分支操作是因为
+相应的向量被多个向量操作引用。
 
 图\ref{fig:n-body-stream}的对偶图FIXME：citehere即为任务流图。此处约定，后文中主要以向量流为分析对象，
 如无特别说明，文中提及的“流”即为向量流。
@@ -450,14 +198,14 @@ FIXME：提及附录。
 第\ref{subsec:functional-advantages}节中提到，纯函数特性使得表达式的求值结果与子表达式求值顺序无关，
 用树的形式表示，就是整个表达式树的求值结果与各个子树的求值顺序无关，这个特性反映在向量流图中，
 就是不同流的计算过程可以独立执行，他们的执行顺序不影响最终结果。
-同时，将流的概念抽象出来，也应用第\ref{subsec:high-level-optimization}节提出的三种高层优化技术
-创造了条件，一条独立的流上相邻的向量操作可以进行重排与聚合。
+同时，将流的概念抽象出来，也为应用第\ref{sec:stream-optimization}节提出的流优化技术
+创造了条件。
 
-综上，将程序中的流抽象出来有两方面作用：
-\begin{compactitem}
-  \item 不同流的计算可以独立并行执行；
-  \item 在流上可以实施存储空间优化、向量原语重排、向量原语聚合三种优化技术。
-\end{compactitem}
+%% 综上，将程序中的流抽象出来有两方面作用：
+%% \begin{compactitem}
+%%   \item 不同流的计算可以独立并行执行；
+%%   \item 在流上可以实施向量原语重排、向量原语聚合三种优化技术。
+%% \end{compactitem}
 
 算法\ref{alg:stream-detection}给出了流探测算法的正规描述。流探测算法是一个以
 树的深度优先遍历FIXME：citehere为基础的递归算法，根据Core语法树不同结点类型做不同处理，
@@ -509,8 +257,7 @@ Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-de
   \end{algorithmic}
 \end{algorithm}
 
-
-\subsection{嵌套并行分解}\label{subsec:np-decomposition}
+\section{嵌套并行分解}\label{sec:np-decomposition}
 第FIXME：修改前文节中已经提及，虽然Rat只提供了一维向量原语，但由于支持高阶函数，
 编程者可以使用一维向量原语表达高维的并行操作，即支持嵌套并行。
 
@@ -581,47 +328,236 @@ Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-de
   \label{fig:np-decomposition}
 \end{figure}
 
-%% \subsection{嵌套并行平坦化}\label{subsec:np-flattening}
-%% 嵌套并行的分解算法思路直观，实现简单，但是有可能会造成一些性能上的问题。
-%% 当嵌套循环的最内层向量操作规模不够大的时候，会造成大批量的细粒度任务，
-%% 这不仅有可能造成并行硬件的计算能力得不到充分利用，还可能会显著提高
-%% 任务调度器的调度开销在整个程序中所占的比例。
+\section{流优化技术}\label{sec:stream-optimization}
+执行流探测算法之后，Core表达式求值树被转化为向量流图，
+本节提出两种施加在流上的优化技术：向量原语重排与向量原语聚合，
+下面分别介绍两种优化技术，然后给出流优化算法。
 
-%% 为解决上述问题，这里提出了嵌套并行平坦化技术作为嵌套并行分解的辅助措施。
-%% 图\ref{fig:np-decomposition}中表示的一组流结构相同，仅存在一些参数上的差异。
-%% 可以看出，结构相同是因为嵌套并行中对每一个外层向量数据，内层并行操作都
-%% 保持相同的计算逻辑，参数不同是因为每一次内层向量操作引用了外层向量不同位置的元素，
-%% 所以，区别这些流的参数是一个整型数，代表外层向量中被引用元素的位置。
+\subsubsection{向量原语重排}
+向量原语重排（reorder）是指，在某些情况下，相邻的向量操作可以通过交换顺序
+减少需要处理的数据总量，从而达到降低线程资源、存储器空间、访存次数等方面的开销，
+下面举例说明向量原语重排的应用。
+\begin{quotation}
+  \kai{
+    考虑下面的表达式求值问题：\\
+    \texttt{gcopy (m, n, 1) (map f input)}\\
+    该表达式等价于：\\
+    \texttt{map f (gcopy (m, n, 1) input)}\\
+    两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-reorder}。从图\ref{fig:vp-reorder}
+    可以看出，第二个表达式要比第少个表达式多处理一部分数据，这样就能减少需要的线程资源，节省
+    存储器带宽，即通过将\texttt{map}原语与\texttt{slice}“重排”执行能够提高效率。
+  }
+\end{quotation}
+\begin{figure}
+  \centering
+  \subfloat[\texttt{gcopy (m, n, 1, 1) (map f input)}]{
+    \includegraphics[height=4cm]{vp-reorder-1}
+  }
+  \\
+  \subfloat[\texttt{map f (gcopy (m, n, 1, 1) input)}]{
+    \includegraphics[height=4cm]{vp-reorder-2}
+  }
+  \caption{向量原语重排示例}
+  \label{fig:vp-reorder}
+\end{figure}
 
-\section{代码生成}\label{sec:code-generation}
-通过流探测算法得到一个程序的向量流图之后，
-在借助嵌套并行分解技术，就可以根据图中流的分布静态地产生
-任务。任务（task）是CoreVM执行计算的粒度单元，一个任务包含一个向量原语操作。
-任务由下列三个要素构成：
-\begin{compactitem}
-  \item 输入向量
-  \item 输出向量
-  \item 向量操作
-\end{compactitem}
-在向量流图中，每一组汇入同一结点的有向边都表示一个向量原语操作，即一个任务，
-这组边的起始结点集表示该任务的数据依赖，汇入结点表示该任务的输出结果。
+在表\ref{tbl:vector-primitives}列出的向量原语中，\texttt{shrink}与\texttt{gcopy}原语的输出向量
+包含的元素都是输入向量的一个子集。如果一个\texttt{map}操作之后紧跟着
+一个\texttt{shrink}操作或\texttt{gcopy}操作，那么\texttt{map}完成的部分工作就会被舍弃掉。
+这时，可以交换\texttt{map}与\texttt{shrink}或\texttt{gcopy}的操作顺序，就可以减少\texttt{map}
+需要处理的数据量，提高效率。
 
-Rat编译期最终的输出形式是一个C程序，在这段C程序中，首先是一个任务初始化函数，
-这个函数包括了将所有编译期产生的任务输送到运行时系统的代码，将程序中所有的任务
-装载到任务调度器，之后启动任务调度器，各个任务并行地执行最终得到程序结果。
+%% 向量原语两两之间的可重排性参见表\ref{tbl:vp-reorder}，
+%% 其中每个单元格对应的两个向量原语的执行顺序为“先左边，再上方”。
+%% 标注$\surd$的单元格表示，该格对应的两个向量原语应该重排以提高执行效率；
+%% 标注--的单元格表示该格对应的两个向量原语可以重排，但不会带来效率提升；
+%% 标注$\times$的单元格表示该格对应的两个向量原语不应重排，重排会带来性能损失；
+%% 空单元格表示该格对应的两个向量原语不能重排，重排会造成语义错误。
+%% \begin{table}
+%%   \centering
+%%   \caption{向量原语可重排性}\label{tbl:vp-reorder}
+%%   \begin{tabularx}{\linewidth}{|c|Z|Z|Z|Z|Z|c|Z|Z|}
+%%     \hline
+%%     & \texttt{map} & \texttt{slice} & \texttt{concat} & \texttt{zip} &
+%%     \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
+%%     \hline
+%%     \texttt{map} & -- & $\surd$ & & & & -- & $\surd$ & \\
+%%     \hline
+%%     \texttt{slice} & $\times$ & & & & & & & \\
+%%     \hline
+%%     \texttt{concat} & & & & & & & &\\
+%%     \hline
+%%     \texttt{zip} & & & & & & & &\\
+%%     \hline
+%%     \texttt{scan} & & & & & & & &\\
+%%     \hline
+%%     \texttt{gpermute} & -- & & & & & & & \\
+%%     \hline
+%%     \texttt{gcopy} & $\times$ & & & & & & & \\
+%%     \hline
+%%     \texttt{sort} & & & & & & & &\\
+%%     \hline
+%%   \end{tabularx}
+%% \end{table}
 
-封装成C语言任务结构如下：
-\lstinputlisting[language=C]{listings/task.c}
+\subsubsection{向量原语聚合}
+向量原语聚合（fusion）是指，在某些情况下，多个向量操作可以合并成单个向量操作，
+从而可以减少访存，节省存储器带宽，同时还能消除访问存储器造成的时延，提高执行速度。
+下面举例说明向量原语聚合的应用。
+\begin{quotation}
+  \kai{
+    考虑下面的表达式求值问题：\\
+    \texttt{map f (map g input)}\\
+    该表达式等价于：\\
+    \texttt{map (f . g) input}\\
+    两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-fusion}。从图\ref{fig:vp-fusion}
+    可以看出，第一个表达式比第二个表达式多引入一个中间向量，虽然
+    通过前一小节介绍的存储空间优化技术避免为这个中间向量分配新的的存储空间，但仍然会多引入
+    一次的向量读与一次向量写。此时，将两个\texttt{map}原语“聚合”成一次能够提高效率。
+  }
+\end{quotation}
+\begin{figure}
+  \centering
+  \subfloat[\texttt{map f (map g input)}]{
+    \includegraphics[height=4cm]{vp-fusion-1}
+  }
+  \\
+  \subfloat[\texttt{map (f . g) input}]{
+    \includegraphics[height=4cm]{vp-fusion-2}
+  }
+  \caption{向量原语聚合示例}
+  \label{fig:vp-fusion}
+\end{figure}
 
-因为从同一结点出发的各条边代表的向量操作可以并行执行，所以编译期任务生成
-采用了一种简单策略，即对向量流图中的任务采用宽度优先序排列：
-从程序的输入向量为出发结点集合，
-对向量流图执行一次宽度优先遍历，每发现一条边，就将改边代表的向量操作封装成
-一个任务，提交给任务调度器。
+表\ref{tbl:vp-fusion}列出了所有两两之间存在聚合能力的向量原语对。
+\begin{table}
+  \centering
+  \caption{可聚合向量原语}\label{tbl:vp-fusion}
+  \begin{tabularx}{\linewidth}{XX}
+    \toprule[1.5pt]
+    \hei{聚合前件} & \hei{聚合后件}\\
+    \midrule[1pt]
+    \texttt{map} & \texttt{map, gpermute, gcopy}\\
+    \texttt{gpermute} & \texttt{map, gpermute, gcopy, sort}\\
+    \texttt{gcopy} & \texttt{map, gpermute, gcopy}\\
+    \texttt{shrink} & \texttt{map}\\
+    \bottomrule[1.5pt]
+  \end{tabularx}
+\end{table}
+%% 向量原语之间的可聚合性参见表\ref{tbl:vp-fusion}。
+%% 其中每个单元格对应的两个向量原语的执行顺序为“先左边，再上方”。
+%% 标注$\surd$的单元格表示，该格对应的两个向量原语应该聚合以提高执行效率；
+%% 空单元格表示该格对应的两个向量原语不能聚合，聚合会造成语义错误。
+%% \begin{table}
+%%   \centering
+%%   \caption{向量原语可聚合性}\label{tbl:vp-fusion}
+%%   \begin{tabularx}{\linewidth}{|c|Z|Z|Z|Z|Z|c|Z|Z|}
+%%     \hline
+%%     & \texttt{map} & \texttt{slice} & \texttt{concat} & \texttt{zip} &
+%%     \texttt{scan} & \texttt{gpermute} & \texttt{gcopy} & \texttt{sort}\\
+%%     \hline
+%%     \texttt{map} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
+%%     \hline
+%%     \texttt{slice} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & & $\surd$\\
+%%     \hline
+%%     \texttt{concat} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & \\
+%%     \hline
+%%     \texttt{zip} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$ & $\surd$\\
+%%     \hline
+%%     \texttt{scan} & & & & $\surd$ & & & &\\
+%%     \hline
+%%     \texttt{gpermute} & $\surd$ & $\surd$ & $\surd$ & $\surd$ & & $\surd$ & $\surd$ & $\surd$\\
+%%     \hline
+%%     \texttt{gcopy} & $\surd$ & & $\surd$ & $\surd$ & & $\surd$ &  & \\
+%%     \hline
+%%     \texttt{sort} & & & $\surd$ & $\surd$ & & & &\\
+%%     \hline
+%%   \end{tabularx}
+%% \end{table}
 
-任务的宽度优先序只是静态产生的“推荐”调度顺序，在这个任务排序中，相邻的任务
-能够并行执行的“可能性”较高。但在程序的运行期，所有添加到调度器的任务是被
-动态调度的，这将在下一章中详细说明。
+\subsubsection{流优化算法}
+前面介绍了两种流优化技术，这里给出流优化算法的正规描述。
+
+%% \section{并行虚拟机设计}\label{sec:parallel-vm}
+%% %% Rat的并行计算能力由向量原语提供，向量原语在多核处理器与GPU上都可以高效实现。
+%% Rat实现方案采用了层次化软件设计，并行虚拟机CoreVM就是这个层次化设计的关键。
+%% CoreVM是一个抽象层次较高的虚拟机，它有下面两个特点：
+%% \begin{compactitem}
+%%   \item CoreVM独立于具体的并行硬件结构设计；
+%%   \item CoreVM在保持高抽象层次的同时也能够很好地描述并行硬件,
+%%     原理上可以在多核处理器以及GPU等不同并行硬件上高效实现。
+%% \end{compactitem}
+%% 这样，只需要在不同的并行硬件上实现CoreVM，就可以完成Rat程序
+%% 在不同硬件上的移植。
+
+%% 第\ref{subsec:core-language}先介绍Core语言，它是并行虚拟机CoreVM运行的指令集，
+%% 然后第\ref{subsec:stream-optimization}节介绍几种执行在Core语言层面执行的优化技术，
+%% %% 最后第\ref{subsec:}给出
+
+
+
+%% \section{自动并行化技术}\label{sec:auto-parallelization}
+%% %% 正如第\ref{sec:parallel-vm}节所说，Rat的并行虚拟机CoreVM被设计为在多种
+%% %% 并行硬件上都能够高效实现，这实现了本章开始提出的三个目标中的第一个。
+%% %% Rat的第一版实现方案选择Nvidia公司的GPU作为运行CoreVM的并行硬件，
+%% %% 在实现任务自动并行化的时候着力与完成另外两个目标，即充分发掘GPU的并行计算能力与
+%% %% 有效协调CPU与GPU并行工作。
+%% 任务的自动并行化一直是一个难题，因为并行问题的固有特征导致不同问题可发掘的并行潜力各不相同，
+%% 这使得对与并行问题的求解没有通用的最优化方案。CoreVM的设计使得数据并行问题被分解成
+%% 一个个向量操作组成的序列，而这个将并行问题序列化为向量操作的过程，
+%% 消除了问题本身的固有特性，这时，序列化的向量操作成为一种“通用”的并行问题描述形式，
+%% 这为发现问题无关的并行性提供了可能。
+
+%% 本节介绍Core程序自动并行化方案，内容安排如下：
+%% 第\ref{subsec:stream-detection}节将首先介绍
+%% 流探测（stream detection）算法，该算法将并行问题转化成流的描述形式，
+%% 为发现问题中的可并行任务做前期准备工作。
+%% 第\ref{subsec:np-decomposition}节说明嵌套并行的分解（decomposition）技术，
+%% 这种技术用于处理嵌套并行操作，将嵌套并行转化为一维向量操作。
+
+
+
+%% %% \subsection{嵌套并行平坦化}\label{subsec:np-flattening}
+%% %% 嵌套并行的分解算法思路直观，实现简单，但是有可能会造成一些性能上的问题。
+%% %% 当嵌套循环的最内层向量操作规模不够大的时候，会造成大批量的细粒度任务，
+%% %% 这不仅有可能造成并行硬件的计算能力得不到充分利用，还可能会显著提高
+%% %% 任务调度器的调度开销在整个程序中所占的比例。
+
+%% %% 为解决上述问题，这里提出了嵌套并行平坦化技术作为嵌套并行分解的辅助措施。
+%% %% 图\ref{fig:np-decomposition}中表示的一组流结构相同，仅存在一些参数上的差异。
+%% %% 可以看出，结构相同是因为嵌套并行中对每一个外层向量数据，内层并行操作都
+%% %% 保持相同的计算逻辑，参数不同是因为每一次内层向量操作引用了外层向量不同位置的元素，
+%% %% 所以，区别这些流的参数是一个整型数，代表外层向量中被引用元素的位置。
+
+%% \section{代码生成}\label{sec:code-generation}
+%% 通过流探测算法得到一个程序的向量流图之后，
+%% 在借助嵌套并行分解技术，就可以根据图中流的分布静态地产生
+%% 任务。任务（task）是CoreVM执行计算的粒度单元，一个任务包含一个向量原语操作。
+%% 任务由下列三个要素构成：
+%% \begin{compactitem}
+%%   \item 输入向量
+%%   \item 输出向量
+%%   \item 向量操作
+%% \end{compactitem}
+%% 在向量流图中，每一组汇入同一结点的有向边都表示一个向量原语操作，即一个任务，
+%% 这组边的起始结点集表示该任务的数据依赖，汇入结点表示该任务的输出结果。
+
+%% Rat编译期最终的输出形式是一个C程序，在这段C程序中，首先是一个任务初始化函数，
+%% 这个函数包括了将所有编译期产生的任务输送到运行时系统的代码，将程序中所有的任务
+%% 装载到任务调度器，之后启动任务调度器，各个任务并行地执行最终得到程序结果。
+
+%% 封装成C语言任务结构如下：
+%% \lstinputlisting[language=C]{listings/task.c}
+
+%% 因为从同一结点出发的各条边代表的向量操作可以并行执行，所以编译期任务生成
+%% 采用了一种简单策略，即对向量流图中的任务采用宽度优先序排列：
+%% 从程序的输入向量为出发结点集合，
+%% 对向量流图执行一次宽度优先遍历，每发现一条边，就将改边代表的向量操作封装成
+%% 一个任务，提交给任务调度器。
+
+%% 任务的宽度优先序只是静态产生的“推荐”调度顺序，在这个任务排序中，相邻的任务
+%% 能够并行执行的“可能性”较高。但在程序的运行期，所有添加到调度器的任务是被
+%% 动态调度的，这将在下一章中详细说明。
 %% \subsection{运行时系统}\label{subsec:runtime-system}
 %% 本节介绍Rat的运行时系统。该运行时系统运行在CPU端，负责管理可用的硬件资源，
 %% 将CoreVM的指令动态地调度到GPU端并行执行。

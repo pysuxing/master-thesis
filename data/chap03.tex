@@ -160,25 +160,25 @@ Rat提供了一组向量原语（Vector Primitive, VP），参见表\ref{tbl:vec
 就可以方便地描述一大类数据并行问题。表\ref{tbl:derived-vector-operations}列举了一些在
 Rat向量原语基础上可以实现的常见向量操作。
 
-\begin{table}[htb]
-  \centering
-  \caption{向量原语}
-  \label{tbl:vector-primitives}
-  \begin{tabularx}{\linewidth}{p{10em}X}
-    \toprule[1.5pt]
-    \hei{向量原语} & \hei{类型声明} \\
-    \midrule[1pt]
-    map & (a -> b) -> [a] -> [b]\\
-    scan & ScanDirection -> InclusiveMode -> (a -> a -> a) -> [a] -> [a]\\
-    slice & Integral i => (i, i) -> [a] -> [a]\\
-    concat & [a] -> [a] -> [a]\\
-    zip & [a] -> [b] -> [(a, b)]\\
-    gpermute & Integral i => PermuteDirection -> (i -> i) -> [a] -> [a]\\
-    gcopy & Boolean b => [b] -> [a] -> [a]\\
-    sort & (a -> a -> Ording) -> [a] -> [a]\\
-    \bottomrule[1.5pt]
-  \end{tabularx}
-\end{table}
+%% \begin{table}[htb]
+%%   \centering
+%%   \caption{向量原语}
+%%   \label{tbl:vector-primitives}
+%%   \begin{tabularx}{\linewidth}{p{10em}X}
+%%     \toprule[1.5pt]
+%%     \hei{向量原语} & \hei{类型声明} \\
+%%     \midrule[1pt]
+%%     map & (a -> b) -> [a] -> [b]\\
+%%     scan & ScanDirection -> InclusiveMode -> (a -> a -> a) -> [a] -> [a]\\
+%%     slice & Integral i => (i, i) -> [a] -> [a]\\
+%%     concat & [a] -> [a] -> [a]\\
+%%     zip & [a] -> [b] -> [(a, b)]\\
+%%     gpermute & Integral i => PermuteDirection -> (i -> i) -> [a] -> [a]\\
+%%     gcopy & Boolean b => [b] -> [a] -> [a]\\
+%%     sort & (a -> a -> Ording) -> [a] -> [a]\\
+%%     \bottomrule[1.5pt]
+%%   \end{tabularx}
+%% \end{table}
 
 \begin{table}[htb]
   \centering

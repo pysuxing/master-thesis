@@ -1,0 +1,38 @@
+digraph G {
+	size="7, 5";
+	ratio="fill";
+	
+        newCells;
+        masses;
+        newVelocities;
+        newPositions;
+        velocities;
+        positions;
+        accelerates;
+        calcSingleAcc;
+        cells;
+        t1[label=""];
+        t2[label=""];
+        t3[label=""];
+        t4[label=""];
+
+        edge[dir=back];
+
+        newCells -> t1[label="map"];
+        t1 -> masses[label="zipin"];
+        t1 -> newVelocities[label="zipin"];
+        t1 -> newPositions[label="zipin"];
+        masses -> cells[label="map"];
+        newVelocities ->  t2[label="map"];
+        t2 -> velocities[label="zipin"];
+        t2 -> accelerates[label="zipin"];
+        newPositions -> t3[label="map"];
+        t3 -> velocities[label="zipin"];
+        t3 -> positions[label="zipin"];
+        velocities -> cells[label="map"];
+        positions -> cells[label="map"];
+        accelerates -> cells[label="map"];
+        accelerates -> calcSingleAcc[style=dashed];
+        calcSingleAcc -> t4[label="fold"];
+        t4 -> cells[label="map"];
+}

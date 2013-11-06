@@ -1,0 +1,2022 @@
+digraph "G" {
+	graph [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+	]
+	node [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "ellipse"
+		style = "solid"
+	]
+	edge [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varscells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "cells"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varsmasses" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "masses"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varspositions" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "positions"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varsvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "velocities"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varsaccelerates" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "accelerates"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varsnewvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "newVelocities"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varsnewpositions" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "newPositions"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varst" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "t"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varsg" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "g"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varscsa" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "calcSingleAcc"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varsca" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "calcAccelerate"
+		shape = "octagon"
+		style = "filled"
+	]
+	"varscds" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		fillcolor = "gray"
+		label = "calcDistanceSquare"
+		shape = "octagon"
+		style = "filled"
+	]
+	"ncsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "result"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"ncszw3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "zipWith3"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"ncsmkc" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "Cell"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"ncsms" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "masses"
+		shape = "box"
+		style = "solid"
+	]
+	"ncsnvs" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "newVelocities"
+		shape = "box"
+		style = "solid"
+	]
+	"ncsnps" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "newPositions"
+		shape = "box"
+		style = "solid"
+	]
+	"msroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "masses"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"msmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "map"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"msmass" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "mass"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"mscells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cells"
+		shape = "box"
+		style = "solid"
+	]
+	"psroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "positions"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"psmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "map"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"psposition" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "position"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"pscells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cells"
+		shape = "box"
+		style = "solid"
+	]
+	"vsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "velocities"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"vsmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "map"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"vsvelocity" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "velocity"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"vscells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cells"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "<p> calcDistanceSquare | c1 | c2 | <gx> getXPos | <gy> getYPos | <xd> xD | <yd> yD "
+		shape = "record"
+		style = "solid"
+	]
+	"cdsplus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "+"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdst1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdst2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdspow1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "pow"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsxd" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "xD"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsl1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "2"
+		shape = "doublecircle"
+		style = "solid"
+	]
+	"cdspow2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "pow"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsyd" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yD"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsl2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "2"
+		shape = "doublecircle"
+		style = "solid"
+	]
+	"cdsgx" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "<p> getXPos | p1"
+		shape = "record"
+		style = "solid"
+	]
+	"cdsgy" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "<p> getYPos | p1"
+		shape = "record"
+		style = "solid"
+	]
+	"cdsgxxp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "xPosition"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsgxt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsgxcp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cellPosition"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsgxp1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "p1"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsgyyp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yPosition"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsgyt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsgycp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cellPosition"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsgyp1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "p1"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsxdt" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsydt" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsxdtminus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "-"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsxdtt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsxdtt2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsxdtgx1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "getXPos"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsxdtgx2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "getXPos"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsxdtc1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "c1"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsxdtc2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "c2"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsydtminus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "-"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cdsydtt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsydtt2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "point"
+		style = "solid"
+	]
+	"cdsydtgy1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "getYPos"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsydtgy2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "getYPos"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsydtc1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "c1"
+		shape = "box"
+		style = "solid"
+	]
+	"cdsydtc2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "c2"
+		shape = "box"
+		style = "solid"
+	]
+	"csaroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "<p> calcSingleAcc | c1 | c2"
+		shape = "record"
+		style = "solid"
+	]
+	"csadiv" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "/"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"csat1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = ""
+		shape = "point"
+		style = "solid"
+	]
+	"csamul" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "*"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"csag" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "g"
+		shape = "box"
+		style = "solid"
+	]
+	"csat3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = ""
+		shape = "point"
+		style = "solid"
+	]
+	"csamass" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "mass"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"csac21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "c2"
+		shape = "box"
+		style = "solid"
+	]
+	"csat2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = ""
+		shape = "point"
+		style = "solid"
+	]
+	"csacds" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calcDistanceSquare"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"csac1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "c1"
+		shape = "box"
+		style = "solid"
+	]
+	"csac22" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "c2"
+		shape = "box"
+		style = "solid"
+	]
+	"caroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "<p> calcAccelerate | cell"
+		shape = "record"
+		style = "solid"
+	]
+	"cafold" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "fold"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"caplus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "+"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cat1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = ""
+		shape = "point"
+		style = "solid"
+	]
+	"camap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "map"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cat2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = ""
+		shape = "point"
+		style = "solid"
+	]
+	"cacsa" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calcSingleAcc"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"cacell" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cell"
+		shape = "box"
+		style = "solid"
+	]
+	"cacells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cells"
+		shape = "box"
+		style = "solid"
+	]
+	"asroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "accelerates"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"asmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "map"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"asca" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calcAccelerate"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"ascells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cells"
+		shape = "box"
+		style = "solid"
+	]
+	"nvsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "newVelocities"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"nvszw" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "zipWith"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"nvslbd1root" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "<p> | v | a"
+		shape = "record"
+		style = "solid"
+	]
+	"nvslbd1plus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "+"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"nvslbd1v" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "v"
+		shape = "box"
+		style = "solid"
+	]
+	"nvslbd1t1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = ""
+		shape = "point"
+		style = "solid"
+	]
+	"nvslbd1mul" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "*"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"nvslbd1a" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "a"
+		shape = "box"
+		style = "solid"
+	]
+	"nvslbd1t" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "t"
+		shape = "box"
+		style = "solid"
+	]
+	"nvsvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "velocities"
+		shape = "box"
+		style = "solid"
+	]
+	"nvsaccelerates" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "accelerates"
+		shape = "box"
+		style = "solid"
+	]
+	"npsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "newPositions"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"npszw" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "zipWith"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"npslbd1root" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "<p> | p | v"
+		shape = "record"
+		style = "solid"
+	]
+	"npslbd1plus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "+"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"npslbd1p" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "p"
+		shape = "box"
+		style = "solid"
+	]
+	"npslbd1t1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = ""
+		shape = "point"
+		style = "solid"
+	]
+	"npslbd1mul" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "*"
+		shape = "plaintext"
+		style = "solid"
+	]
+	"npslbd1v" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "v"
+		shape = "box"
+		style = "solid"
+	]
+	"npslbd1t" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "t"
+		shape = "box"
+		style = "solid"
+	]
+	"npspositions" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "positions"
+		shape = "box"
+		style = "solid"
+	]
+	"npsvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "velocities"
+		shape = "box"
+		style = "solid"
+	]
+	subgraph "vars" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			rankdir = "LR"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			fillcolor = "gray"
+			shape = "octagon"
+			style = "filled"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"varscells"
+		"varsmasses"
+		"varspositions"
+		"varsvelocities"
+		"varsaccelerates"
+		"varsnewvelocities"
+		"varsnewpositions"
+		"varst"
+		"varsg"
+		"varscsa"
+		"varsca"
+		"varscds"
+	}
+	subgraph "ncs" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"ncsroot"
+		"ncszw3"
+		"ncsmkc"
+		"ncsms"
+		"ncsnvs"
+		"ncsnps"
+	}
+	subgraph "ms" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"msroot"
+		"msmap"
+		"msmass"
+		"mscells"
+	}
+	subgraph "ps" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"psroot"
+		"psmap"
+		"psposition"
+		"pscells"
+	}
+	subgraph "vs" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"vsroot"
+		"vsmap"
+		"vsvelocity"
+		"vscells"
+	}
+	subgraph "cds" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "point"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"cdsroot"
+		"cdsplus"
+		"cdst1"
+		"cdst2"
+		"cdspow1"
+		"cdsxd"
+		"cdsl1"
+		"cdspow2"
+		"cdsyd"
+		"cdsl2"
+		"cdsgx"
+		"cdsgy"
+		"cdsgxxp"
+		"cdsgxt1"
+		"cdsgxcp"
+		"cdsgxp1"
+		"cdsgyyp"
+		"cdsgyt1"
+		"cdsgycp"
+		"cdsgyp1"
+		"cdsxdt"
+		"cdsydt"
+		"cdsxdtminus"
+		"cdsxdtt1"
+		"cdsxdtt2"
+		"cdsxdtgx1"
+		"cdsxdtgx2"
+		"cdsxdtc1"
+		"cdsxdtc2"
+		"cdsydtminus"
+		"cdsydtt1"
+		"cdsydtt2"
+		"cdsydtgy1"
+		"cdsydtgy2"
+		"cdsydtc1"
+		"cdsydtc2"
+	}
+	subgraph "csa" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "point"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"csaroot"
+		"csadiv"
+		"csat1"
+		"csamul"
+		"csag"
+		"csat3"
+		"csamass"
+		"csac21"
+		"csat2"
+		"csacds"
+		"csac1"
+		"csac22"
+	}
+	subgraph "ca" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"caroot"
+		"cafold"
+		"caplus"
+		"cat1"
+		"camap"
+		"cat2"
+		"cacsa"
+		"cacell"
+		"cacells"
+	}
+	subgraph "as" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"asroot"
+		"asmap"
+		"asca"
+		"ascells"
+	}
+	subgraph "nvs" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"nvsroot"
+		"nvszw"
+		"nvslbd1root"
+		"nvslbd1plus"
+		"nvslbd1v"
+		"nvslbd1t1"
+		"nvslbd1mul"
+		"nvslbd1a"
+		"nvslbd1t"
+		"nvsvelocities"
+		"nvsaccelerates"
+		subgraph "nvslbd1" {
+			graph [
+				fontsize = "14"
+				fontname = "Times-Roman"
+				fontcolor = "black"
+			]
+			node [
+				fontsize = "14"
+				fontname = "Times-Roman"
+				fontcolor = "black"
+				shape = "ellipse"
+				style = "solid"
+			]
+			edge [
+				fontsize = "14"
+				fontname = "Times-Roman"
+				fontcolor = "black"
+				style = "solid"
+			]
+			"nvslbd1root"
+			"nvslbd1plus"
+			"nvslbd1v"
+			"nvslbd1t1"
+			"nvslbd1mul"
+			"nvslbd1a"
+			"nvslbd1t"
+		}
+	}
+	subgraph "nps" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"npsroot"
+		"npszw"
+		"npslbd1root"
+		"npslbd1plus"
+		"npslbd1p"
+		"npslbd1t1"
+		"npslbd1mul"
+		"npslbd1v"
+		"npslbd1t"
+		"npspositions"
+		"npsvelocities"
+		subgraph "npslbd1" {
+			graph [
+				fontsize = "14"
+				fontname = "Times-Roman"
+				fontcolor = "black"
+			]
+			node [
+				fontsize = "14"
+				fontname = "Times-Roman"
+				fontcolor = "black"
+				shape = "ellipse"
+				style = "solid"
+			]
+			edge [
+				fontsize = "14"
+				fontname = "Times-Roman"
+				fontcolor = "black"
+				style = "solid"
+			]
+			"npslbd1root"
+			"npslbd1plus"
+			"npslbd1p"
+			"npslbd1t1"
+			"npslbd1mul"
+			"npslbd1v"
+			"npslbd1t"
+		}
+	}
+	{
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			rank = "same"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"varsvelocities"
+		"nvslbd1root"
+	}
+	{
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			rank = "same"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"varscsa"
+		"caroot"
+	}
+	"ncsroot" -> "ncszw3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"ncsroot" -> "ncsmkc" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"ncsroot" -> "ncsms" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"ncsroot" -> "ncsnps" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"ncsroot" -> "ncsnvs" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"msroot" -> "msmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"msroot" -> "msmass" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"msroot" -> "mscells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"psroot" -> "psmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"psroot" -> "psposition" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"psroot" -> "pscells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"vsroot" -> "vsmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"vsroot" -> "vsvelocity" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"vsroot" -> "vscells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsroot":"p" -> "cdsplus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsroot":"p" -> "cdst1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsroot":"p" -> "cdst2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdst1" -> "cdspow1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdst1" -> "cdsxd" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdst1" -> "cdsl1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdst2" -> "cdspow2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdst2" -> "cdsyd" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdst2" -> "cdsl2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsroot":"gx" -> "cdsgx" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsroot":"gy" -> "cdsgy" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgx":"p" -> "cdsgxxp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgx":"p" -> "cdsgxt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgxt1" -> "cdsgxcp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgxt1" -> "cdsgxp1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgy":"p" -> "cdsgyyp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgy":"p" -> "cdsgyt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgyt1" -> "cdsgycp" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsgyt1" -> "cdsgyp1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsroot":"xd" -> "cdsxdt" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsroot":"yd" -> "cdsydt" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsxdt" -> "cdsxdtminus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsxdt" -> "cdsxdtt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsxdt" -> "cdsxdtt2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsxdtt1" -> "cdsxdtgx1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsxdtt1" -> "cdsxdtc1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsxdtt2" -> "cdsxdtgx2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsxdtt2" -> "cdsxdtc2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsydt" -> "cdsydtminus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsydt" -> "cdsydtt1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsydt" -> "cdsydtt2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsydtt1" -> "cdsydtgy1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsydtt1" -> "cdsydtc1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsydtt2" -> "cdsydtgy2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cdsydtt2" -> "cdsydtc2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csaroot":"p" -> "csadiv" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csaroot":"p" -> "csat1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csaroot":"p" -> "csat2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat1" -> "csamul" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat1" -> "csag" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat1" -> "csat3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat3" -> "csamass" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat3" -> "csac21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat2" -> "csacds" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat2" -> "csac1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"csat2" -> "csac22" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"caroot":"p" -> "cafold" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"caroot":"p" -> "caplus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"caroot":"p" -> "cat1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cat1" -> "camap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cat1" -> "cat2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cat1" -> "cacells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cat2" -> "cacsa" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"cat2" -> "cacell" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"asroot" -> "asmap" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"asroot" -> "asca" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"asroot" -> "ascells" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvslbd1root":"p" -> "nvslbd1plus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvslbd1root":"p" -> "nvslbd1v" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvslbd1root":"p" -> "nvslbd1t1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvslbd1t1" -> "nvslbd1mul" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvslbd1t1" -> "nvslbd1a" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvslbd1t1" -> "nvslbd1t" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvsroot" -> "nvszw" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvsroot" -> "nvslbd1root":"p" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvsroot" -> "nvsvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"nvsroot" -> "nvsaccelerates" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npslbd1root":"p" -> "npslbd1plus" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npslbd1root":"p" -> "npslbd1p" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npslbd1root":"p" -> "npslbd1t1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npslbd1t1" -> "npslbd1mul" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npslbd1t1" -> "npslbd1v" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npslbd1t1" -> "npslbd1t" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npsroot" -> "npszw" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npsroot" -> "npslbd1root":"p" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npsroot" -> "npspositions" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npsroot" -> "npsvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"ncsms" -> "varsmasses" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"ncsnps" -> "varsnewpositions" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"ncsnvs" -> "varsnewvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"varsmasses" -> "msroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varsnewvelocities" -> "nvsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varsnewpositions" -> "npsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"npspositions" -> "varspositions" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"npsvelocities" -> "varsvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"nvsvelocities" -> "varsvelocities" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"nvsaccelerates" -> "varsaccelerates" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"varspositions" -> "psroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varsvelocities" -> "vsroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varsaccelerates" -> "asroot" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varscsa" -> "csaroot":"p" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varsca" -> "caroot":"p" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"varscds" -> "cdsroot":"p" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"asca" -> "varsca" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+	"varscsa" -> "cacsa" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		dir = "back"
+		style = "dashed"
+	]
+	"csacds" -> "varscds" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "dashed"
+	]
+}
