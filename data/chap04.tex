@@ -7,12 +7,11 @@
 第\ref{sec:compiler-overview}节介绍Rat语言编译实现的总体方案，总览Rat程序的编译流程。
 第\ref{sec:core-language}节给出了Core语言的设计，Core语言为Rat提供了数值计算能力与
 数据并行能力，它提供的向量原语是可以在多种并行硬件上高效实现的。
-第\ref{sec:stream-detection}节说明流探测算法，该算法是Rat编译实现中最为关键的算法，
-是并行任务生成的基础。
-第\ref{sec:np-decomposition}节说明嵌套并行的分解技术，它的功能是将嵌套并行操作分解
-为一维并行操作序列。
-第\ref{sec:stream-optimization}节介绍若干高层优化技术，这些高层优化技术运行在
-CoreVM层面。
+第\ref{sec:stream-detection}节说明流探测技术，该算法是Rat编译实现中最为关键的算法，是并行任务生成的基础。
+%% 第\ref{sec:np-decomposition}节说明嵌套并行的分解技术，它的功能是将嵌套并行操作分解
+%% 为一维并行操作序列。
+第\ref{sec:stream-optimization}节介绍若干高层优化技术，这些高层优化技术
+施加在向量流上。
 
 \section{编译实现总体方案}\label{sec:compiler-overview}
 第\ref{sec:c-interface}节已经提到，Rat编译器是一个源到源编译期，
@@ -77,10 +76,12 @@ CoreVM层面。
 \section{Core语言}\label{sec:core-language}
 Core语言是一种结构简单的语言，容易分析，并且支持若干高层优化技术。
 
-Core语言的指令集庞大，但结构相对简单，只包含两类指令能够：向量原语与标量原语。
+Core语言的指令集庞大，但结构相对简单，只包含三类指令：向量原语、标量原语和
+辅助指令。
 其中，标量原语提供了数值计算能力，
-而向量原语提供了数据并行能力。两类指令构成了一种简单而强大
+向量原语提供了并行计算能力。两类指令构成了一种简单而强大
 的计算模型，非常适合表达实际的数据并行问题。
+辅助指令提供一些附加功能。
 
 \subsection{向量原语}\label{subsec:vector-primitives}
 Core语言提供了一个非常精简的并行数据操作集，它包括了一些最为基本的向量操作，这些操作
@@ -102,6 +103,7 @@ Core语言提供了一个非常精简的并行数据操作集，它包括了一�
     shrink & 对给定向量采取紧缩复制\\
     sort & 给定排序函数，对向量中的元素进行排序\\
     random & 产生随机向量\\
+    generate & 根据位置产生向量元素\\
     zip & 将多个向量中的元素逐位置组成元组\\
     collect & 将多个同类型数据组合成一个向量\\
     \bottomrule[1.5pt]
@@ -143,11 +145,44 @@ Core语言提供了数量众多的标量原语，功能为基本的算数逻辑�
   \end{tabularx}
 \end{table}
 
-\section{流探测算法}\label{sec:stream-detection}
-流探测算法根据程序的Core语法树构建出向量流图。
-进而从向量流图中可以搜索可并行任务，同时在单一流上可以实施上一节中提出的高层优化技术。
+\subsection{辅助指令}
+Core语言提供了若干的辅助指令，这部分指令既不属于提供数值计算能力的
+标量原语，也不属于提供并行计算能力的向量原语。
+表\ref{tbl:assist-instruction}他们的名称及功能。
+\begin{table}
+  \centering
+  \caption{辅助指令}
+  \label{tbl:vector-primitives}
+  \begin{tabularx}{\linewidth}{p{10em}X}
+    \toprule[1.5pt]
+    \hei{辅助指令} & \hei{功能说明} \\
+    \midrule[1pt]
+    \texttt{length} & 返回向量长度\\
+    \texttt{vref} & 引用向量某个特定位置的值\\
+    \bottomrule[1.5pt]
+  \end{tabularx}
+\end{table}
 
-流探测算法的功能就是将并行程序转化成向量操作序列，我们将连续的向量操作序列与这些操作
+\section{流探测技术}\label{sec:stream-detection}
+在流驱动计算模型中，问题被表示为数据流图的形式，
+数据之间存在的依赖关系由流图显式给出，计算过程
+沿着数据流的方向前进。一旦某个计算任务的所有输入数据
+变成可用状态，那么该计算任务就可以执行，并产生新的数据输出。
+
+Rat程序的并行执行采用流驱动计算模型FIXME：citehere，
+流探测技术是Rat程序并行化的关键技术，是程序自动并行化的基础。
+第\ref{subsec:stream-concept}节将首先结合实例说明流的概念，
+第\ref{subsec:np-decomposition}节介绍嵌套并行分解技术，
+第\ref{subsec:stream-detection-algorithm}给出流探测算法的正规描述，
+第\ref{subsec:task-generation}最后介绍根据流探测算法的结果静态产生
+计算任务的方法。
+
+%% 流探测结果生成流探测算法根据程序的Core语法树构建出向量流图。
+%% 进而从向量流图中可以搜索可并行任务，
+%% 同时在单一流上可以实施上一节中提出的高层优化技术。
+
+\subsection{向量流图}
+我们将连续的向量操作序列与这些操作
 输出的向量序列称之为”流“，其定义如下：
 \begin{definition}
   称施加在某个数据向量上的向量操作序列为程序中任务流，由这个向量操作序列生成的向量数据序列
@@ -206,58 +241,7 @@ Core语言提供了数量众多的标量原语，功能为基本的算数逻辑�
 %%   \item 不同流的计算可以独立并行执行；
 %%   \item 在流上可以实施向量原语重排、向量原语聚合三种优化技术。
 %% \end{compactitem}
-
-算法\ref{alg:stream-detection}给出了流探测算法的正规描述。流探测算法是一个以
-树的深度优先遍历FIXME：citehere为基础的递归算法，根据Core语法树不同结点类型做不同处理，
-Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-detection}中只列出了
-流探测算法的主干，该算法在探测流的同时还可以完成向量对象的引用计数统计等一些列标记工作，
-这些静态执行的标记工作将被Rat的运行时系统用来管理程序运行期的行为。
-\begin{algorithm}[htbp]
-  \caption{流探测算法}
-  \label{alg:stream-detection}
-  \begin{algorithmic}[1]
-    \Require 待求值表达式Core语法树$T$
-    \Ensure 待求值表达式的向量流图$V$
-
-    \Function{detect-stream}{$T$}
-      \State $V \leftarrow \left\{ T \right\}$
-      \State \Return \Call{detect-stream-rec}{$T, V$}
-    \EndFunction
-
-    \Function{detect-stream-rec}{$n, V$}
-      \If{$nodetype(n) = OBJECT\_REF \ \&\  is\_detected(n) = FALSE$}
-      \State $V \leftarrow$ \Call{detect-stream-rec}{$ref(n), V$}
-      \ElsIf{$nodetype(n) = LITERAL$}
-      \State $donothing$
-      \ElsIf{$nodetype(n) = FUNCTION\_APP$}
-      \State $operator \leftarrow get\_operator(T)$
-      \State $V \leftarrow$ \Call{detect-stream-rec}{$operator, E$}
-      \For{$operand$ in $get\_operands(n)$} {
-        \If{$is\_vector(operand)$}
-        \State $operand.add\_child(n)$
-        \State $operand.set\_op\_(n, operator)$
-        \State $V \leftarrow V \cup \left\{ operand \right\}$
-        \EndIf
-      }
-      \EndFor
-      \ElsIf{$nodetype(n) = LAMBDA\_EXP$}
-      \State $V \leftarrow$ \Call{detect-stream-rec}{$get\_return\_value(n)$}
-      \ElsIf{$nodetype(n) = CONDITIONAL$}
-      \For{$branch$ in $get\_branches(n)$} {
-        \If{$is\_vector(branch)$}
-        \State $branch.add\_child(n)$
-        \State $branch.set\_flag\_(n, CONDITIONAL)$
-        \State $V \leftarrow V \cup \left\{ branch \right\}$
-        \EndIf
-      }
-      \EndFor
-      \EndIf
-      \State \Return $V$
-    \EndFunction
-  \end{algorithmic}
-\end{algorithm}
-
-\section{嵌套并行分解}\label{sec:np-decomposition}
+\subsection{嵌套并行分解}\label{subsec:np-decomposition}
 第FIXME：修改前文节中已经提及，虽然Rat只提供了一维向量原语，但由于支持高阶函数，
 编程者可以使用一维向量原语表达高维的并行操作，即支持嵌套并行。
 
@@ -293,47 +277,118 @@ Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-de
 操作翻译成一个循环体，其迭代次数为\texttt{map}原语目标向量的长度，循环体内部
 为目标向量的每一个元素都生成一个任务发送到任务调度器。这种处理策略的好处是
 思路简单，而且支持任意多层嵌套并行的处理，嵌套并行最终被转化成一批等规模的一维向量操作，
-规模等于最内层向量操作的规模。算法\ref{alg:np-decomposition}给出了
-这种简单嵌套并行分解算法的正规描述。
-\begin{algorithm}
-  \caption{简单的嵌套并行分解算法}
-  \label{alg:np-decomposition}
+规模等于最内层向量操作的规模。
+%% 算法\ref{alg:np-decomposition}给出了
+%% 这种简单嵌套并行分解算法的正规描述。
+%% \begin{algorithm}
+%%   \caption{简单的嵌套并行分解算法}
+%%   \label{alg:np-decomposition}
+%%   \begin{algorithmic}[1]
+%%     \Require 向量流图中\texttt{map}原语指向的结点$V$
+%%     \Ensure 由\texttt{map}原语生成$V$的操作中包含的任务组成的队列$TQ$
+%%     \Function{np-decompsite}{$V, TQ$}
+%%     \State $sop \leftarrow get\_scalar\_op(v)$
+%%     \If{$contain\_vp(sop) = TRUE$}
+%%     \For{$element$ in $get\_source\_vector(V)$}
+%%     \State $TQ \leftarrow$ \Call{np-decompsite}{$make\_node(sop, element), TQ$}
+%%     \EndFor
+%%     \Else
+%%     \State $TQ \leftarrow$ \Call{generate-task}{$V$}
+%%     \EndIf
+%%     \State \Return{$TQ$}
+%%     \EndFunction
+%%   \end{algorithmic}
+%% \end{algorithm}
+
+\begin{quotation}
+  \kai{
+    经过嵌套并行分解处理，n-body问题中包含嵌套并行操作的表达式\texttt{map (calcSingleAcc cell) cells}
+    实际上被翻译成一组数量为\texttt{cells}长度的一维向量操作，如图\ref{fig:np-decomposition}。
+    从图中可以看出，嵌套并行分解生成了一组新的流，这些流的结构相同，仅存在一些参数上的差异，
+    这种参数差异反映了内层并行操作对外层向量数据不同位置元素的引用。
+  }
+\end{quotation}
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{np-decomposition}
+  \caption{嵌套并行分解操作}
+  \label{fig:np-decomposition}
+\end{figure}
+
+\subsection{流探测算法}\label{subsec:stream-detection-algorithm}
+算法\ref{alg:stream-detection}给出了流探测算法的正规描述。流探测算法是一个以
+树的深度优先遍历FIXME：citehere为基础的递归算法，根据Core语法树不同结点类型做不同处理，
+Core语法树的结点类型参见表\ref{tbl:l2-ast}。
+
+FIXME：这里描述算法。
+\begin{algorithm}[htbp]
+  \caption{流探测算法}
+  \label{alg:stream-detection}
   \begin{algorithmic}[1]
-    \Require 向量流图中\texttt{map}原语指向的结点$V$
-    \Ensure 由\texttt{map}原语生成$V$的操作中包含的任务组成的队列$TQ$
-    \Function{np-decompsite}{$V, TQ$}
-    \State $sop \leftarrow get\_scalar\_op(v)$
-    \If{$contain\_vp(sop) = TRUE$}
-    \For{$element$ in $get\_source\_vector(V)$}
-    \State $TQ \leftarrow$ \Call{np-decompsite}{$make\_node(sop, element), TQ$}
-    \EndFor
-    \Else
-    \State $TQ \leftarrow$ \Call{generate-task}{$V$}
-    \EndIf
-    \State \Return{$TQ$}
+    \Require 待求值表达式Core语法树$T$
+    \Ensure 待求值表达式的向量流图$V$
+
+    \Function{detect-stream}{$T$}
+      \State $V \leftarrow \left\{ T \right\}$
+      \State \Return \Call{detect-stream-rec}{$T, V$}
+    \EndFunction
+
+    \Function{detect-stream-rec}{$n, V$}
+      \If{$nodetype(n) = OBJECT\_REF \ \&\  is\_detected(n) = FALSE$}
+      \State $V \leftarrow$ \Call{detect-stream-rec}{$ref(n), V$}
+      %% LITERAL
+      %% \ElsIf{$nodetype(n) = LITERAL$}
+      %% \State $donothing$
+      %% FUNCTION_APP
+      \ElsIf{$nodetype(n) = FUNCTION\_APP$}
+      \State $operator \leftarrow get\_operator(T)$ % get operator
+      \If{$is\_vector\_primitive(operator)$}        % vector primitive
+      \For{$operand$ in $get\_operands(n)$} {
+        \If{$is\_vector(operand)$}
+        \State $operand.add\_child(n)$
+        \State $operand.set\_op\_(n, operator)$
+        \State $V \leftarrow V \cup \left\{ operand \right\}$
+        \EndIf
+      }
+      \EndFor
+      \EndIf
+      \If{$operator = MAP$}                         % map
+      \State $sop \leftarrow get\_scalar\_op(T)$
+      \State $V \leftarrow$ \Call{detect-stream-rec}{$sop, V$}
+      \EndIf
+      \ElsIf{$nodetype(n) = LAMBDA\_EXP$}
+      \State $V \leftarrow$ \Call{detect-stream-rec}{$get\_value(n)$}
+      \ElsIf{$nodetype(n) = CONDITIONAL$}
+      \For{$branch$ in $get\_branches(n)$} {
+        \If{$is\_vector(branch)$}
+        \State $branch.add\_child(n)$
+        \State $branch.set\_flag\_(n, CONDITIONAL)$
+        \State $V \leftarrow V \cup \left\{ branch \right\}$
+        \EndIf
+      }
+      \EndFor
+      \EndIf
+      \State \Return $V$
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
 
-\begin{quotation}
-  经过嵌套并行分解处理，n-body问题中包含嵌套并行操作的表达式\texttt{map (calcSingleAcc cell) cells}
-  实际上被翻译成一组数量为\texttt{cells}长度的一维向量操作，如图\ref{fig:np-decomposition}。
-  从图中可以看出，嵌套并行分解生成了一组新的流，这些流的结构相同，仅存在一些参数上的差异，
-  这种参数差异反映了内层并行操作对外层向量数据不同位置元素的引用。
-\end{quotation}
-\begin{figure}
-  \centering
-  \includegraphics[height=5cm]{np-decomposition}
-  \caption{嵌套并行分解操作}
-  \label{fig:np-decomposition}
-\end{figure}
+算法\ref{alg:stream-detection}中只给出了流探测算法的主干，
+该算法在探测流的同时还完成一些标记工作，
+这些静态执行的标记工作将被Rat的运行时系统用来完成内存管理等任务。
+标记工作包括：
+\begin{compactitem}
+  \item 所有数据结点与变量结点的引用计数统计；
+  \item 所有数据结点与变量结点的依赖技术统计；
+\end{compactitem}
+
 
 \section{流优化技术}\label{sec:stream-optimization}
 执行流探测算法之后，Core表达式求值树被转化为向量流图，
 本节提出两种施加在流上的优化技术：向量原语重排与向量原语聚合，
 下面分别介绍两种优化技术，然后给出流优化算法。
 
-\subsubsection{向量原语重排}
+\subsection{向量原语重排}
 向量原语重排（reorder）是指，在某些情况下，相邻的向量操作可以通过交换顺序
 减少需要处理的数据总量，从而达到降低线程资源、存储器空间、访存次数等方面的开销，
 下面举例说明向量原语重排的应用。
@@ -400,7 +455,7 @@ Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-de
 %%   \end{tabularx}
 %% \end{table}
 
-\subsubsection{向量原语聚合}
+\subsection{向量原语聚合}
 向量原语聚合（fusion）是指，在某些情况下，多个向量操作可以合并成单个向量操作，
 从而可以减少访存，节省存储器带宽，同时还能消除访问存储器造成的时延，提高执行速度。
 下面举例说明向量原语聚合的应用。
@@ -475,7 +530,7 @@ Core语法树的结点类型参见表\ref{tbl:l2-ast}。算法\ref{alg:stream-de
 %%   \end{tabularx}
 %% \end{table}
 
-\subsubsection{流优化算法}
+\subsection{流优化算法}
 前面介绍了两种流优化技术，这里给出流优化算法的正规描述。
 
 %% \section{并行虚拟机设计}\label{sec:parallel-vm}
