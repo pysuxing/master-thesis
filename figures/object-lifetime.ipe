@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70005" creator="Ipe 7.1.1">
-<info created="D:20131102165950" modified="D:20131102184121"/>
+<info created="D:20131102165950" modified="D:20131106081246"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -294,8 +294,8 @@ h
 <text matrix="1 0 0 1 144 -192" transformations="translations" pos="80 768" stroke="red" type="label" valign="baseline" size="Large">1</text>
 <text matrix="1 0 0 1 -16 0" transformations="translations" pos="80 768" stroke="red" type="label" valign="baseline" size="Large">1</text>
 <text matrix="1 0 0 1 -16 -48" transformations="translations" pos="80 768" stroke="red" type="label" valign="baseline" size="Large">1</text>
-<text matrix="1 0 0 1 -16 0" transformations="translations" pos="32 768" stroke="black" type="label" valign="baseline" size="huge">in1</text>
-<text matrix="1 0 0 1 -16 -48" transformations="translations" pos="32 768" stroke="black" type="label" valign="baseline" size="huge">in2</text>
+<text matrix="1 0 0 1 -16 0" transformations="translations" pos="32 768" stroke="black" type="label" valign="baseline" size="huge">u</text>
+<text matrix="1 0 0 1 -16 -48" transformations="translations" pos="32 768" stroke="black" type="label" valign="baseline" size="huge">v</text>
 <text matrix="1 0 0 1 -16 -96" transformations="translations" pos="32 768" stroke="black" type="label" valign="baseline" size="huge">t1</text>
 <text matrix="1 0 0 1 -16 -144" transformations="translations" pos="32 768" stroke="black" type="label" valign="baseline" size="huge">t2</text>
 <text matrix="1 0 0 1 -16 -192" transformations="translations" pos="32 768" stroke="black" type="label" valign="baseline" size="huge">result</text>
@@ -350,8 +350,8 @@ h
 224 496 m
 384 496 l
 </path>
-<text matrix="1 0 0 1 0 -128" transformations="translations" pos="80 768" stroke="blue" type="label" valign="baseline" size="Large">in1 mem</text>
-<text matrix="1 0 0 1 32 -160" transformations="translations" pos="80 768" stroke="blue" type="label" valign="baseline" size="Large">in2 mem</text>
+<text matrix="1 0 0 1 0 -128" transformations="translations" pos="80 768" stroke="blue" type="label" valign="baseline" size="Large">u mem</text>
+<text matrix="1 0 0 1 32 -160" transformations="translations" pos="80 768" stroke="blue" type="label" valign="baseline" size="Large">v mem</text>
 <text matrix="1 0 0 1 80 -208" transformations="translations" pos="80 768" stroke="blue" type="label" valign="baseline" size="Large">t1 mem</text>
 <text matrix="1 0 0 1 112 -240" transformations="translations" pos="80 768" stroke="blue" type="label" valign="baseline" size="Large">t2 mem</text>
 <text matrix="1 0 0 1 192 -272" transformations="translations" pos="80 768" stroke="blue" type="label" valign="baseline" size="Large">result mem</text>

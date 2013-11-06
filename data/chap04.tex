@@ -140,110 +140,110 @@ FIXME：提及附录。
 在Rat语言的实现过程中，采用了三种高层优化技术。这些优化技术在Core语言的层面
 实施，实质上是一些Core语法树到Core语法树的变换。下面分别介绍这三种优化技术。
 
-\subsubsection{存储空间优化}
-第\ref{subsec:immutable-object}节已经指出，Rat语言中的所有对象在整个
-生命周期中是不可改写的，称为恒值对象。也就是说，每当一个数据操作（标量操作
-或向量操作）被施加到一个对象上时，逻辑上都会产生一个新的对象，编程者可以认为
-新的对象与原有对象使用不同的存储空间。
+%% \subsubsection{存储空间优化}
+%% 第\ref{subsec:immutable-object}节已经指出，Rat语言中的所有对象在整个
+%% 生命周期中是不可改写的，称为恒值对象。也就是说，每当一个数据操作（标量操作
+%% 或向量操作）被施加到一个对象上时，逻辑上都会产生一个新的对象，编程者可以认为
+%% 新的对象与原有对象使用不同的存储空间。
 
-恒值对象简化了程序语义，但如果在具体实现中，
-为每一个对象都分配新的存储空间显然是不经济的，
-在Rat的实现中，采用了三种存储空间优化技术，可以在
-保持程序高层语义简洁的同时提高存储空间利用率。
-这三种技术分别是：向量内存即时回收（vector memory collection）、向量原语原地执行（execute in-place）、
-写时拷贝（copy-on-write）。
+%% 恒值对象简化了程序语义，但如果在具体实现中，
+%% 为每一个对象都分配新的存储空间显然是不经济的，
+%% 在Rat的实现中，采用了三种存储空间优化技术，可以在
+%% 保持程序高层语义简洁的同时提高存储空间利用率。
+%% 这三种技术分别是：向量内存即时回收（vector memory collection）、向量原语原地执行（execute in-place）、
+%% 写时拷贝（copy-on-write）。
 
-首先介绍向量内存即时回收技术。一段程序中往往存在许多的中间对象，
-他们在整个生命周期中只被引用一次，作用相当于临时变量。
-当对一个对象的最后一次引用结束之后，即使该对象的生命周期还没结束，
-但它的存储空间已经可以被回收利用而不影响程序的正确性。也就是说，
-在物理实现中，对象占用分配给它的存储空间的时间可以短于它的逻辑生命周期。
-重用存储空间意义重大，对存储空间开销很大的长向量数据执行内存回收重用尤其重要。
-%% 图\ref{fig:object-lifetime}给出了一个例子说明。
-\begin{quotation}
-    \kai{
-    仍以\ref{subsec:functional-advantages}节中表达式求值问题为例：\\
-    \texttt{dot (map f u) (scan g v)}\\
+%% 首先介绍向量内存即时回收技术。一段程序中往往存在许多的中间对象，
+%% 他们在整个生命周期中只被引用一次，作用相当于临时变量。
+%% 当对一个对象的最后一次引用结束之后，即使该对象的生命周期还没结束，
+%% 但它的存储空间已经可以被回收利用而不影响程序的正确性。也就是说，
+%% 在物理实现中，对象占用分配给它的存储空间的时间可以短于它的逻辑生命周期。
+%% 重用存储空间意义重大，对存储空间开销很大的长向量数据执行内存回收重用尤其重要。
+%% %% 图\ref{fig:object-lifetime}给出了一个例子说明。
+%% \begin{quotation}
+%%     \kai{
+%%     仍以\ref{subsec:functional-advantages}节中表达式求值问题为例：\\
+%%     \texttt{dot (map f u) (scan g v)}\\
 
-    上述表达式的求值树参见图\ref{fig:expression-tree}。整个计算过程涉及5个向量数据，
-    分别是两个输入向量\texttt{u}与\texttt{v}，两个中间向量\texttt{t1}与\texttt{t2}，
-    最终结果向量\texttt{result}。其中\texttt{u}与\texttt{v}分别
-    在计算\texttt{t1}与\texttt{t2}的时候被引用一次，之后不再被引用，\texttt{t1}与
-    \texttt{t2}在计算最终结果\texttt{result}的时候被引用一次，之后不再被引用。
-    5个向量的的逻辑生命周期见图\ref{fig:object-lifetime}，图中还给出了各向量
-    引用计数随时间的变化情况（以红色标识）以及他们实际占用内存空间的时间区间（以蓝色标识）。
+%%     上述表达式的求值树参见图\ref{fig:expression-tree}。整个计算过程涉及5个向量数据，
+%%     分别是两个输入向量\texttt{u}与\texttt{v}，两个中间向量\texttt{t1}与\texttt{t2}，
+%%     最终结果向量\texttt{result}。其中\texttt{u}与\texttt{v}分别
+%%     在计算\texttt{t1}与\texttt{t2}的时候被引用一次，之后不再被引用，\texttt{t1}与
+%%     \texttt{t2}在计算最终结果\texttt{result}的时候被引用一次，之后不再被引用。
+%%     5个向量的的逻辑生命周期见图\ref{fig:object-lifetime}，图中还给出了各向量
+%%     引用计数随时间的变化情况（以红色标识）以及他们实际占用内存空间的时间区间（以蓝色标识）。
     
-    从图\ref{fig:object-lifetime}可以看出，\texttt{result}与\texttt{u}，\texttt{v}的
-    存储空间占用时间区间不存在重合，且在\texttt{result}实际占用存储空间的时间段内
-    \texttt{u}、\texttt{v}的引用计数都为0。在这种情况下，\texttt{u}、\texttt{v}占用
-    的内存空间就可以回收由\texttt{result}重用。
-  }
-\end{quotation}
-\begin{figure}
-  \centering
-  \includegraphics[scale=0.8]{object-lifetime}
-  \caption{对象生命周期与存储空间占用示意图}
-  \label{fig:object-lifetime}
-\end{figure}
+%%     从图\ref{fig:object-lifetime}可以看出，\texttt{result}与\texttt{u}，\texttt{v}的
+%%     存储空间占用时间区间不存在重合，且在\texttt{result}实际占用存储空间的时间段内
+%%     \texttt{u}、\texttt{v}的引用计数都为0。在这种情况下，\texttt{u}、\texttt{v}占用
+%%     的内存空间就可以回收由\texttt{result}重用。
+%%   }
+%% \end{quotation}
+%% \begin{figure}
+%%   \centering
+%%   \includegraphics[scale=0.8]{object-lifetime}
+%%   \caption{对象生命周期与存储空间占用示意图}
+%%   \label{fig:object-lifetime}
+%% \end{figure}
 
-在上例给出的存储空间优化分析中，还有存在另一种优化可能性，那就是有些向量原语可以
-原地执行。所谓原地执行，就是向量操作直接在输入向量的内存空间上
-写入输出向量，不许要申请新的存储空间。原地执行必须满足一个条件，就是输入向量在本次向量操作之后引用计数变为0，
-即在本次向量操作中输入向量是最后一次被引用。
-\begin{quotation}
-  \kai{
-    在图\ref{fig:object-lifetime}所示的生命周期中与存储空间占用情况中，虽然\texttt{t1}与\texttt{u}
-    的存储空间占用时间区间存在重合，但由于\texttt{u}在\texttt{map}操作中是最后一次被引用，
-    同时，\texttt{map}原语支持原地执行，这时，\texttt{t1}可以直接回收利用\texttt{u}的存储空间。
-  }
-\end{quotation}
+%% 在上例给出的存储空间优化分析中，还有存在另一种优化可能性，那就是有些向量原语可以
+%% 原地执行。所谓原地执行，就是向量操作直接在输入向量的内存空间上
+%% 写入输出向量，不许要申请新的存储空间。原地执行必须满足一个条件，就是输入向量在本次向量操作之后引用计数变为0，
+%% 即在本次向量操作中输入向量是最后一次被引用。
+%% \begin{quotation}
+%%   \kai{
+%%     在图\ref{fig:object-lifetime}所示的生命周期中与存储空间占用情况中，虽然\texttt{t1}与\texttt{u}
+%%     的存储空间占用时间区间存在重合，但由于\texttt{u}在\texttt{map}操作中是最后一次被引用，
+%%     同时，\texttt{map}原语支持原地执行，这时，\texttt{t1}可以直接回收利用\texttt{u}的存储空间。
+%%   }
+%% \end{quotation}
 
-表\ref{tbl:inplace-vp}给出了向量原语对原地执行的支持状况，某些向量原语需要同步操作才能完成原地执行。
-\begin{table}
-  \centering
-  \caption{向量原语的原地执行支持}\label{tbl:inplace-vp}
-  \begin{tabularx}{\linewidth}{ZZZ}
-    \toprule[1.5pt]
-    \hei{向量原语} & \hei{是否支持原地执行} & \hei{是否需要同步}\\
-    \midrule[1pt]
-    map & $\surd$ & $\times$\\
-    slice & $\times$ & --\\
-    scan & $\times$ & --\\
-    gpermute & $\surd$ & $\surd$\\
-    gcopy & $\surd$ & $\surd$\\
-    sort & $\times$ & --\\
-    zip & $\surd$ & $\times$\\
-    concat & $\times$ & --\\
-    \bottomrule[1.5pt]
-  \end{tabularx}
-\end{table}
+%% 表\ref{tbl:inplace-vp}给出了向量原语对原地执行的支持状况，某些向量原语需要同步操作才能完成原地执行。
+%% \begin{table}
+%%   \centering
+%%   \caption{向量原语的原地执行支持}\label{tbl:inplace-vp}
+%%   \begin{tabularx}{\linewidth}{ZZZ}
+%%     \toprule[1.5pt]
+%%     \hei{向量原语} & \hei{是否支持原地执行} & \hei{是否需要同步}\\
+%%     \midrule[1pt]
+%%     map & $\surd$ & $\times$\\
+%%     slice & $\times$ & --\\
+%%     scan & $\times$ & --\\
+%%     gpermute & $\surd$ & $\surd$\\
+%%     gcopy & $\surd$ & $\surd$\\
+%%     sort & $\times$ & --\\
+%%     zip & $\surd$ & $\times$\\
+%%     concat & $\times$ & --\\
+%%     \bottomrule[1.5pt]
+%%   \end{tabularx}
+%% \end{table}
 
 
-写时拷贝也称为零拷贝（zero-copy），指某些向量操作虽然逻辑上定义了新的向量，但实际上没有对输入向量进行任何处理，
-得到的新向量与原向量内容相同或部分相同，这时新向量就可以直接指向输入向量的内存空间。
-这时，逻辑上可能有多个向量指向同一块存储空间。因为前面提到的两种内存优化技术可能
-需要改写向量存储空间（指向该空间的某个向量引用计数变为0或有向量原语试图原地执行），
-这时视开销情况执行内存拷贝动作或是为改写动作分配新内存。
+%% 写时拷贝也称为零拷贝（zero-copy），指某些向量操作虽然逻辑上定义了新的向量，但实际上没有对输入向量进行任何处理，
+%% 得到的新向量与原向量内容相同或部分相同，这时新向量就可以直接指向输入向量的内存空间。
+%% 这时，逻辑上可能有多个向量指向同一块存储空间。因为前面提到的两种内存优化技术可能
+%% 需要改写向量存储空间（指向该空间的某个向量引用计数变为0或有向量原语试图原地执行），
+%% 这时视开销情况执行内存拷贝动作或是为改写动作分配新内存。
 
-向量原语对写时拷贝的支持情况参见表\ref{tbl:copy-on-write}。
-\begin{table}
-  \centering
-  \caption{向量原语的写时拷贝支持}\label{tbl:copy-on-write}
-  \begin{tabularx}{\linewidth}{ZZ}
-    \toprule[1.5pt]
-    \hei{向量原语} & \hei{是否支持写时拷贝}\\
-    \midrule[1pt]
-    map & $\times$\\
-    slice & $\surd$ \\
-    scan & $\times$\\
-    gpermute & $\surd$\\
-    gcopy & $\times$\\
-    sort & $\times$\\
-    zip & $\surd$\\
-    concat & $\surd$\\
-    \bottomrule[1.5pt]
-  \end{tabularx}
-\end{table}
+%% 向量原语对写时拷贝的支持情况参见表\ref{tbl:copy-on-write}。
+%% \begin{table}
+%%   \centering
+%%   \caption{向量原语的写时拷贝支持}\label{tbl:copy-on-write}
+%%   \begin{tabularx}{\linewidth}{ZZ}
+%%     \toprule[1.5pt]
+%%     \hei{向量原语} & \hei{是否支持写时拷贝}\\
+%%     \midrule[1pt]
+%%     map & $\times$\\
+%%     slice & $\surd$ \\
+%%     scan & $\times$\\
+%%     gpermute & $\surd$\\
+%%     gcopy & $\times$\\
+%%     sort & $\times$\\
+%%     zip & $\surd$\\
+%%     concat & $\surd$\\
+%%     \bottomrule[1.5pt]
+%%   \end{tabularx}
+%% \end{table}
 
 %% 上面举例说明了两种存储空间优化技术，下面给出存储空间静态优化算法\ref{alg:memory-optimization}。
 %% 算法\ref{alg:memory-optimization}是一种静态优化算法，在编译期完成。
