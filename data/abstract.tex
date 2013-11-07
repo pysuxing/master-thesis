@@ -1,21 +1,43 @@
 \begin{cabstract}
-国防科学技术大学是一所直属中央军委的综合性大学。1984年,学校经国务院、中央军委和教育部批准首批成立研究生院，%
-肩负着为全军培养高级科学和工程技术人才与指挥人才，培训高级领导干部，从事先进武器装备和国防关键技术研究的重要任务。%
-国防科技大学是全国重点大学，也是全国首批进入国家“211工程” 建设并获中央专项经费支持的全国重点院校之一。%
-学校前身是1953年创建于哈尔滨的中国人民解放军军事工程学院，简称“哈军工”。
+当前，计算机硬件系统正朝着并行化与异构化的趋势发展。继多核微处理器
+普及之后，图形处理器GPU、数字信号处理器DSP、FPGA等多种硬件加速设备
+被越来越多地应用到计算机系统。这些硬件加速设备特点各异，与通用处理器
+相比往往在特定方面具备突出的性能优势，它们在与通用处理器组成的
+异构计算机系统中作为协处理器辅助通用处理器执行计算任务。由CPU与GPU组成
+的计算机系统是现阶段最为典型异构系统。
+
+跟随计算机硬件系统并行化与异构化的发展趋势，
+现阶段针对异构系统的并行软件技术也处于蓬勃发展的时期。
+最大程度地开发异构系统中并行硬件的计算能力是并行软件技术的首要目标，
+同时，并行软件技术也要兼顾易用性，即应该尽量降低并行程序设计的难度。
+
+本文采用设计了一门并行程序语言，面向数据并行问题，并制定了
+该语言在CPU/GPU异构计算机系统上的实现方案，兼顾了高效性与
+易用性两方面的要求，对于提高在异构计算机系统上的软件开发效率，
+具有积极意义。本文的主要贡献如下：
+
+首先，该语言采用函数式程序语言设计，抽象层次高，表达能力强，
+大大降低了并行编程的难度。
+
+第二，设计了一门中间语言Core，该语言采用基于并行向量原语的编程模型，
+非常适合表达数据并行问题，使用一组精简的向量原语就可以构造许多
+实际的并行程序。
+
+第三，采用流驱动计算模型作为任务自动并行化的基本技术，
+提出了将数据并行问题转化为数据流的方法，该方法可以挖掘
+问题中的并行潜力，且与问题无关，通用性较强。
+同时，将计算任务表示成数据流的形式非常适合GPU本身提供的
+并行计算模型。
+
+最后，设计了一个运行时系统，该系统能够有效地管理系统
+内存资源，将计算并行任务高效地调度到GPU上执行。
+
+
 \end{cabstract}
-\ckeywords{国防科学技术大学; 211; 哈军工}
+\ckeywords{并行编程语言, 函数式语言, 流驱动模型, 自动并行化}
 
 \begin{eabstract}
-National University of Defense Technology is a comprehensive national key university based in Changsha, %
-Hunan Province, China. It is under the dual supervision of the Ministry of National Defense %
-and the Ministry of Education, designated for Project 211 and Project 985, %
-the two national plans for facilitating the development of Chinese higher education. %
-
-NUDT was originally founded in 1953 as the Military Academy of Engineering in Harbin of Heilongjiang Province. %
-In 1970 the Academy of Engineering moved southwards to Changsha and was renamed Changsha Institute of Technology.%
- The Institute changed its name to National University of Defense Technology in 1978.
 
 \end{eabstract}
-\ekeywords{NUDT; MND; ME}
+\ekeywords{}
 
