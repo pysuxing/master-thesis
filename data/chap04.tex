@@ -771,20 +771,20 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
   \label{fig:np-decomposition}
 \end{figure}
 
-%% \subsection{运行时系统}\label{subsec:runtime-system}
-%% 本节介绍Rat的运行时系统。该运行时系统运行在CPU端，负责管理可用的硬件资源，
-%% 将CoreVM的指令动态地调度到GPU端并行执行。
+\section{小结}
+本章详细说明了Rat程序的编译过程，以及Rat编译实现的关键技术。
 
-%% \subsubsection{并行任务调度器}
+中间语言Core的设计是整个编译实现技术中非常重要的环节。
+Core语言指令集包括一组向量原语，
+大量标量原语以及少量辅助指令。
+标量原语为Rat提供了数据并行能力，标量原语提供了数值计算能力。
+Core语言适合描述数据并行问题，同时它的标量原语可以在并行硬件上高效实现。
 
-%% \subsubsection{硬件资源管理器}
+流探测技术是Rat编译实现中另一个关键技术，
+它为程序的自动并行化提供了支持。向量流图与流驱动模型是一种
+发现程序并行潜力的通用方法，与具体问题无关。
+而流探测算法能够将问题转化成向量流图，从而使用流驱动模型
+产生并行任务。
 
-%% \subsection{向量原语驱动}\label{subsec:vp-driver}
+同时，流探测技术还是Rat编译期执行高层流优化措施与产生C语言代码的基础。
 
-%% \section{GPU端优化技术}\label{sec:gpu-optimization}
-
-%% \subsection{寄存器优化}
-
-%% \subsection{全局存储器优化}
-
-%% \subsection{共享存储器优化}
