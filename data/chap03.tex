@@ -165,13 +165,14 @@ Rat提供了若干向量操作函数，表\ref{tbl:vector-operations}中给出�
     \toprule[1.5pt]
     \hei{向量原语} & \hei{功能说明} \\
     \midrule[1pt]
-    map & 给定一元操作，对一个向量中所有元素施加同一操作\\
-    fold & 对向量中的元素重排\\
-    slice & 给定二元函数，求一个向量中元素的累加和\\
-    concat & 将嵌套向量合并成一维向量\\
-    zip & 将多个向量中的元素逐位置组成元组\\
-    permute & 对向量中的元素重排\\
-    sort & 给定排序函数，对向量中的元素进行排序\\
+    \texttt{map} & 给定一元操作，对一个向量中所有元素施加同一操作\\
+    \texttt{filter} & 给定一元谓词，过滤一个向量中所有不满组该谓词的元素\\
+    \texttt{fold} & 对向量中的元素重排\\
+    \texttt{slice} & 给定二元函数，求一个向量中元素的累加和\\
+    \texttt{concat} & 将嵌套向量合并成一维向量\\
+    \texttt{zip} & 将多个向量中的元素逐位置组成元组\\
+    \texttt{permute} & 对向量中的元素重排\\
+    \texttt{sort} & 给定排序函数，对向量中的元素进行排序\\
     \bottomrule[1.5pt]
   \end{tabularx}
 \end{table}
@@ -309,7 +310,7 @@ Church-Rosser定理（也称为菱形性质）FIXME：citehere可以得到下面
 \begin{figure}
   \centering
   \includegraphics[height=5cm]{expression-tree}
-  \caption{表达式求值树}
+  \caption{求内积表达式求值树}
   \label{fig:expression-tree}
 \end{figure}
 
