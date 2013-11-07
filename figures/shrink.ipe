@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70005" creator="Ipe 7.1.1">
-<info created="D:20131031205906" modified="D:20131107090947"/>
+<info created="D:20131031205906" modified="D:20131107091621"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -267,27 +267,6 @@ h
 384 768 l
 h
 </path>
-<text transformations="translations" pos="80 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[0]</text>
-<text transformations="translations" pos="144 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[1]</text>
-<text transformations="translations" pos="208 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[2]</text>
-<text transformations="translations" pos="272 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[3]</text>
-<text transformations="translations" pos="336 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[4]</text>
-<path matrix="1 0 0 1 128 0" stroke="black" fill="white" pen="ultrafat">
-256 768 m
-256 704 l
-320 704 l
-320 768 l
-h
-</path>
-<path matrix="1 0 0 1 128 0" stroke="black" fill="white" pen="ultrafat">
-320 768 m
-320 704 l
-384 704 l
-384 768 l
-h
-</path>
-<text matrix="1 0 0 1 128 0" transformations="translations" pos="272 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[5]</text>
-<text matrix="1 0 0 1 128 0" transformations="translations" pos="336 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[6]</text>
 <path matrix="1 0 0 1 0 -192" stroke="black" fill="white" pen="ultrafat">
 64 768 m
 64 704 l
@@ -309,23 +288,78 @@ h
 256 768 l
 h
 </path>
-<text matrix="1 0 0 1 0 -192" transformations="translations" pos="80 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[1]</text>
-<text matrix="1 0 0 1 0 -192" transformations="translations" pos="144 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[3]</text>
-<text matrix="1 0 0 1 0 -192" transformations="translations" pos="208 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[5]</text>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-160 704 m
+<text transformations="translations" pos="80 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[0]</text>
+<text transformations="translations" pos="144 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[1]</text>
+<text transformations="translations" pos="208 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[2]</text>
+<text transformations="translations" pos="272 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[3]</text>
+<text transformations="translations" pos="336 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[4]</text>
+<path matrix="1 0 0 1 0 -96" stroke="black" fill="white" pen="ultrafat">
+64 768 m
+64 704 l
+128 704 l
+128 768 l
+h
+</path>
+<path matrix="1 0 0 1 0 -96" stroke="black" fill="white" pen="ultrafat">
+128 768 m
+128 704 l
+192 704 l
+192 768 l
+h
+</path>
+<path matrix="1 0 0 1 0 -96" stroke="black" fill="white" pen="ultrafat">
+192 768 m
+192 704 l
+256 704 l
+256 768 l
+h
+</path>
+<path matrix="1 0 0 1 0 -96" stroke="black" fill="white" pen="ultrafat">
+256 768 m
+256 704 l
+320 704 l
+320 768 l
+h
+</path>
+<path matrix="1 0 0 1 0 -96" stroke="black" fill="white" pen="ultrafat">
+320 768 m
+320 704 l
+384 704 l
+384 768 l
+h
+</path>
+<text matrix="1 0 0 1 -16 80" transformations="translations" pos="96 544" stroke="black" type="label" width="11.368" height="15.978" depth="0" valign="bottom" size="Huge">1</text>
+<text transformations="translations" pos="144 624" stroke="black" type="label" width="11.368" height="15.978" depth="0" valign="bottom" size="Huge">2</text>
+<text transformations="translations" pos="208 624" stroke="black" type="label" width="11.368" height="15.978" depth="0" valign="bottom" size="Huge">2</text>
+<text transformations="translations" pos="272 624" stroke="black" type="label" width="11.368" height="15.978" depth="0" valign="bottom" size="Huge">3</text>
+<text transformations="translations" pos="336 624" stroke="black" type="label" width="11.368" height="15.978" depth="0" valign="bottom" size="Huge">3</text>
+<text matrix="1 0 0 1 0 -192" transformations="translations" pos="80 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[0]</text>
+<text matrix="1 0 0 1 0 -192" transformations="translations" pos="144 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[1]</text>
+<text matrix="1 0 0 1 -64 -192" transformations="translations" pos="272 720" stroke="black" type="label" width="35.111" height="18.564" depth="6.18" valign="bottom" size="Huge">a[3]</text>
+<path stroke="black" pen="ultrafat" arrow="normal/large">
+96 608 m
 96 576 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-288 704 m
+<path stroke="black" pen="ultrafat" arrow="normal/large">
+160 704 m
+160 672 l
+</path>
+<path stroke="black" pen="ultrafat" arrow="normal/large">
+160 608 m
 160 576 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-416 704 m
+<path stroke="black" pen="ultrafat" arrow="normal/large">
+288 704 m
+288 704 l
+288 672 l
+</path>
+<path stroke="black" pen="ultrafat" arrow="normal/large">
+288 608 m
 224 576 l
 </path>
-<text matrix="1 0 0 1 80 -48" transformations="translations" pos="80 720" stroke="black" type="label" width="35.398" height="16.26" depth="0" valign="bottom" size="Huge">i=1</text>
-<text matrix="1 0 0 1 128 -48" transformations="translations" pos="80 720" stroke="black" type="label" width="38.118" height="15.978" depth="0" valign="bottom" size="Huge">s=2</text>
-<text matrix="1 0 0 1 368 -48" transformations="translations" pos="80 720" stroke="black" type="label" width="36.046" height="16.261" depth="4.82" valign="bottom" size="Huge">j=6</text>
+<path stroke="black" pen="ultrafat" arrow="normal/large">
+96 704 m
+96 672 l
+</path>
 </page>
 </ipe>

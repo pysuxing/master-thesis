@@ -1,6 +1,6 @@
 digraph G {
         {
-                rank = same;
+                rank = min;
                 rankdir=LR;
                 src;
                 lp;
@@ -10,11 +10,12 @@ digraph G {
                 t2;
         }
         {
-                rank = same;
+                rank = max;
                 rankdir=LR;
-                core1;
+                sd;
+                sg1;
                 opt;
-                core2;
+                sg2;
                 cgen;
                 ccode;
         }
@@ -27,9 +28,11 @@ digraph G {
         t1[label="L1\nTranformer", shape=box];
         l2[label="Level-2\nAST"];
         t2[label="L2\nTranformer", shape=box];
-        core1[label="Core\nAST"];
+        core[label="Core\nAST"];
+        sd[label="Stream\nDetection", shape=box];
+        sg1[label="Stream\nGraph"];
         opt[label="Optimization", shape=box];
-        core2[label="Core\nAST"];
+        sg2[label="Stream\nGraph"];
         cgen[label="Code\nGenerator", shape=box];
         ccode[label="C\nSource"];
 
@@ -38,9 +41,11 @@ digraph G {
         l1 -> t1;
         t1 -> l2;
         l2 -> t2;
-        t2 -> core1;
+        t2 -> core;
         ccode -> cgen[dir=back];
-        cgen -> core2[dir=back];
-        core2 -> opt[dir=back];
-        opt -> core1[dir=back];
+        cgen -> sg2[dir=back];
+        sg2 -> opt[dir=back];
+        opt -> sg1[dir=back];
+        sg1 -> sd[dir=back];
+        sd -> core[dir=back];
 }

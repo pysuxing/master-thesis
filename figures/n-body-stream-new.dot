@@ -11,28 +11,28 @@ digraph G {
         accelerates;
         calcSingleAcc;
         cells;
-        t1[label=""];
-        t2[label=""];
-        t3[label=""];
-        t4[label=""];
+        t1;
+        t2;
+        t3;
+        t4;
 
         edge[dir=back];
 
         newCells -> t1[label="map"];
-        t1 -> masses[label="zipin"];
-        t1 -> newVelocities[label="zipin"];
-        t1 -> newPositions[label="zipin"];
+        t1 -> masses[label="zip"];
+        t1 -> newVelocities[label="zip"];
+        t1 -> newPositions[label="zip"];
         masses -> cells[label="map"];
         newVelocities ->  t2[label="map"];
-        t2 -> velocities[label="zipin"];
-        t2 -> accelerates[label="zipin"];
+        t2 -> velocities[label="zip"];
+        t2 -> accelerates[label="zip"];
         newPositions -> t3[label="map"];
-        t3 -> velocities[label="zipin"];
-        t3 -> positions[label="zipin"];
+        t3 -> velocities[label="zip"];
+        t3 -> positions[label="zip"];
         velocities -> cells[label="map"];
         positions -> cells[label="map"];
-        accelerates -> cells[label="map"];
+        accelerates -> cells[label="map", style=dashed];
         accelerates -> calcSingleAcc[style=dashed];
-        calcSingleAcc -> t4[label="fold"];
+        calcSingleAcc -> t4[label="scan"];
         t4 -> cells[label="map"];
 }

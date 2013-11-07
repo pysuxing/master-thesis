@@ -1,6 +1,6 @@
 digraph G {
         node[shape=box];
-        vm[label="Core Virtual Machine"];
+        // vm[label="Core Virtual Machine"];
         rt[label="Runtime System"];
         scheduler[label="Task Scheduler"];
         rm[label="Memory Manager"];
@@ -9,7 +9,7 @@ digraph G {
         cpu[label="Multi-core Processor", style=dashed];
         others[label="Other Accelerators", style=dashed];
 
-        vm -> rt;
+        // vm -> rt;
         rt -> scheduler;
         rt -> rm;
         rt -> driver;

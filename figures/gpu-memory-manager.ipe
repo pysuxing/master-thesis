@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70005" creator="Ipe 7.1.1">
-<info created="D:20131105210323" modified="D:20131105211113"/>
+<info created="D:20131105210323" modified="D:20131107155821"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -232,133 +232,106 @@ h
 <page>
 <layer name="alpha"/>
 <view layers="alpha" active="alpha"/>
-<path layer="alpha" stroke="black" pen="ultrafat">
-22.6274 0 0 22.6274 160 736 e
-</path>
-<path stroke="black" pen="ultrafat">
-22.6274 0 0 22.6274 224 736 e
-</path>
-<path stroke="black" pen="ultrafat">
-22.6274 0 0 22.6274 288 736 e
-</path>
-<path stroke="black" pen="ultrafat">
-22.6274 0 0 22.6274 352 736 e
-</path>
-<path stroke="black" pen="ultrafat">
-22.6274 0 0 22.6274 416 736 e
-</path>
-<path stroke="black" pen="ultrafat">
-22.6274 0 0 22.6274 480 736 e
-</path>
-<path matrix="1 0 0 1 0 80" stroke="black" pen="ultrafat">
-128 592 m
-128 560 l
-192 560 l
-192 592 l
+<path layer="alpha" matrix="1 0 0 1 16 -80" stroke="black">
+32 800 m
+32 752 l
+96 752 l
+96 800 l
 h
 </path>
-<path matrix="1 0 0 1 0 80" stroke="black" pen="ultrafat">
-224 592 m
-224 560 l
-288 560 l
-288 592 l
+<path matrix="1 0 0 1 16 -80" stroke="black" fill="gray">
+96 800 m
+96 752 l
+192 752 l
+192 800 l
 h
 </path>
-<path matrix="1 0 0 1 0 80" stroke="black" pen="ultrafat">
-320 592 m
-320 560 l
-384 560 l
-384 592 l
+<path matrix="1 0 0 1 16 -80" stroke="black">
+192 800 m
+192 752 l
+256 752 l
+256 800 l
 h
 </path>
-<path matrix="1 0 0 1 0 80" stroke="black" pen="ultrafat">
-416 592 m
-416 560 l
-480 560 l
-480 592 l
+<path matrix="1 0 0 1 16 -80" stroke="black" pen="fat" arrow="normal/normal">
+80 784 m
+144 816
+208 784 s
+</path>
+<path matrix="1 0 0 1 16 -80" stroke="black" pen="fat" arrow="normal/normal">
+208 768 m
+144 800
+80 768 s
+</path>
+<path matrix="1 0 0 1 16 -80" stroke="black" fill="gray" pen="fat">
+256 800 m
+256 752 l
+384 752 l
+384 800 l
 h
 </path>
-<path matrix="1 0 0 1 0 16" stroke="black" pen="ultrafat">
-128 592 m
-128 560 l
-192 560 l
-192 592 l
+<path matrix="1 0 0 1 16 -80" stroke="black" pen="fat">
+384 800 m
+384 752 l
+576 752 l
+576 800 l
 h
 </path>
-<path matrix="1 0 0 1 0 16" stroke="black" pen="ultrafat">
-224 592 m
-224 560 l
-288 560 l
-288 592 l
+<path matrix="1 0 0 1 16 -80" stroke="black" pen="fat" arrow="normal/normal">
+240 784 m
+320 816
+400 784 s
+</path>
+<path matrix="1 0 0 1 16 -80" stroke="black" pen="fat" arrow="normal/normal">
+400 768 m
+320 800
+240 768 s
+</path>
+<path matrix="1 0 0 1 0 -32" stroke="black" pen="fat">
+128 672 m
+128 672 l
+128 672 l
+128 672 l
 h
 </path>
-<path matrix="1 0 0 1 0 16" stroke="black" pen="ultrafat">
-320 592 m
-320 560 l
-384 560 l
-384 592 l
+<path matrix="1 0 0 1 -32 80" stroke="black" pen="fat">
+48 688 m
+48 656 l
+96 656 l
+96 688 l
 h
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-159.299 713.383 m
-158.54 672 l
+<text matrix="1 0 0 1 -32 32" transformations="translations" pos="64 720" stroke="black" type="label" width="28.875" height="9.963" depth="0" halign="center" valign="center" size="Large">head</text>
+<text matrix="1 0 0 1 -48 -80" transformations="translations" pos="64 720" stroke="black" type="label" width="118.702" height="9.962" depth="2.79" valign="baseline" size="Large">GPU Memory Pool</text>
+<path matrix="1 0 0 1 0 -32" stroke="black" pen="fat" arrow="normal/normal">
+48 768 m
+48 752 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-224.202 713.373 m
-158.54 672 l
+<path matrix="1 0 0 1 64 0" stroke="black" pen="fat">
+16 0 0 16 144 800 e
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-287.56 713.377 m
-158.54 672 l
+<path matrix="1 0 0 1 64 0" stroke="black" pen="fat">
+16 0 0 16 208 800 e
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-286.019 712.883 m
-350.175 672 l
+<path matrix="1 0 0 1 64 0" stroke="black" pen="fat">
+16 0 0 16 272 800 e
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-353.657 713.433 m
-255.208 672 l
+<path stroke="black" dash="dashed" pen="fat" arrow="normal/normal">
+208 784 m
+112 720 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-416.488 713.378 m
-448.544 672 l
+<path stroke="black" dash="dashed" pen="fat" arrow="normal/normal">
+272 784 m
+112 720 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-481.463 713.42 m
-448.544 672 l
+<path stroke="black" dash="dashed" pen="fat" arrow="normal/normal">
+272 784 m
+272 720 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-192 656 m
-224 656 l
+<path stroke="black" dash="dashed" pen="fat" arrow="normal/normal">
+336 784 m
+272 720 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-288 656 m
-320 656 l
-</path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-384 656 m
-416 656 l
-</path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-192 592 m
-224 592 l
-</path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
-288 592 m
-320 592 l
-</path>
-<text transformations="translations" pos="160 736" stroke="black" type="label" width="17.554" height="9.803" depth="0" halign="center" valign="center" size="Large">V0</text>
-<text matrix="1 0 0 1 64 0" transformations="translations" pos="160 736" stroke="black" type="label" width="17.554" height="9.803" depth="0" halign="center" valign="center" size="Large">V1</text>
-<text matrix="1 0 0 1 128 0" transformations="translations" pos="160 736" stroke="black" type="label" width="17.554" height="9.803" depth="0" halign="center" valign="center" size="Large">V2</text>
-<text matrix="1 0 0 1 192 0" transformations="translations" pos="160 736" stroke="black" type="label" width="17.554" height="9.803" depth="0" halign="center" valign="center" size="Large">V3</text>
-<text matrix="1 0 0 1 256 0" transformations="translations" pos="160 736" stroke="black" type="label" width="17.554" height="9.803" depth="0" halign="center" valign="center" size="Large">V4</text>
-<text matrix="1 0 0 1 320 0" transformations="translations" pos="160 736" stroke="black" type="label" width="17.554" height="9.803" depth="0" halign="center" valign="center" size="Large">V5</text>
-<text matrix="1 0 0 1 0 -80" transformations="translations" pos="160 736" stroke="black" type="label" width="7.024" height="9.245" depth="0" halign="center" valign="center" size="Large">3</text>
-<text matrix="1 0 0 1 96 -80" transformations="translations" pos="160 736" stroke="black" type="label" width="7.024" height="9.245" depth="0" halign="center" valign="center" size="Large">1</text>
-<text matrix="1 0 0 1 192 -80" transformations="translations" pos="160 736" stroke="black" type="label" width="7.024" height="9.245" depth="0" halign="center" valign="center" size="Large">1</text>
-<text matrix="1 0 0 1 288 -80" transformations="translations" pos="160 736" stroke="black" type="label" width="7.024" height="9.245" depth="0" halign="center" valign="center" size="Large">2</text>
-<text matrix="1 0 0 1 -64 0" transformations="translations" pos="64 736" stroke="black" type="label" width="91.77" height="9.962" depth="2.79" valign="baseline" size="Large">Vector Objects</text>
-<text matrix="1 0 0 1 -64 -80" transformations="translations" pos="64 736" stroke="black" type="label" width="112.372" height="9.962" depth="2.79" valign="baseline" size="Large">Occupied Memory</text>
-<text matrix="1 0 0 1 -64 -144" transformations="translations" pos="64 736" stroke="black" type="label" width="81.349" height="9.803" depth="2.79" valign="baseline" size="Large">Free Memory</text>
+<text matrix="1 0 0 1 32 80" transformations="translations" pos="64 720" stroke="black" type="label" width="85.531" height="9.962" depth="2.79" valign="baseline" size="Large">vector objects</text>
 </page>
 </ipe>

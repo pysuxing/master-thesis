@@ -1,47 +1,50 @@
 \chapter{Rat运行时系统}
-FIXME:这里加上任务生成的内容，即晚上考虑的内容。
-
-第\ref{chap:compiler}章介绍了Rat的并行虚拟机CoreVM，并提出了一种程序自动并行化方案。
-本章将详述CoreVM在CPU/GPU异构计算机系统上的具体实现。
-CoreVM实现的整体结构如图\ref{fig:backend}。
+第\ref{chap:compiler}章介绍了Rat的编译技术，Rat编译期生成C程序，实质上是
+对运行时系统的API调用，本章将详述Rat运行时系统在CPU/GPU异构硬件系统上的设计与实现。
+运行时系统结构如图\ref{fig:backend}。
 \begin{figure}
   \centering
-  \includegraphics[height=5cm]{backend}
-  \caption{CoreVM在异构计算机系同上的实现}
+  \includegraphics[width=\linewidth]{backend}
+  \caption{运行时系统结构图}
   \label{fig:backend}
 \end{figure}
 
-从图\ref{fig:backend}中可以看出，
-CoreVM的实现构建在在运行时系统（Runtime System）之上，而运行时系统由三部分组成：
+从图\ref{fig:backend}中可以看出，运行时系统由三部分组成：
 内存资源管理器（Memory Manager）、并行任务调度器（Task Scheduler）与向量原语驱动（VP Driver）。
 第\ref{sec:memory-manager}节介绍内存资源管理器，该组件对整个系统中可用的内存资源实施统一的管理分配。
 第\ref{sec:task-scheduler}节介绍并行任务调度器，该组件的输入为编译期静态生成的任务队列，
-负责程序运行期动态地将队列中的计算任务发送到GPU上，同时在CPU端协同GPU完成一些辅助计算。
-第\ref{sec:vp-driver}节介绍向量原语驱动，也就是向量原语具体硬件上实现，这里采用Nvidia GPU作为硬件平台。
+在程序运行期动态地将队列中的计算任务发送到GPU上，同时在CPU端协同GPU完成一些辅助计算。
+%% 第\ref{sec:vp-driver}节介绍
+向量原语驱动就是向量原语具体硬件上实现，这里采用Nvidia GPU作为硬件平台，
+Core语言的向量原语在GPU的实现技术已经比较成熟，这里以广泛被使用的程序库CUDPP
+作为实现工具。FIXME：citehere
 
 \section{内存资源管理器}\label{sec:memory-manager}
+由于Rat运行在CPU/GPU异构硬件系统中，向量操作在GPU端完成，所以向量的数据必须存储在GPU端内存中，
+但GPU上的内存分配与回收必须在CPU端通过特定的API调用完成，
+因此，虽然内存资源本身位于GPU上，但负责GPU内存分配与回收的管理功能却要在CPU端执行。
+这就造成了向量对象的数据内容存储在GPU端内存、元信息（长度、元素类型等）存储在CPU内存的特殊内存布局，
+图\ref{fig:vector-memory}表示了向量对象这一特点。
+%% 由于这种特殊的内存分布方式，大部分Core语言指令都在GPU端执行，但也存在某些指令
+%% 在CPU端执行，如表\ref{tbl:assist-instruction}中列出的\texttt{length}指令，
+%% 以及向量操作内部的\texttt{if}指令等。
+\begin{figure}
+  \centering
+  \includegraphics[height=5cm]{vector-memory}
+  \caption[向量内存分布]{向量内存在CPU/GPU硬件系统上的分布}
+  \label{fig:vector-memory}
+\end{figure}
+
 内存资源管理器的功能是，管理CPU端与GPU端的内存空间，对并行任务调度器的内存请求产生响应。
 它主要管理两类内存空间，即GPU全局内存（global memory）与CPU端页锁内存（page-locked memory）。
 
-FIXME：第二章要介绍CPU/GPU编程模型。
-对于Nvidia GPU来说，GPU上的内存分配与回收都是在CPU端通过特定的API调用完成的，因此，
-虽然内存资源本身位于GPU上，但负责GPU内存分配与回收的管理功能却要在CPU端执行。
-
-一般来说，CPU端的内存管理可以直接调用操作系统API完成，但页锁内存需要特殊对待。
-
+%% 一般来说，CPU端的内存管理可以直接调用操作系统API完成，
+%% 有一类特殊的CPU内存——页锁内存需要特殊考虑。
 \subsection{GPU全局内存管理}
-%% 本节介绍GPU全局内存的管理。首先给出几种可以提高内存利用率的优化技术，
-%% 然后再简述GPU内存管理的物理实现。
-%% Rat程序中对向量内存的使用有以下两个特点，这可以指导内存管理算法的设计。
-%% \begin{compactitem}
-%%   \item 多个向量对象可能包含相同的内容；
-%%   \item 处于同一条流上的向量对象在长度上很可能相等；
-%% \end{compactitem}
-%% 首先，为了节省内存空间，应该令包含相同内容的向量数据共享物理内存空间，
-%% 这可以通过对物理内存空间进行引用计数管理实现；
-%% 第二，由于处在同一条流上的向量对象被某些向量操作联系在一起，如果他们的
-%% 长度相同，那么位于流前部的向量就可以回收位于流后部的向量的内存空间而无需
-%% 重新申请空间。
+由于Rat程序中包含大量的向量创建与回收操作，而GPU驱动提供的内存分配与回收API
+不仅开销巨大，而且可能会中断GPU上正在执行的计算任务，所以，运行时系统内部
+实现了一个GPU全局内存管理器，维护程序中使用的GPU存储空间，处理程序运行期
+对GPU内存的分配与回收。
 
 第\ref{subsec:immutable-object}节已经指出，Rat语言中的所有对象在整个
 生命周期中是不可改写的，称为恒值对象。也就是说，每当一个数据操作（标量操作
@@ -52,68 +55,30 @@ FIXME：第二章要介绍CPU/GPU编程模型。
 为每一个对象都分配新的内存空间显然是不经济的，
 在Rat的实现中，采用了三种内存空间优化技术，可以在
 保持程序高层语义简洁的同时提高内存空间利用率。
-这三种技术分别是：零拷贝（zero-copy）、向量内存即时回收（vector memory collection）、
-向量原语原地执行（execute in-place）。
+这三种技术分别是：向量内存即时回收（vector memory collection）、
+零拷贝（zero-copy）、向量原语原地执行（execute in-place）。
 
-\subsubsection{零拷贝}
-写时拷贝也称为写时拷贝（copy-on-write），指某些向量操作虽然逻辑上定义了新的向量，但实际上没有对输入向量进行任何处理，
-得到的新向量与原向量内容相同或部分相同，这时新向量就可以直接指向输入向量的内存空间。
-这时，逻辑上可能有多个向量指向同一块内存空间。因为前面提到的两种内存优化技术可能
-需要改写向量内存空间（指向该空间的某个向量引用计数变为0或有向量原语试图原地执行），
-这时视开销情况执行内存拷贝动作或是为改写动作分配新内存。
+本节先给出GPU全局内存管理的基本方案，然后分别介绍三种内存优化技术。
 
-向量原语对零拷贝的支持情况参见表\ref{tbl:copy-on-write}。
-\begin{table}
+\subsubsection{GPU全局内存管理器}
+内存管理器在初始化阶段一次性申请一大块连续内存空间作为可用内存池，
+其大小通过程序参数指定。可用内存池采用一种特殊的双向链表组织，
+结构如图\ref{fig:gpu-memory-manager}。每一个可用内存块都在自己
+自己的头部存储本块的大小、链表中前一个与后一个可用内存块的地址，
+内存管理器只需要知道第一块的地址，就可以获取所有可用内存的信息。
+\begin{figure}
   \centering
-  \caption{向量原语的零拷贝支持}\label{tbl:copy-on-write}
-  \begin{tabularx}{\linewidth}{ZZ}
-    \toprule[1.5pt]
-    \hei{向量原语} & \hei{是否支持写时拷贝}\\
-    \midrule[1pt]
-    map & $\times$\\
-    slice & $\surd$ \\
-    scan & $\times$\\
-    gpermute & $\times$\\
-    gcopy & $\times$\\
-    sort & $\times$\\
-    zip & $\surd$\\
-    concat & $\times$\\
-    \bottomrule[1.5pt]
-  \end{tabularx}
-\end{table}
+  \includegraphics[width=\linewidth]{gpu-memory-manager}
+  \caption{GPU内存管理器}
+  \label{fig:gpu-memory-manager}
+\end{figure}
 
-\subsubsection{向量原语原地执行}
-在上例给出的内存空间优化分析中，还有存在另一种优化可能性，那就是有些向量原语可以
-原地执行。所谓原地执行，就是向量操作直接在输入向量的内存空间上
-写入输出向量，不许要申请新的内存空间。原地执行必须满足一个条件，就是输入向量在本次向量操作之后引用计数变为0，
-即在本次向量操作中输入向量是最后一次被引用。
-\begin{quotation}
-  \kai{
-    在图\ref{fig:object-lifetime}所示的生命周期中与内存空间占用情况中，虽然\texttt{t1}与\texttt{u}
-    的内存空间占用时间区间存在重合，但由于\texttt{u}在\texttt{map}操作中是最后一次被引用，
-    同时，\texttt{map}原语支持原地执行，这时，\texttt{t1}可以直接回收利用\texttt{u}的内存空间。
-  }
-\end{quotation}
+内存分配算法采用最佳匹配算法（best-fit）。这基于Rat程序的一个特点，那就是
+处于同一条流上的向量对象很可能有相同的大小，也就是说，可用内存块链表中
+很有可能存在与分配请求刚高匹配的内存块，这样就避免了碎片的产生。
 
-表\ref{tbl:inplace-vp}给出了向量原语对原地执行的支持状况，某些向量原语需要同步操作才能完成原地执行。
-\begin{table}
-  \centering
-  \caption{向量原语的原地执行支持}\label{tbl:inplace-vp}
-  \begin{tabularx}{\linewidth}{ZZZ}
-    \toprule[1.5pt]
-    \hei{向量原语} & \hei{是否支持原地执行} & \hei{是否需要同步}\\
-    \midrule[1pt]
-    map & $\surd$ & $\times$\\
-    slice & $\times$ & --\\
-    scan & $\times$ & --\\
-    gpermute & $\surd$ & $\surd$\\
-    gcopy & $\surd$ & $\surd$\\
-    sort & $\times$ & --\\
-    zip & $\times$ & --\\
-    concat & $\times$ & --\\
-    \bottomrule[1.5pt]
-  \end{tabularx}
-\end{table}
+内存回收算法采取合并式回收，即如果在物理区域上与被释放的块相连的内存块可用，
+则将他们合并为一个大的可用内存块。
 
 \subsubsection{向量内存即时回收}
 首先介绍向量内存即时回收技术。一段程序中往往存在许多的中间对象，
@@ -149,82 +114,136 @@ FIXME：第二章要介绍CPU/GPU编程模型。
   \label{fig:object-lifetime}
 \end{figure}
 
-\subsubsection{GPU全局内存管理算法}
-%% 图\ref{fig:gpu-memory-manager}显示GPU全局内存管理器的结构，在GPU全局内存上
-%% 申请的内存空间被组织到两个队列中，两个队列分别维护着被占用内存块与空闲内存块。
-%% \begin{figure}
-%%   \centering
-%%   \includegraphics[height=5cm]{gpu-memory-manager}
-%%   \caption{GPU全局内存管理器}
-%%   \label{fig:gpu-memory-manager}
-%% \end{figure}
+\subsubsection{零拷贝}
+零拷贝也称为写时拷贝（copy-on-write），指某些向量操作虽然逻辑上定义了新的向量，
+但实际上没有对输入向量进行任何处理，
+得到的新向量与原向量内容相同或部分相同，这时新向量就可以直接指向输入向量的内存空间。
+这时，逻辑上可能有多个向量指向同一块内存空间。因为前面提到的两种内存优化技术可能
+需要改写向量内存空间（指向该空间的某个向量引用计数变为0或有向量原语试图原地执行），
+这时视开销情况执行内存拷贝动作或是为改写动作分配新内存。
 
-前面介绍了三种内存空间优化技术，GPU全局内存管理器使用这三种技术管理GPU全局内存
-的分配与回收。
+向量原语对零拷贝的支持情况参见表\ref{tbl:copy-on-write}。
+\begin{table}
+  \centering
+  \caption{向量原语的零拷贝支持}\label{tbl:copy-on-write}
+  \begin{tabularx}{\linewidth}{ZZZ}
+    \toprule[1.5pt]
+    \hei{向量原语} & \hei{是否支持零拷贝} & \hei{备注}\\
+    \midrule[1pt]
+    map & $\times$ &\\
+    scan & $\times$ &\\
+    gpermute & $\times$ &\\
+    gcopy & $\surd$ & 拷贝步长必须为1\\
+    shrink & $\times$ &\\
+    sort & $\times$ &\\
+    random & $\times$ &\\
+    generate & $\times$ &\\
+    zip & $\surd$ &\\
+    \bottomrule[1.5pt]
+  \end{tabularx}
+\end{table}
 
-算法\ref{alg:gpu-memory-manager}给出了GPU全局内存分配算法
-的正规描述。该算法接收一个任务作为输入，为该任务的输出分配内存。
-该算法首先检查任务的向量操作是否能够零拷贝执行，如果可以，则直接将任务输入向量的引用计数
-增一；若任务的向量操作可以原地执行，而且任务的输入向量引用计数为1，则原地执行；否则，
-调用内存分配器分配内存；内存分配器现在空闲内存表中搜索可用内存，如果搜索不到，则退化为调用
-GPU提供的内存分配API。
-\begin{algorithm}
-  \caption{GPU全局内存分配算法}
-  \label{alg:gpu-memory-manager}
-  \begin{algorithmic}[1]
-    \Require 任务$task$
-    \Ensure 设置用于存放$t$的结果向量的内存区域$mem$。
+\subsubsection{向量原语原地执行}
+有些向量原语可以原地执行。所谓原地执行，就是向量操作直接在输入向量的内存空间上
+写入结果，不需要申请新的内存空间。原地执行必须满足一个条件，就是输入向量在本次向量操作之后引用计数变为0，
+即在本次向量操作中输入向量是最后一次被引用。
+\begin{quotation}
+  \kai{
+    在图\ref{fig:object-lifetime}所示的生命周期中与内存空间占用情况中，虽然\texttt{t1}与\texttt{u}
+    的内存空间占用时间区间存在重合，但由于\texttt{u}在\texttt{map}操作中是最后一次被引用，
+    同时，\texttt{map}原语支持原地执行，这时，\texttt{t1}可以直接回收利用\texttt{u}的内存空间。
+  }
+\end{quotation}
 
-    \Function{task-mem-alloc}{$task$}
-    \State $vop \leftarrow get\_vop(task)$
-    \State $mem \leftarrow NULL$
-    \State $input \leftarrow get\_input(task)$
-    \If{$zero\_copy(vop) = TRUE$}
-    \State \Call{inc-mem-ref}{$input$}
-    \State $mem \leftarrow input$
-    \ElsIf{$exc\_inplace(vop) = TRUE \& mem\_ref(input) = 1$}
-    \State $mem \leftarrow input$
-    \Else
-    \State $mem \leftarrow$ \Call{mem-alloc}{$get\_output\_size(task)$}
-    \EndIf
-    \State $set\_output(mem)$
-    \EndFunction
+表\ref{tbl:inplace-vp}给出了向量原语对原地执行的支持状况，某些向量原语需要同步操作才能完成原地执行。
+\begin{table}
+  \centering
+  \caption{向量原语的原地执行支持}\label{tbl:inplace-vp}
+  \begin{tabularx}{\linewidth}{ZZZ}
+    \toprule[1.5pt]
+    \hei{向量原语} & \hei{是否支持原地执行} & \hei{是否需要同步}\\
+    \midrule[1pt]
+    map & $\surd$ & $\times$\\
+    scan & $\times$ & --\\
+    gpermute & $\surd$ & $\surd$\\
+    gcopy & $\times$ & --\\
+    shrink & $\times$ & --\\
+    sort & $\times$ & --\\
+    random & $\surd$ & $\times$\\
+    generate & $\surd$ & $\times$\\
+    zip & $\times$ & --\\
+    \bottomrule[1.5pt]
+  \end{tabularx}
+\end{table}
 
-    \Function{mem-alloc}{$size$}
-    \State $mem \leftarrow$ \Call{search-free-memblock}{$size$}
-    \If{$mem = NULL$}
-    \State $mem \leftarrow$ \Call{gpu-malloc}{$size$}
-    \EndIf
-    \State \Return{mem}
-    \EndFunction
-  \end{algorithmic}
-\end{algorithm}
 
-对于已经执行完毕的任务，要检查他们的内存是否能够回收。
-算法\ref{alg:gpu-memory-collect}给出了GPU全局内存回收算法的正规描述。
-该算法接受一个已经完成的任务作为输入，如果该任务不是零拷贝或原地执行操作，
-则检查它的输入内存引用计数是否为0，为0则将内存区域添加到可用内存队列。
-最后检查可用内存队列的大小，如果超过某个阈值则调用GPU API释放一些内存。
-\begin{algorithm}
-  \caption{GPU全局内存回收算法}
-  \label{alg:gpu-memory-collect}
-  \begin{algorithmic}[1]
-    \Require 执行完毕的任务$task$
-    \Ensure 对$task$占用的内存执行回收
-    \Function{task-mem-free}{$task$}
-    \State $vop \leftarrow get\_vop(task)$
-    \State $input \leftarrow get\_input(task)$
-    \If{$zero\_copy(vop) = FALSE \& exc\_inplace(vop) = FALSE$}
-    \If{$mem\_ref(input) = 0$}
-    \State \Call{mem-free}{$mem$}
-    \EndIf
-    \EndIf
-    \If{$free\_list\_size() > THREADHOLD$}
-    \State \Call{release-gpu-mem}{}
-    \EndIf
-    \EndFunction
-  \end{algorithmic}
-\end{algorithm}
+%% \subsubsection{GPU全局内存管理算法}
+%% 前面介绍了三种内存空间优化技术，GPU全局内存管理器使用这三种技术管理GPU全局内存
+%% 的分配与回收。
+
+%% 算法\ref{alg:gpu-memory-manager}给出了GPU全局内存分配算法
+%% 的正规描述。该算法接收一个任务作为输入，为该任务的输出分配内存。
+%% 该算法首先检查任务的向量操作是否能够零拷贝执行，如果可以，则直接将任务输入向量的引用计数
+%% 增一；若任务的向量操作可以原地执行，而且任务的输入向量引用计数为1，则原地执行；否则，
+%% 调用内存分配器分配内存；内存分配器现在空闲内存表中搜索可用内存，如果搜索不到，则退化为调用
+%% GPU提供的内存分配API。
+%% \begin{algorithm}
+%%   \caption{GPU全局内存分配算法}
+%%   \label{alg:gpu-memory-manager}
+%%   \begin{algorithmic}[1]
+%%     \Require 任务$task$
+%%     \Ensure 设置用于存放$t$的结果向量的内存区域$mem$。
+
+%%     \Function{task-mem-alloc}{$task$}
+%%     \State $vop \leftarrow get\_vop(task)$
+%%     \State $mem \leftarrow NULL$
+%%     \State $input \leftarrow get\_input(task)$
+%%     \If{$zero\_copy(vop) = TRUE$}
+%%     \State \Call{inc-mem-ref}{$input$}
+%%     \State $mem \leftarrow input$
+%%     \ElsIf{$exc\_inplace(vop) = TRUE \& mem\_ref(input) = 1$}
+%%     \State $mem \leftarrow input$
+%%     \Else
+%%     \State $mem \leftarrow$ \Call{mem-alloc}{$get\_output\_size(task)$}
+%%     \EndIf
+%%     \State $set\_output(mem)$
+%%     \EndFunction
+
+%%     \Function{mem-alloc}{$size$}
+%%     \State $mem \leftarrow$ \Call{search-free-memblock}{$size$}
+%%     \If{$mem = NULL$}
+%%     \State $mem \leftarrow$ \Call{gpu-malloc}{$size$}
+%%     \EndIf
+%%     \State \Return{mem}
+%%     \EndFunction
+%%   \end{algorithmic}
+%% \end{algorithm}
+
+%% 对于已经执行完毕的任务，要检查他们的内存是否能够回收。
+%% 算法\ref{alg:gpu-memory-collect}给出了GPU全局内存回收算法的正规描述。
+%% 该算法接受一个已经完成的任务作为输入，如果该任务不是零拷贝或原地执行操作，
+%% 则检查它的输入内存引用计数是否为0，为0则将内存区域添加到可用内存队列。
+%% 最后检查可用内存队列的大小，如果超过某个阈值则调用GPU API释放一些内存。
+%% \begin{algorithm}
+%%   \caption{GPU全局内存回收算法}
+%%   \label{alg:gpu-memory-collect}
+%%   \begin{algorithmic}[1]
+%%     \Require 执行完毕的任务$task$
+%%     \Ensure 对$task$占用的内存执行回收
+%%     \Function{task-mem-free}{$task$}
+%%     \State $vop \leftarrow get\_vop(task)$
+%%     \State $input \leftarrow get\_input(task)$
+%%     \If{$zero\_copy(vop) = FALSE \& exc\_inplace(vop) = FALSE$}
+%%     \If{$mem\_ref(input) = 0$}
+%%     \State \Call{mem-free}{$mem$}
+%%     \EndIf
+%%     \EndIf
+%%     \If{$free\_list\_size() > THREADHOLD$}
+%%     \State \Call{release-gpu-mem}{}
+%%     \EndIf
+%%     \EndFunction
+%%   \end{algorithmic}
+%% \end{algorithm}
 
 \subsection{CPU页锁内存管理}
 在CPU端使用页锁内存可以提供一些性能上的优势FIXME：citehere，：
@@ -236,14 +255,13 @@ GPU提供的内存分配API。
 
 基于页锁内存的上述性质，首先要确定一个页锁内存的上限，在程序的运行过程中
 从作系统处申请的页锁内存不能超过该限制。然后要考虑在何种情况下使用页锁内存
-能够提高性能。具体来说，在下列三种情况下使用页锁内存：
+能够提高性能。具体来说，当需要执行的任务满足下面的条件时使用页锁内存：
 \begin{compactitem}
-  \item 程序在GPU端的执行过程中，如果需要在CPU与GPU之间传输数据，则优先采用页锁内存；
-  \item 如果程序的输入数据在执行过程中只被引用一次，那么可以使用页锁内存避免数据传输；
-  \item 程序中执行写出结果的最后一个任务可以使用页锁内存作为输出空间，避免数据传输。
+  \item 任务需要在CPU与GPU之间传输数据
+  \item 需要传输的数据块只被读写一次
 \end{compactitem}
 
-此外，页锁内存的管理与GPU全局内存存在一点不同，页锁内存管理器不维护空闲的页锁内存，
+此外，页锁内存的管理与GPU全局内存还存在一点重要区别，页锁内存管理器不维护空闲的页锁内存，
 一旦页锁内存被释放则立即归还操作系统，这是为了避免占用过多页锁内存影响操作系统性能。
 
 \section{并行任务调度器}\label{sec:task-scheduler}
@@ -281,10 +299,100 @@ GPU上可以重叠执行多个Kernel，也可重叠执行Kernel与主机端设�
 资源允许的情况下可以同时执行。
 
 \subsection{并行任务动态调度}\label{subsec:task-scheduling}
-根据CPU/GPU异构硬件系统的特点，我们为并行任务调度器设计了
+根据CPU/GPU异构硬件系统的特点，我们为并行任务调度器设计了调度算法，该算法以流探测算法
+为基础，从程序的向量流图中搜索“单行流”，并以单行流作为任务动态调度的单元。
 
+\subsubsection{单行流}
+首先给出单行流的定义。
+\begin{definition}
+  向量流图中，从一个结点$n_0$出发沿某条流向前经过$k$个结点$n_1, n_2, \cdots, n_k$，
+  若$n_k$是分支结点或流的终点，或沿流的方向向前的下一个结点$n_{k+1}$是汇合结点，
+  称由$n_0, n_1, \cdots, n_k$与连接他们的边组成流路径为单行流。
+\end{definition}
 
-%% 同时还根据GPU本身的硬件限制（如流处理器数量、单个流处理器线程上限、单个流处理器寄存器综述等）
+单行流的特点是，单行流上所有数据结点依赖且仅依赖该单行流上位于它前面的结点。
+单行流上的操作必须顺序执行，不可能并行执行，
+同时，两条单行流可以完全独立地执行，他们的结点之间不存在任何依赖关系。
+单行流的这种特点与GPU任务流的特点完全相同，所以，以单行流为单位，将一条单行流上
+发送到到一条GPU任务流上执行是非常合适的。
 
-\section{向量原语的GPU实现}\label{sec:vp-driver}
+\begin{quotation}
+  \kai{
+    观察n-body问题的向量流图\ref{fig:n-body-stream}，从\texttt{cells}出发的单行流共有
+    四条，分别是：\\
+    \texttt{cells -> masses}\\
+    \texttt{cells -> t4 -> calcSingleAcc}\\
+    \texttt{cells -> velocities}\\
+    \texttt{cells -> positions}\\
+    注意从\texttt{cells}指向\texttt{accelerates}的\texttt{map}操作已经被
+    转换为\texttt{foreach}命令。
+  }
+\end{quotation}
+
+由于在编译期任务生成的时候为运行时系统保留了向量流图的依赖关系，
+所以运行时系统可以根据流图搜索可用的单行流将之发送到GPU任务流上。
+下面给出任务调度器的动态调度算法。
+
+\subsubsection{并行任务动态调度算法}
+任务调度器维护下面几个数据结构：
+\begin{compactitem}
+  \item GPU任务流队列
+  \item 可调度单行流队列
+  \item 待调度任务集合
+  \item 新就绪对象集合
+\end{compactitem}
+
+在程序开始执行的时候，GPU任务流初始化若干条任务流，任务流的数目在程序运行期不再变化，
+然后任务调度器开始搜索可调度单行流发往相应的任务流。
+
+算法\ref{alg:task-scheduling}给出了并行任务动态调度算法的正规描述。
+任务调度器首先以输入向量对象为起点开始搜索单行流，将搜索得到的所有可用单行流
+加入可调度单行流队列，然后将该队列中的单行流发送到空闲的GPU任务流。
+当所有GPU任务流都被占用或者可调度单行流队列已经排空时，
+任务调度器对各个GPU任务流进行轮询，
+直至某条GPU任务流上的单行流执行完毕。执行完毕的单行流会造成某些向量对象
+的从数据为就绪状态转入就绪状态，这时调度器从这些新增的就绪向量对象开始
+搜索单行流加入可调度单行流队列，开始新一轮调度。
+
+\begin{algorithm}
+  \caption{并行任务动态调度算法}
+  \label{alg:task-scheduling}
+  \begin{algorithmic}[1]
+    \Require GPU任务流队列$GPUQueue$，可调度单行流队列$SSQueue$，新就绪对象集合$vectors$
+    \Function{schedule}{}
+    \Loop
+    \For{$v$ in $vectors$}
+    \State $ss \leftarrow$ \Call{search-sstream}{v}
+    \State $SSQueue \leftarrow SSQueue \cup \left\{ ss \right\}$
+    \EndFor
+    \If{$empty(SSQueue) = TRUE\ or\ allbusy(GPUQueue) = TRUE$}
+    \For{$gq$ in $GPUQueue$}
+    \If{$finished(gq)$}
+    \State $vectors \leftarrow ready\_vectors(gq)$
+    \State \textbf{goto loop} 
+    \EndIf
+    \EndFor
+    \EndIf
+    \EndLoop
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+%% \section{向量原语的GPU实现}\label{sec:vp-driver}
+%% %% 同时还根据GPU本身的硬件限制（如流处理器数量、单个流处理器线程上限、单个流处理器寄存器综述等）
+%% 表\ref{tbl:vector-primitives}中列出的向量原语中，\texttt{zip}原语支持零拷贝，
+%% 可以在CPU端以常数时间完成，其余的向量原语在GPU上都有高效实现。
+
+%% CUDPP
+
+\section{小结}
+本章对Rat的运行时系统设计作出了详细描述。
+运行时系统提出了两点创新性设计：
+
+在CPU端实现了一个GPU全局存储器管理器，代替编程者完成GPU端的内存自动分配回收任务。
+该内存管理器采用了三种优化策略减少程序执行过程中的内存开销。
+
+设计了基于单行流的并行任务动态调度算法。单行流的概念与GPU任务流的性质相似，
+使用单行流作为任务调度单元非常适合现有的GPU软硬件结构，同时可以
+保证不同任务之间并行执行的能力。
 
