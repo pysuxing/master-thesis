@@ -1,7 +1,3 @@
-/* input and output variables */
-extern float* in1, in2, out, ...;
-extern size_t inlen1, inlen2, outlen, ...;
-
 int rat_init()
 {
     /* some initialization */

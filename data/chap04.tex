@@ -14,7 +14,7 @@
 %% 为一维并行操作序列。
 第\ref{sec:stream-optimization}节介绍若干高层优化技术，这些高层优化技术
 施加在向量流上。
-地\ref{sec:code-generation}节介绍如何从程序的流表示生成C代码。
+第\ref{sec:code-generation}节介绍如何从程序的向量流图生成C代码。
 
 \section{编译实现总体方案}\label{sec:compiler-overview}
 第\ref{sec:c-interface}节已经提到，Rat编译器是一个源到源编译期，
@@ -87,9 +87,9 @@ Core语言的指令集庞大，但结构相对简单，只包含三类指令：�
 辅助指令提供一些附加功能。
 
 \subsection{向量原语}\label{subsec:vector-primitives}
-Core语言提供了一个非常精简的并行数据操作集，它包括了一些最为基本的向量操作，这些操作
-最为重要的特点是非常适合并行实现，第\ref{sec:vp-driver}节将介绍他们在GPU上的实现技术。
-事实上，正是这组原语为Rat提供了强大的数据并行能力。
+Core语言提供了一组非常精简的并行操作原语，它包括了一些最为基本的向量操作，这些操作
+最为重要的特点是非常适合并行实现。
+事实上，正是这组原语为Rat提供了数据并行能力。
 表\ref{tbl:vector-primitives}列出了所有向量原语。
 \begin{table}[htb]
   \centering
@@ -99,16 +99,15 @@ Core语言提供了一个非常精简的并行数据操作集，它包括了一�
     \toprule[1.5pt]
     \hei{向量原语} & \hei{功能说明} \\
     \midrule[1pt]
-    map & 给定一元操作，对一个向量中所有元素施加同一操作\\
-    scan & 给定满足结合律的二元操作，求一个向量中元素的部分和\\
-    gpermute & 对向量中的元素重排\\
-    gcopy & 对向量中的元素采取特定步长复制\\
-    shrink & 对给定向量采取紧缩复制\\
-    sort & 给定排序函数，对向量中的元素进行排序\\
-    random & 产生随机向量\\
-    generate & 根据位置产生向量元素\\
-    zip & 将多个向量中的元素逐位置组成元组\\
-    %% collect & 将多个同类型数据组合成一个向量\\
+    \texttt{map} & 给定一元操作，对一个向量中所有元素施加同一操作\\
+    \texttt{scan} & 给定满足结合律的二元操作，求一个向量中元素的部分和\\
+    \texttt{gpermute} & 对向量中的元素重排\\
+    \texttt{gcopy} & 对向量中的元素采取特定步长复制\\
+    \texttt{shrink} & 对给定向量采取紧缩复制\\
+    \texttt{sort} & 给定排序函数，对向量中的元素进行排序\\
+    \texttt{random} & 产生随机向量\\
+    \texttt{generate} & 根据位置产生向量元素\\
+    \texttt{zip} & 将多个向量中的元素逐位置组成元组\\
     \bottomrule[1.5pt]
   \end{tabularx}
 \end{table}
@@ -116,7 +115,9 @@ Core语言提供了一个非常精简的并行数据操作集，它包括了一�
 这组原语存在于典型的函数式语言中，但一般是针对表（List）定义的，其语义也是串行的，
 但Core语言的向量原语是并行的，这是一个显著区别。
 这组原语的选取受到了MapReduce的启发FIXME：citehere。
-使用这组精简的原语集足够构建更多更为复杂的向量操作，FIXME：提及第三章中的向量操作举例说明。
+使用这组精简的原语集可以构建更多更为复杂的向量操作，
+如表\ref{tbl:vector-operations}中列出的\texttt{filter}操作就可以按照如下方式定义：\\
+\centerline{\texttt{filter p v = shrink (scan (map p v)) v}}
 
 下面分别给出各向量原语的定义。
 \subsubsection{map}
@@ -172,6 +173,7 @@ Core语言提供了一个非常精简的并行数据操作集，它包括了一�
   $[a_{g^{-1}(0)}, a_{g^{-1}(1)}, \cdots, a_{g^{-1}_{n-1}}]$\hfill{}Forward\\
   $[a_{g(0)}, a_{g(1)}, \cdots, a_{g_{n-1}}]$\hfill{}Backward\\  
 \end{definition}
+
 图\ref{fig:gpermute-diagram}给出gpermute原语的操作说明。
 \begin{figure}[h]
   \centering
@@ -191,6 +193,7 @@ Core语言提供了一个非常精简的并行数据操作集，它包括了一�
   gcopy原语以一个整数三元组$(i, j, s)$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入参数，
   其中$0\le{}i<j\le{}n-1$，返回一个向量$$[a_{i}, a_{i+s}, a_{i+2s}, \cdots, a_{j-mod(j-i,s)}]$$作为结果。
 \end{definition}
+
 图\ref{fig:gcopy-diagram}给出gcopy原语的操作说明。
 \begin{figure}[h]
   \centering
@@ -204,6 +207,7 @@ Core语言提供了一个非常精简的并行数据操作集，它包括了一�
   shrink原语以一个位置压缩向量$$[b_0, b_1, \cdots, b_{n-1}]$$与一个数据向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
   返回一个向量$$[a_{n_1}, a_{n_2}, \cdots, a_{n_k}]$$作为结果。
 \end{definition}
+
 图\ref{fig:shrink-diagram}给出shrink原语的操作说明。
 \begin{figure}[h]
   \centering
@@ -218,6 +222,7 @@ Core语言提供了一个非常精简的并行数据操作集，它包括了一�
   返回一个结果向量$$[a_{n_1}, a_{n_2}, \cdots, a_{n_n}]$$，该向量是输入向量的一个重排，
   并且对于任意$n_i\prec{}n_j$都有$a{n_i}\prec{}a{n_j}$。
 \end{definition}
+
 图\ref{fig:sort-diagram}给出sort原语的操作说明。
 \begin{figure}[h]
   \centering
@@ -276,7 +281,7 @@ Core语言提供了数量众多的标量原语，功能为基本的算数逻辑�
 \subsection{辅助指令}
 Core语言提供了若干的辅助指令，这部分指令既不属于提供数值计算能力的
 标量原语，也不属于提供并行计算能力的向量原语。
-表\ref{tbl:assist-instruction}他们的名称及功能。
+表\ref{tbl:assist-instruction}列出了他们的名称及功能。
 \begin{table}
   \centering
   \caption{辅助指令}
@@ -300,8 +305,8 @@ Core语言提供了若干的辅助指令，这部分指令既不属于提供数�
 以\texttt{foreach}指令为例，它以一个向量\texttt{v}
 与一个操作\texttt{op}为参数，将\texttt{op}作用在\texttt{v}中所有
 元素之上，然后将结果再次收集成一个向量。可以将\texttt{foreach}看作
-一种和\texttt{map}类似的操作，他们区别在于\texttt{map}只允许
-将标量操作施加到一维向量之上，而\texttt{foreach}指令则无这种限制。
+一种和\texttt{map}类似的操作，他们区别在于\texttt{map}是并行执行的，
+而\texttt{foreach}指令则不一定如此。
 \texttt{foreach}指令与嵌套循环的处理有关，这将在第\ref{subsec:np-decomposition}节说明。
 
 \section{流探测技术}\label{sec:stream-detection}
@@ -366,11 +371,11 @@ Rat程序的并行执行采用流驱动计算模型FIXME：citehere，在研究�
 的向量流在\texttt{u}处\emph{分支}，汇合操作是由\texttt{zip}原语引起的，分支操作是因为
 相应的向量被多个向量操作引用。
 
-图\ref{fig:n-body-stream}的对偶图FIXME：citehere即为任务流图。此处约定，后文中主要以向量流为分析对象，
+向量流图的对偶图即为任务流图。此处约定，后文中主要以向量流为分析对象，
 如无特别说明，文中提及的“流”即为向量流。
 
 对比观察\ref{fig:n-body-core}与
-图\ref{fig:n-body-stream}可以发现，两个图都可以反映整个表达式的求值过程，只不过表达式树采用
+图\ref{fig:n-body-stream}可以发现，表达式树与向量流图都可以反映整个表达式的求值过程，只不过表达式树采用
 自顶向下的求值逻辑，其含义是：如果想要求解某个表达式的值，那么要先求解它依赖的子表达式的值。
 而向量流图采用了流驱动（data-flow driven）方式FIXME：citehere，其含义是：一旦某条流中的某个结点值可用，那么从该结点
 分支出去的所有流都可以继续向前计算。
@@ -461,13 +466,8 @@ Core语法树结点类型参见表\ref{tbl:l2-ast}，
 \end{algorithm}
 
 算法\ref{alg:stream-detection}中只给出了流探测算法的主干，
-该算法在探测流的同时还完成一些标记工作，
-这些静态执行的标记工作将被Rat的运行时系统用来完成内存管理等任务。
-标记工作包括：
-\begin{compactitem}
-  \item 所有数据结点与变量结点的引用计数统计；
-  \item 所有数据结点与变量结点的依赖计数统计；
-\end{compactitem}
+该算法在探测流的同时还完成一些标记工作，包括所有数据结点与变量结点的引用计数统计与依赖计数统计等。
+这些静态执行的标记工作将被Rat的运行时系统用来完成内存管理等任务，
 
 
 \section{流优化技术}\label{sec:stream-optimization}
@@ -483,9 +483,9 @@ Core语法树结点类型参见表\ref{tbl:l2-ast}，
 \begin{quotation}
   \kai{
     考虑下面的表达式求值问题：\\
-    \texttt{gcopy (m, n, 1) (map f input)}\\
+    \centerline{\texttt{gcopy (m, n, 1) (map f input)}}\\
     该表达式等价于：\\
-    \texttt{map f (gcopy (m, n, 1) input)}\\
+    \centerline{\texttt{map f (gcopy (m, n, 1) input)}}\\
     两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-reorder}。从图\ref{fig:vp-reorder}
     可以看出，第二个表达式要比第少个表达式多处理一部分数据，这样就能减少需要的线程资源，节省
     存储器带宽，即通过将\texttt{map}原语与\texttt{slice}“重排”执行能够提高效率。
@@ -550,9 +550,9 @@ Core语法树结点类型参见表\ref{tbl:l2-ast}，
 \begin{quotation}
   \kai{
     考虑下面的表达式求值问题：\\
-    \texttt{map f (map g input)}\\
+    \centerline{\texttt{map f (map g input)}}\\
     该表达式等价于：\\
-    \texttt{map (f . g) input}\\
+    \centerline{\texttt{map (f . g) input}}\\
     两个表达式语义上等价，但求解过程不同，参见图\ref{fig:vp-fusion}。从图\ref{fig:vp-fusion}
     可以看出，第一个表达式比第二个表达式多引入一个中间向量，虽然
     通过前一小节介绍的存储空间优化技术避免为这个中间向量分配新的的存储空间，但仍然会多引入
@@ -646,7 +646,7 @@ Core语法树结点类型参见表\ref{tbl:l2-ast}，
 该C程序是一个对Rat运行时系统API的调用序列。C程序中，每一个向量操作使用一个
 任务结构表示，程序中所有任务都在这一阶段由编译期静态生成，然后产生一个任务
 初始化函数将所有任务添加到运行时系统的任务调度队列，在程序启动后，运行时
-系统的任务调度器会负责调度任务执行。Rat编译期生成的C程序框架如下：
+系统的任务调度器会负责调度任务执行。Rat编译器生成的C程序框架如下：
 \lstinputlisting[language=C]{listings/skeleton.c}
 
 第\ref{subsec:task-encapsulation}节介绍如何将向量流图中的向量操作映射到C语言任务结构，
@@ -663,7 +663,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 该结构中的\texttt{vp}成员指向具体的向量原语结构。
 \texttt{in}与\texttt{out}成员指向输入与输出对象，
 \texttt{vector}也是结构体类型，他们内部有指向存放向量数据
-的内存区域的指针，但在编译期部位向量对象分配内存，
+的内存区域的指针，但在编译期不为向量对象分配内存，
 向量内存是由运行时系统动态管理的。
 
 不同的向量原语有不同结构定义，如\texttt{map}原语的结构类型包括了一个函数指针\texttt{op}，
@@ -671,9 +671,9 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 该操作的实际类型。
 \lstinputlisting[language=C]{listings/task.c}
 
-向量流图中的每一条边都被打包成一个\texttt{task}类型的结构，
+向量流图中的每一条边都被打包成一个\texttt{task}结构，
 然后通过运行时系统API装入任务调度器。这种封装方式保存了向量流图
-的逻辑结构，运行时系统将依靠向量流图实现任务的动态调度。
+的逻辑结构，运行时系统将继续依靠向量流图实现任务的动态调度。
 
 因为从同一结点出发的各条边代表的向量操作可以并行执行，所以编译期任务生成
 采用了一种简单策略，即对向量流图中的任务采用宽度优先序排列：
@@ -692,7 +692,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 这是由嵌套并行造成的，下面的章节将对这种情况进行说明。
 
 \subsection{嵌套并行分解}\label{subsec:np-decomposition}
-第FIXME：修改前文节中已经提及，虽然Rat只提供了一维向量原语，但由于支持高阶函数，
+前文节中已经提及，虽然Rat只提供了一维向量原语，但由于支持高阶函数，
 编程者可以使用一维向量原语表达高维的并行操作，即支持嵌套并行。
 
 简而言之，嵌套并行是因为在一个标量操作的内部逻辑中引入了向量操作。
@@ -702,7 +702,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 \begin{quotation}
   \kai{
     在\texttt{n-body}问题的向量流图\ref{fig:n-body-stream}中，有一条用虚线绘制的有向边，
-    该边从\texttt{calcAccelerate}结点指向\texttt{accelerates}结点。
+    该边从\texttt{cells}结点指向\texttt{accelerates}结点。
     \texttt{accelerates}结点的求值表达式为\texttt{map (calcSingleAcc cell) cells}，
     因为\texttt{calcAccelerate}并不是一个向量数据，而是一个函数，
     是一个由\texttt{map}施加在\texttt{cells}之上的标量操作。
@@ -733,7 +733,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 一般地，对于一个嵌套并行操作\texttt{map sopContainingVop v}
 我们将它转化成下面的形式：\texttt{foreach v sopContainingVop}
 正如前面一节所说，\texttt{foreach}指令将生成一个任务队列。
-翻译得到C代码参考FIXME：howtoref？
+
 %% 算法\ref{alg:np-decomposition}给出了
 %% 这种简单嵌套并行分解算法的正规描述。
 %% \begin{algorithm}
