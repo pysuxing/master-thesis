@@ -3,49 +3,49 @@ Rat语言语法设计的首要目标是为编程者提供易用的并行语言�
 描述并行问题。
 
 Rat是一种函数式并行程序语言，它具备函数式语言的一般特性：高阶函数、恒值对象、
-纯函数特性等，抽象表达能力，问题描述简洁优雅；它面向科学与工程计算领域，强化
+纯函数特性等，抽象表达能力强，问题描述简洁优雅；它面向科学与工程计算领域，强化
 数值计算，弱化符号计算，支持定长整数与浮点数类型，这不同于一般函数式语言；
 它是一种静态强类型语言，在编译期执行类型检查，运行时安全性较强，无动态类型
-检测开销；它提供了一组向量原语，可用来描述一大类数据并行操作；它被设计为一门
-辅助性程序语言，为与C语言交互设计了有简单易用的接口，编程者一般只使用Rat语言编写
+检测开销；它提供了一组向量操作函数，可用来描述一大类数据并行操作；它被设计为一门
+辅助性程序语言，为与C语言交互设计了简单易用的接口，编程者一般只使用Rat语言编写
 程序中的数据并行部分。
 
 本章的内容结构如下：
 %% 第\ref{sec:rat-overview}节对Rat语言做简单综述，
 第\ref{sec:type-system}节介绍Rat的类型系统,
-第\ref{sec:vector-primitives}节介绍Rat的核心并行语言要素---向量原语,
+第\ref{sec:vector-operations}节介绍Rat的并行语言要素---并行向量操作,
 第\ref{sec:functional-characters}节对Rat语言采用的函数式语言特性进行说明，
-并说明选取函数式语言设计的优势,
+并说明采用函数式语言设计的优势,
 第\ref{sec:c-interface}节介绍Rat程序与C语言的交互界面,
-第\ref{sec:n-body}节给出一个完整并行程序示例---n-body问题用以说明Rat语言的易用性。
-
-%% \section{Rat语言综述}\label{sec:rat-overview}
+第\ref{sec:n-body}节给出一个完整并行程序示例---n-body问题
+用以说明Rat语言的易用性。
 
 \section{类型系统}\label{sec:type-system}
 \subsection{Rat支持的数据类型}
 在一般的程序语言中，数据与操作（函数、过程）是不同的概念，
-数据就是存储在计算机当中的“数”，而操作表示施加在数据上的程序行为。
+数据就是存储在计算机当中的“数”，而操作表示施加在数据上的处理动作。
 在函数式程序语言中，数据与函数的界限是模糊的，二者只不过具有不同的类型而已。
 Rat是函数式语言，采用类似于Haskell的类型系统，支持数据类型与函数类型。
+
 为了便于理解，在本节中，我们依旧区分“数据”与“函数”，下面分别予以介绍。
 
 \subsubsection{数据类型}
 Rat将数据分为两类：标量数据类型（scalar type）与向量类型（vector type）。
 其中向量类型是同质（homogeneous）标量类型的一维集合。表\ref{tbl:rat-datatype}列举了
-Rat的内建数据类型。
+Rat支持的数据类型。
 
 标量类型包括内建数据类型（builtin type），元组类型(tuple)。内建数据类型是计算机能够表示的基本
 数据类型，包括定长整数与定长浮点数。而且，由于Rat语言面向科学计算领域，
 强化数值计算能力，弱化符号计算能力。所以，Rat内建的基本数据
-数据类型只包括定长整数类型与定长浮点数类型。
+数据类型只包括定长整数类型与定长浮点数类型，不支持无限精度浮点数与任意大整数。
 
-元组类型也称结构类型（struct），允许不同类型的元素组合得到，Rat的元组类型允许嵌套定义。
+元组类型也称结构类型（struct），由不同类型的数据组合得到，Rat的元组类型允许嵌套定义。
 
-向量类型是一个同质数据集合，它包含的数据个体相同的类型，并且必须是标量类型。在Rat语言中
-使用方括号表示向量类型，如\texttt{[Int32]}表示一个32位整数向量类型。
-向量是一维数据集合，Rat在语法层面不支持高维数组，但通过定义元组及相应的函数可以轻松构建高维
-数组程序库。向量类型是Rat语言提供数据并行能力的数据基础，这一点将在第\ref{sub:vector-operations}
-中详细说明。
+向量类型是一个同质数据集合，它包含的数据具有相同的类型，这些数据可以是标量类型，
+也可以是向量，通过向量的嵌套定义，可以构建高维数组程序库。
+在Rat语言中使用方括号表示向量类型，如\texttt{[Int32]}表示一个32位整数向量类型。
+向量是一维数据集合。向量类型是Rat语言提供数据并行能力的数据基础，
+这一点将在第\ref{sec:vector-operations}中详细说明。
 
 \begin{table}[htbp]
   \centering
@@ -90,7 +90,7 @@ Rat是函数式语言，支持高阶函数等函数式语言特性，这将在�
 \begin{quotation}
   \kai{
     \texttt{dot}函数求两个单精度浮点向量的内积，它的类型声明如下：\\
-    \centering\texttt{dot :: [Float] -> [Float] -> Float}\\
+    \centerline{\texttt{dot :: [Float] -> [Float] -> Float}}\\
     其中，最后一个箭头右侧
     的类型表示dot函数返回一个\texttt{Float}类型的结果，前面两个\texttt{[Float]}表示\texttt{dot}
     函数以两个\texttt{[Float]}类型的单精度浮点向量作为输入参数。至于为什么\texttt{dot}的类型
@@ -105,9 +105,9 @@ Rat是一种静态强类型语言，在编译期执行严格的类型检查，�
   \item 安全性：强类型检查可以保证类型安全，从而避免一大类运行时错误。
     强类型检查的内容包括，所有函数（数据）的类型皆在编译期确定；
     任何函数（数据）的类型在生命周期中保持不变；
-    保证所有数据操作的有效性；不允许类型转换操作。
-    Rat语言采用的类型系统类似于Haskell，而使用过Haskell
-    的编程者都会有体会，那就是程序只要通过了编译，基本不会发生运行时错误。
+    保证所有数据操作的有效性；不允许隐式类型转换操作。
+    %% Rat语言采用的类型系统类似于Haskell，而使用过Haskell
+    %% 的编程者都会有体会，那就是程序只要通过了编译，基本不会发生运行时错误。
   \item 高效率：静态类型在运行时没有类型识别与检测的额外开销，可以提高执行效率，这与Rat面向
     科学工程计算的设计初衷相符合。
 \end{itemize}
@@ -152,7 +152,7 @@ Rat语言的定位是数据并行语言，采用一种数据并行编程模型�
 弱，可并行度高。数据并行模型是一种层次较高的并行编程模型，编程者只需要
 指出施加在数据上的操作以及该接受该操作的数据集就能实现程序的并行执行，
 因此，数据并行问题的描述具有简洁优雅的特点。同时，数据并行问题涵盖了一
-大类科学与工程计算问题，应用场景非常广阔。
+大类科学与工程计算问题。
 
 Rat提供了若干向量操作函数，表\ref{tbl:vector-operations}中给出了一些例子。
 每一个向量操作定义了一种施加在一维向量上的操作，这些操作的最大特点是，
@@ -178,11 +178,11 @@ Rat提供了若干向量操作函数，表\ref{tbl:vector-operations}中给出�
 
 Rat语言虽然只提供了有一维向量操作，但由于高阶函数与嵌套向量的支持，
 Rat语言允许编程者实现高维数组以及表达嵌套并行。嵌套并行的例子可以
-参考\ref{sec:n-body}节，第\ref{subsec:code-generation}中还要详细描述
+参考\ref{sec:n-body}节，第\ref{subsec:np-decomposition}中还要详细描述
 嵌套并行的分解技术。
 
 \section{函数式语言特性}\label{sec:functional-characters}
-Rat采用了函数式语言设计，具备函数式程序语言的一般特点。在本章的后续各节中
+Rat采用了函数式语言设计，具备函数式程序语言的一般特点。后续各节
 将分别介绍Rat采用的函数式语言特性，并在最后进行总结，说明采用函数式设计带来的优势。
 
 \subsection{函数“一等公民”}
@@ -192,7 +192,6 @@ Rat采用了函数式语言设计，具备函数式程序语言的一般特点�
 在$\lambda$演算的形式化系统中，所有公式都可以看作函数，也就是说，常量被看作0元函数。
 命令式语言区分“函数”与“数据”的界限在函数式语言中并不存在，函数与数据是等价的，
 函数式语言中函数是一等公民，下面给出其定义：
-
 \begin{definition}
   当程序语言中的函数具备下列性质时，称函数为该语言的“一等公民”（first-class citizen）FIXME：citehere：
   \begin{compactitem}
@@ -230,30 +229,29 @@ Rat语言面向科学工程计算设计，它关注的核心任务是数学计�
 \begin{quotation}
   \kai{
     \texttt{dot}函数求两个单精度浮点向量的内积，它的类型声明如下：\\
-    \texttt{dot :: [Float] -> [Float] -> Float}\\
+    \centerline{\texttt{dot :: [Float] -> [Float] -> Float}}
     \texttt{dot}函数有两个形式参数，当按照如下方式调用\texttt{dot}函数时，
     将可以得到两个向量\texttt{u}，\texttt{v}的内积：\\
-    \texttt{s = dot u v}\\
+    \centerline{\texttt{s = dot u v}}\\
     但如果只对一个形式参数实例化，即按照如下方式调用，
     将得到一个一元函数\texttt{dotWithU}，
     它有只有一个形式参数，当对这个形式参数实例化的时候，求解该实参与向量
     \texttt{u}的内积：\\
-    \texttt{dotWithU = dot u}\\
-    \texttt{s = dotWithU v}
+    \centerline{\texttt{dotWithU = dot u}}\\
+    \centerline{\texttt{s = dotWithU v}}
   }
 \end{quotation}
 
 柯里化也可以从另一个视角理解，将所有函数都看作一元函数，一个n元函数可以看作
 一个返回值为n-1元函数的一元函数。即，在多元函数的类型声明中，箭头\texttt{->}
 是右结合的。这样，\texttt{dot}函数的类型声明可以看作：\\
-\texttt{dot:: [Float] -> ([Float] -> [Float])}
+\centerline{\texttt{dot:: [Float] -> ([Float] -> [Float])}}
 
 \subsection{恒值对象}\label{subsec:immutable-object}
 恒值对象也是函数式语言的重要特点。需要说明的是，这里的“对象”（object）
 不同与面向对象程序语言中的对象，而是函数式语言中唯一的实体类型---函数，
 之所以采用“恒值对象”而非“恒值函数”，是因为将“函数”与“赋值”联系起来
-不够自然。FIXME:可以介绍传值语义以及命令式函数式混合体设计。
-
+不够自然。
 \begin{definition}
   恒值对象，指对象只在其定义的时候被确定其值，在其后的生命周期中不允许再次赋值，
   对象的值在整个生命周期中保持不变。
@@ -262,7 +260,7 @@ Rat语言面向科学工程计算设计，它关注的核心任务是数学计�
 Rat语言中的函数（函数与数据的总称）都是恒值对象，所以，严格来讲，Rat不支持
 “变量”的概念。
 
-恒值特性是与纯函数特性协调的，因为在现行的冯$\cdot$诺依曼计算机上，对象赋值
+恒值对象是与纯函数特性协调的，因为在现行的冯$\cdot$诺依曼计算机上，对象赋值
 就代表内存区域的改写，这必然引起副作用的发生。
 
 \subsection{函数式语言设计的优势}\label{subsec:functional-advantages}
@@ -284,7 +282,7 @@ Rat语言中的函数（函数与数据的总称）都是恒值对象，所以�
 这样就使得编译器更容易掌握程序行为，同时也使得程序的高层优化更容易进行。
 
 \subsubsection{为程序并行化提供支持}
-函数式语言的理论基础是$\lambda$演算，程序的运行实质就是$lambda$演算理论中
+函数式语言的理论基础是$\lambda$演算，程序的运行实质就是$\lambda$演算理论中
 表达式求值的过程。表达式求值的基本形式是函数应用（function application），即
 通常所说的函数调用：将函数形式参数实例化，计算返回值。一个复杂表达式可能由
 多个子表达式构成，各个子表达式的求值先于整个表达式的求值。
@@ -301,7 +299,7 @@ Church-Rosser定理（也称为菱形性质）FIXME：citehere可以得到下面
 \begin{quotation}
   \kai{
     考虑下面的表达式求值问题：\\
-    \texttt{dot (map f u) (scan g v)}\\
+    \centerline{\texttt{dot (map f u) (scan g v)}}
     表达式求值过程可以以一棵求值树表示，树中每一个非叶结点表示一个函数应用，
     叶结点表示函数或者数据，求值过程自下向上，最终得到根结点的值即为整个表达式的
     求值结果。上述表达式的求值树如图\ref{fig:expression-tree}，其中分别以
@@ -338,7 +336,24 @@ Rat的C语言交互接口非常简单，仅包含一个export语句。export语�
 通过export语句，Rat编译器将使用Rat语言定义的函数提供给C语言使用，C语言可以调用Rat函数完成
 计算任务。
 
-FIXME:有关数据类型映射的表格可以添加
+Rat的数据类型与C语言数据类型之间存在简单映射，表\ref{tbl:rat-c-type-map}给出了这种映射关系。
+\begin{table}
+  \centering
+  \caption{Rat与C语言数据类型映射关系}
+  \label{tbl:rat-c-type-map}
+  \begin{tabularx}{\linewidth}{XX}
+    \toprule[1.5pt]
+    \hei{Rat类型} & \hei{C类型}\\
+    \midrule[1pt]
+    \texttt{UInt8, UInt16, ...} & \texttt{uint8\_t, uint16\_t, ...}\\
+    \texttt{Int8, Int16, ...} & \texttt{int8\_t, int16\_t, ...t}\\
+    \texttt{Float, Double} & \texttt{float, double}\\
+    \texttt{(a, b)} & \texttt{struct \{ a; b \}}\\
+    \texttt{[a]} & \texttt{struct \{ a*; size\_t\}}\\
+    \bottomrule[1.5pt]
+  \end{tabularx}
+\end{table}
+
 %% Rat的C语言交互接口包括两个语法：import语句与export语句。
 %% \begin{itemize}
 %%   \item import语法形式如下：\\
@@ -349,7 +364,7 @@ FIXME:有关数据类型映射的表格可以添加
 
 \section{Rat程序实例---n-body问题}\label{sec:n-body}
 本节使用Rat语言解决一个实际问题---n-body问题，以此展示Rat语言强大的抽象能力与
-表达能力，同时展示Rat语言隐藏并行细节的能力。FIXME：font
+表达能力，同时展示Rat语言隐藏并行细节的能力。
 \begin{quotation}
   \kai{
     n-body问题是一个经典数据并行问题。问题描述如下：
@@ -375,18 +390,18 @@ FIXME:有关数据类型映射的表格可以添加
     其中位置\texttt{Position}与速度\texttt{Velocity}都由一对浮点数组成，
     质量\texttt{Mass}是一个浮点数，例子\texttt{Cell}由它的三种属性构成。
   \item 第12-13行定义了引力常数\texttt{g}
-  \item 第15-34行定义了完成计算功能的函数\texttt{solveNBodyOneStep}，
+  \item 第15-33行定义了完成计算功能的函数\texttt{solveNBodyOneStep}，
     该函数以时间步长\texttt{t}与一组粒子\texttt{cells}为输入参数，计算\texttt{t}
     时间后粒子状态。
     \begin{compactitem}
-      \item 第19-27行定义了一些辅助函数与中间变量，
+      \item 第19-26行定义了一些辅助函数与中间变量，
         \texttt{positions}包含所有粒子的位置，\texttt{velocities}包含了所有粒子的初始速度，
         \texttt{calcDistanceSqure}计算两个粒子距离的平方和，
         \texttt{calcSingleAcc}计算单个粒子对给定粒子造成的加速度。
-      \item 第28-29行定义\texttt{calcAccelerate}计算所有粒子对给定粒子造成的加速度和，
+      \item 第27-28行定义\texttt{calcAccelerate}计算所有粒子对给定粒子造成的加速度和，
         使用了\texttt{fold}方法。
       \item 第30行定义的\texttt{accelerates}包含所有粒子在当前状态下受力产生的加速度。
-      \item 第31-34行计算$t$时间后粒子的速度\texttt{newVelocities}与位置\texttt{newPositions}，
+      \item 第31-33行计算$t$时间后粒子的速度\texttt{newVelocities}与位置\texttt{newPositions}，
         使用了\texttt{zipWith}方法。
       \item 第17行根据计算得到的$t$时间后的粒子位置与速度生成新的粒子状态，
         使用了\texttt{zipWith3}方法。
@@ -403,9 +418,14 @@ FIXME:有关数据类型映射的表格可以添加
 \section{小结}
 本章给出了Rat语言的语法设计。
 
-Rat是一种函数式语言，Rat采用一种类似与Haskell的语法，
+Rat是一种纯函数式语言，Rat采用一种类似与Haskell的语法，
 但仅仅是Haskell语法一个很小的子集。
-Rat的语法特点是在简洁精巧，灵活易用的同时提供了表达数据并行计算
+它的抽象层次高，表达能力强，
+对编程者隐藏并行细节，同时，纯函数特性对计算任务的并行化提供了优势。
+
+Rat面向科学计算问题设计，支持定长整数与浮点数类型，使用静态强类型系统，允许通过
+类型类的方式使用多态。
+它的语法特点是在保持简洁精巧，灵活易用的同时提供了表达数据并行计算
 额强大能力，这主要依靠并行向量函数。
 
 并行向量函数从传统函数式语言中的表处理函数得到启发，
@@ -413,3 +433,6 @@ Rat的语法特点是在简洁精巧，灵活易用的同时提供了表达数�
 但二者具有根本差别，那就是：表是一种链状结构，所以表函数是串行定义的，
 而向量是数组结构，向量函数是并行执行的。
 
+Rat语言被设计为一种辅助程序语言，它的C语言接口允许Rat程序被外部C程序调用，
+典型的使用方式是，使用C语言编写数据IO等任务中的串行部分，使用Rat编写数值计算
+等任务中的并行部分。
