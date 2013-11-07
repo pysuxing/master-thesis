@@ -44,7 +44,7 @@ Rat的内建数据类型。
 向量类型是一个同质数据集合，它包含的数据个体相同的类型，并且必须是标量类型。在Rat语言中
 使用方括号表示向量类型，如\texttt{[Int32]}表示一个32位整数向量类型。
 向量是一维数据集合，Rat在语法层面不支持高维数组，但通过定义元组及相应的函数可以轻松构建高维
-数组程序库。向量类型是Rat语言提供数据并行能力的数据基础，这一点将在第\ref{subsub:vector-primitives}
+数组程序库。向量类型是Rat语言提供数据并行能力的数据基础，这一点将在第\ref{sub:vector-operations}
 中详细说明。
 
 \begin{table}[htbp]
@@ -74,9 +74,9 @@ Rat的内建数据类型。
     \cline{3-4}
     & & Double & 64 bit 双精度浮点数\\
     \cline{2-4}
-    & 元组类型 & (a, b, ...) & 其中a, b是任何类型（非函数类型）\\
+    & 元组类型 & (a, b, ...) & 其中a, b是任何非函数类型\\
     \hline
-    \multicolumn{2}{|l|}{向量类型} & [a] & 元素类型为a的向量类型，a为标量类型\\
+    \multicolumn{2}{|l|}{向量类型} & [a] & 元素类型为a的向量类型，a为非函数类型\\
     \hline
   \end{tabularx}
 \end{table}
@@ -146,7 +146,7 @@ instance Num Int32 where
   - a b = substractInt32 a b
 \end{lstlisting}
 
-\section{向量原语}\label{sec:vector-primitives}
+\section{向量操作}\label{sec:vector-operations}
 Rat语言的定位是数据并行语言，采用一种数据并行编程模型。数据并行问
 题的特点是，将相同的操作施加到不同的数据上，不同数据操作之间的相关性较
 弱，可并行度高。数据并行模型是一种层次较高的并行编程模型，编程者只需要
@@ -154,231 +154,32 @@ Rat语言的定位是数据并行语言，采用一种数据并行编程模型�
 因此，数据并行问题的描述具有简洁优雅的特点。同时，数据并行问题涵盖了一
 大类科学与工程计算问题，应用场景非常广阔。
 
-Rat提供了一组向量原语（Vector Primitive, VP），参见表\ref{tbl:vector-primitives}。
-每一个向量原语定义一种施加在一维向量上的并行操作。从表\ref{tbl:vector-primitives}
-中可以看出，Rat提供的这一组向量原语集合非常精简，一共只有八个，而仅仅通过组合使用这八个向量原语
-就可以方便地描述一大类数据并行问题。表\ref{tbl:derived-vector-operations}列举了一些在
-Rat向量原语基础上可以实现的常见向量操作。
-
-%% \begin{table}[htb]
-%%   \centering
-%%   \caption{向量原语}
-%%   \label{tbl:vector-primitives}
-%%   \begin{tabularx}{\linewidth}{p{10em}X}
-%%     \toprule[1.5pt]
-%%     \hei{向量原语} & \hei{类型声明} \\
-%%     \midrule[1pt]
-%%     map & (a -> b) -> [a] -> [b]\\
-%%     scan & ScanDirection -> InclusiveMode -> (a -> a -> a) -> [a] -> [a]\\
-%%     slice & Integral i => (i, i) -> [a] -> [a]\\
-%%     concat & [a] -> [a] -> [a]\\
-%%     zip & [a] -> [b] -> [(a, b)]\\
-%%     gpermute & Integral i => PermuteDirection -> (i -> i) -> [a] -> [a]\\
-%%     gcopy & Boolean b => [b] -> [a] -> [a]\\
-%%     sort & (a -> a -> Ording) -> [a] -> [a]\\
-%%     \bottomrule[1.5pt]
-%%   \end{tabularx}
-%% \end{table}
-
+Rat提供了若干向量操作函数，表\ref{tbl:vector-operations}中给出了一些例子。
+每一个向量操作定义了一种施加在一维向量上的操作，这些操作的最大特点是，
+他们在实现上是并行的。
 \begin{table}[htb]
   \centering
-  \caption{派生向量操作}
-  \label{tbl:derived-vector-operations}
+  \caption{常用向量函数}
+  \label{tbl:vector-operations}
   \begin{tabularx}{\linewidth}{p{10em}X}
     \toprule[1.5pt]
-    \hei{向量原语} & \hei{类型声明} \\
+    \hei{向量原语} & \hei{功能说明} \\
     \midrule[1pt]
-    fold & (a -> a -> a) -> [a] -> a\\
-    permute & Integral i =>（i -> i）-> [a] -> [a]\\
-    backpermute & Integral i =>（i -> i）->[a] -> [a]\\
-    scale & Integral i => ScaleType -> i -> [a] -> [a]\\
-    compact & Boolean b => [b] -> [a] -> [a]\\
-    sparse & Boolean b => [b] -> [a] -> [a]\\
-    filter & Boolean b => (a -> b) -> [a] -> [a]\\
-    reverse & [a] -> [a]\\
+    map & 给定一元操作，对一个向量中所有元素施加同一操作\\
+    fold & 对向量中的元素重排\\
+    slice & 给定二元函数，求一个向量中元素的累加和\\
+    concat & 将嵌套向量合并成一维向量\\
+    zip & 将多个向量中的元素逐位置组成元组\\
+    permute & 对向量中的元素重排\\
+    sort & 给定排序函数，对向量中的元素进行排序\\
     \bottomrule[1.5pt]
   \end{tabularx}
 \end{table}
 
-下面分别对各个向量原语进行说明，给出他们的严格语义定义，
-图\ref{fig:vp-diagrams}是各向量原语的操作示意图。
-
-%% \subsection{map}
-%% map原语以一个标量操作与一个向量为输入参数，标量操作的类型与输入向量的类型
-%% 严格匹配。map原语对向量中的所有数据个体施加同一操作，然后收集结果
-%% 返回一个新的向量。
-%% \begin{definition}
-%%   map原语以一个一元函数$f$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入参数，
-%%   返回一个向量$$[f(a_0), f(a_1), \cdots, f(a_{n-1})]$$作为结果。
-%% \end{definition}
-
-%% 图\ref{fig:map-diagram}给出map原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \includegraphics[height=4cm]{map}
-%%   \caption{map原语操作示意图}
-%%   \label{fig:map-diagram}
-%% \end{figure}
-
-%% \subsection{slice}
-%% slice原语对一个向量执行截断操作，他以一对整数\texttt{(i, j)}作为向量
-%% 截断的起点与重点，截取输入向量的一段作为输出向量。\texttt{(i, j)}表示
-%% 一个前闭后开区间，即$[i, j)$。图\ref{fig:slice-diagram}给出了slice原语的操作说明。
-%% \begin{definition}
-%%   slice原语以一对整数$(i, j)$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入参数，
-%%   其中$0\le{}i<j\le{}n-1$，返回一个向量$$[a_{i}, \cdots, a_{j-1}]$$作为结果。
-%% \end{definition}
-
-%% 图\ref{fig:slice-diagram}给出slice原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \includegraphics[height=4cm]{slice}
-%%   \caption{slice原语操作示意图}
-%%   \label{fig:slice-diagram}
-%% \end{figure}
-
-%% \subsection{concat}
-%% concat原语对向量执行拼接操作，他以两个同类型的向量作为输入，
-%% 将第二个向量拼接到第一个向量末尾作为输出向量，输出向量的长度等于
-%% 两个输入向量长度的和。图\ref{fig:concat-diagram}给出了concat原语的操作说明。
-%% \begin{definition}
-%%   concat原语以两个同类型向量$$[a_0, a_1, \cdots, a_{n-1}]$$ $$[b_0, b_1, \cdots, b_{m-1}]$$作为输入参数，
-%%   返回一个向量$$[a_1, a_2 \cdots, a_{n-1}, b_0, b_1, \cdots, b_{m-1}]$$作为结果。
-%% \end{definition}
-
-%% 图\ref{fig:concat-diagram}给出concat原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \includegraphics[height=4cm]{concat}
-%%   \caption{concat原语操作示意图}
-%%   \label{fig:concat-diagram}
-%% \end{figure}
-
-%% \subsection{zip}
-%% zip原语对向量执行逐元素合并操作，他以等长两个向量作为输入，
-%% 将分属两个向量的处于相同位置的元素合并成一个二元组，最后输出一个二元组向量。
-%% 图\ref{fig:zip-diagram}给出了zip原语的操作说明。
-%% \begin{definition}
-%%   zip原语以两个等长向量$$[a_0, a_1, \cdots, a_{n-1}]$$ $$[b_0, b_1, \cdots, b_{n-1}]$$作为输入参数，
-%%   返回一个向量$$[(a_0, b_0), (a_1, b_1), \cdots, (a_{n-1}, b_{n-1})]$$作为结果。
-%% \end{definition}
-
-%% 图\ref{fig:zip-diagram}给出zip原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \includegraphics[height=4cm]{zip}
-%%   \caption{zip原语操作示意图}
-%%   \label{fig:zip-diagram}
-%% \end{figure}
-
-%% \subsection{scan}
-%% scan原语又称为prefix-sum，它使用一个满足结合律的二元函数对输入向量做部分和累加操作。scan原语提供两个配置选项：
-%% 累加方向\texttt{ScanDirection}与头部元素包含模式\texttt{InclusiveMode}。
-%% \begin{definition}
-%%   scan原语以一个满足结合律以$I$为幺元的二元函数$\oplus$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
-%%   根据两个配置参数  $ScanDirection, InclusiveMode$的取值返回一个部分和向量作为结果。
-%%   不同配置参数下的返回结果如下：\\
-%%   $[a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-1})]$\hfill{}Inclusive, Forward\\
-%%   $[(a_0\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}]$\hfill{}Inclusive, Backward\\
-%%   $[I, a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-2})]$\hfill{}Exclusive, Forward\\
-%%   $[(a_1\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}, I]$\hfill{}Exclusive, Backward\\
-%%   %% \begin{tabular}{|l|l|l|}
-%%   %%   \hline
-%%   %%   %% \backslashbox{ScanDirection}{InclusiveMode}
-%%   %%   & Inclusive & Exclusive\\
-%%   %%   \hline
-%%   %%   Forward & $[a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-1})]$ &
-%%   %%   $[I, a_0, (a_0\oplus{}a_1), \cdots, (a_0\oplus{}\cdots\oplus{}a_{n-2})]$ \\
-%%   %%   \hline
-%%   %%   Backward & $[(a_0\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}]$ &
-%%   %%   $[(a_1\oplus\cdots\oplus{}a_{n-1}), \cdots, (a_{n-2}\oplus{}a_{n-1}), a_{n-1}, I]$ \\
-%%   %%   \hline
-%%   %% \end{tabular}
-%% \end{definition}
-
-%% 图\ref{fig:scan-diagram}给出scan原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \subfloat[Inclusive, Forward]{
-%%     \includegraphics[height=4cm]{scan-if}\hspace{2em}
-%%   }
-%%   \subfloat[Exclusive, Forward]{
-%%     \includegraphics[height=4cm]{scan-ef}\hspace{2em}
-%%   }
-%%   \\
-%%   \subfloat[Inclusive, Backward]{
-%%     \includegraphics[height=4cm]{scan-ib}\hspace{2em}
-%%   }
-%%   \subfloat[Exclusive, Backward]{
-%%     \includegraphics[height=4cm]{scan-eb}\hspace{2em}
-%%   }
-%%   \caption{scan原语操作示意图}
-%%   \label{fig:scan-diagram}
-%% \end{figure}
-
-%% \subsection{gpermute}
-%% gpermute对一个向量执行通用乱序操作，它以一个索引计算函数与一个向量为输入，接受一个配置参数PermuteDirection。
-%% \begin{definition}
-%%   gpermute原语以一个索引计算函数$g$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
-%%   根据配置参数  $PermuteDirection$的取值返回一个重排序的向量作为结果。
-%%   不同配置参数下的返回结果如下：\\
-%%   $[a_{g^{-1}(0)}, a_{g^{-1}(1)}, \cdots, a_{g^{-1}_{n-1}}]$\hfill{}Forward\\
-%%   $[a_{g(0)}, a_{g(1)}, \cdots, a_{g_{n-1}}]$\hfill{}Backward\\  
-%% \end{definition}
-
-%% 图\ref{fig:gpermute-diagram}给出gpermute原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \subfloat[Forward]{
-%%     \includegraphics[height=4cm]{gpermute-f}
-%%   }
-%%   \\
-%%   \subfloat[Backward]{
-%%     \includegraphics[height=4cm]{gpermute-b}
-%%   }
-%%   \caption{gpermute原语操作示意图}
-%%   \label{fig:gpermute-diagram}
-%% \end{figure}
-
-%% \subsection{gcopy}
-%% gcopy原语以一个标志向量与一个数据向量为输入，根据标志向量中数据的真值确定是否对数据向量
-%% 中相应位置的元素执行拷贝，将所有拷贝的数据收集起来得到结果。
-%% \begin{definition}
-%%   gcopy原语以一个标志向量$$[b_0, b_1, \cdots, b_{n-1}]$$与一个数据向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
-%%   返回一个向量$$[a_{n_1}, a_{n_2}, \cdots, a_{n_k}]$$作为结果，其中$0\le{}n_1<n_2<\cdots{}<n_k\le{}n-1$且
-%%   $b_{n_i}=true, i=1,2,\cdots,k$。
-%% \end{definition}
-
-%% 图\ref{fig:gcopy-diagram}给出gcopy原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \includegraphics[height=4cm]{gcopy}
-%%   \caption{gcopy原语操作示意图}
-%%   \label{fig:gcopy-diagram}
-%% \end{figure}
-
-%% \subsection{sort}
-%% sort原语以一个比较函数与一个向量作为输入，返回一个结果向量，其中的元素皆来自输入向量，
-%% 但任何一个元素都比位于它后面的元素“小”。
-%% \begin{definition}
-%%   sort原语以一个二元比较函数$\prec$与一个向量$$[a_0, a_1, \cdots, a_{n-1}]$$作为输入，
-%%   返回一个结果向量$$[a_{n_1}, a_{n_2}, \cdots, a_{n_n}]$$，该向量是输入向量的一个重排，
-%%   并且对于任意$n_i\prec{}n_j$都有$a{n_i}\prec{}a{n_j}$。
-%% \end{definition}
-
-%% 图\ref{fig:sort-diagram}给出sort原语的操作说明。
-%% \begin{figure}[h]
-%%   \centering
-%%   \includegraphics[height=4cm]{sort}
-%%   \caption{sort原语操作示意图}
-%%   \label{fig:sort-diagram}
-%% \end{figure}
-
-%% 下面使用一个简单例子说明数据并行问题的特点。
-%% \begin{quotation}
-%%   求解两个向量$u, v$的内积FIXME:equation and font
-%%   $$d=u\cdot{}v=\sum_{k=1}^nu_kv_k$$
-%% \end{quotation}
+Rat语言虽然只提供了有一维向量操作，但由于高阶函数与嵌套向量的支持，
+Rat语言允许编程者实现高维数组以及表达嵌套并行。嵌套并行的例子可以
+参考\ref{sec:n-body}节，第\ref{subsec:code-generation}中还要详细描述
+嵌套并行的分解技术。
 
 \section{函数式语言特性}\label{sec:functional-characters}
 Rat采用了函数式语言设计，具备函数式程序语言的一般特点。在本章的后续各节中
@@ -598,3 +399,17 @@ FIXME:有关数据类型映射的表格可以添加
 即书写算法，实现计算功能，程序就可以并行地运行，
 而完全不用考虑内存如何分配、线程如何管理，管理并行细节的任务已经Rat编译期与运行时系统完成。
 而有关Rat如何实现这一功能，将在下一章给出详细说明。
+
+\section{小结}
+本章给出了Rat语言的语法设计。
+
+Rat是一种函数式语言，Rat采用一种类似与Haskell的语法，
+但仅仅是Haskell语法一个很小的子集。
+Rat的语法特点是在简洁精巧，灵活易用的同时提供了表达数据并行计算
+额强大能力，这主要依靠并行向量函数。
+
+并行向量函数从传统函数式语言中的表处理函数得到启发，
+很多并行向量函数在传统函数式语言中都能找到对应的表处理函数，
+但二者具有根本差别，那就是：表是一种链状结构，所以表函数是串行定义的，
+而向量是数组结构，向量函数是并行执行的。
+
