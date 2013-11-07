@@ -1,6 +1,6 @@
 \chapter{Rat运行时系统}
-第\ref{chap:compiler}章介绍了Rat的编译技术，Rat编译期生成C程序，实质上是
-对运行时系统的API调用，本章将详述Rat运行时系统在CPU/GPU异构硬件系统上的设计与实现。
+第\ref{chap:compiler}章介绍了Rat的编译技术，Rat编译器生成的C程序实质上是
+对运行时系统的API调用。本章将详述Rat运行时系统在CPU/GPU异构硬件系统上的设计与实现。
 运行时系统结构如图\ref{fig:backend}。
 \begin{figure}
   \centering
@@ -11,18 +11,18 @@
 
 从图\ref{fig:backend}中可以看出，运行时系统由三部分组成：
 内存资源管理器（Memory Manager）、并行任务调度器（Task Scheduler）与向量原语驱动（VP Driver）。
-第\ref{sec:memory-manager}节介绍内存资源管理器，该组件对整个系统中可用的内存资源实施统一的管理分配。
+第\ref{sec:memory-manager}节介绍内存资源管理器，该组件对整个系统中可用的内存资源实施统一的管理。
 第\ref{sec:task-scheduler}节介绍并行任务调度器，该组件的输入为编译期静态生成的任务队列，
 在程序运行期动态地将队列中的计算任务发送到GPU上，同时在CPU端协同GPU完成一些辅助计算。
 %% 第\ref{sec:vp-driver}节介绍
 向量原语驱动就是向量原语具体硬件上实现，这里采用Nvidia GPU作为硬件平台，
-Core语言的向量原语在GPU的实现技术已经比较成熟，这里以广泛被使用的程序库CUDPP
-作为实现工具。FIXME：citehere
+Core语言的向量原语在GPU的实现技术已经比较成熟，如广泛被使用的程序库CUDPP，
+这里就不再介绍。FIXME：citehere
 
 \section{内存资源管理器}\label{sec:memory-manager}
-由于Rat运行在CPU/GPU异构硬件系统中，向量操作在GPU端完成，所以向量的数据必须存储在GPU端内存中，
-但GPU上的内存分配与回收必须在CPU端通过特定的API调用完成，
-因此，虽然内存资源本身位于GPU上，但负责GPU内存分配与回收的管理功能却要在CPU端执行。
+由于Rat运行在CPU/GPU异构硬件系统中，向量操作在GPU端完成，所以向量的数据必须存储在GPU端内存中。
+GPU上的内存分配与回收必须在CPU端通过特定的API调用完成，
+即，虽然内存资源本身位于GPU端，但GPU内存分配与回收的管理功能却要在CPU端执行。
 这就造成了向量对象的数据内容存储在GPU端内存、元信息（长度、元素类型等）存储在CPU内存的特殊内存布局，
 图\ref{fig:vector-memory}表示了向量对象这一特点。
 %% 由于这种特殊的内存分布方式，大部分Core语言指令都在GPU端执行，但也存在某些指令
@@ -36,7 +36,7 @@ Core语言的向量原语在GPU的实现技术已经比较成熟，这里以广�
 \end{figure}
 
 内存资源管理器的功能是，管理CPU端与GPU端的内存空间，对并行任务调度器的内存请求产生响应。
-它主要管理两类内存空间，即GPU全局内存（global memory）与CPU端页锁内存（page-locked memory）。
+它主要管理两类内存空间：GPU全局内存（global memory）与CPU端页锁内存（page-locked memory）。
 
 %% 一般来说，CPU端的内存管理可以直接调用操作系统API完成，
 %% 有一类特殊的CPU内存——页锁内存需要特殊考虑。
@@ -58,7 +58,7 @@ Core语言的向量原语在GPU的实现技术已经比较成熟，这里以广�
 这三种技术分别是：向量内存即时回收（vector memory collection）、
 零拷贝（zero-copy）、向量原语原地执行（execute in-place）。
 
-本节先给出GPU全局内存管理的基本方案，然后分别介绍三种内存优化技术。
+下面先给出GPU全局内存管理的基本方案，然后分别介绍三种内存优化技术。
 
 \subsubsection{GPU全局内存管理器}
 内存管理器在初始化阶段一次性申请一大块连续内存空间作为可用内存池，
@@ -91,8 +91,7 @@ Core语言的向量原语在GPU的实现技术已经比较成熟，这里以广�
 \begin{quotation}
     \kai{
     以\ref{subsec:functional-advantages}节中表达式求值问题为例：\\
-    \texttt{dot (map f u) (scan g v)}\\
-
+    \centerline{\texttt{dot (map f u) (scan g v)}}\\
     上述表达式的求值树参见图\ref{fig:expression-tree}。整个计算过程涉及5个向量数据，
     分别是两个输入向量\texttt{u}与\texttt{v}，两个中间向量\texttt{t1}与\texttt{t2}，
     最终结果向量\texttt{result}。其中\texttt{u}与\texttt{v}分别
@@ -246,11 +245,9 @@ Core语言的向量原语在GPU的实现技术已经比较成熟，这里以广�
 %% \end{algorithm}
 
 \subsection{CPU页锁内存管理}
-在CPU端使用页锁内存可以提供一些性能上的优势FIXME：citehere，：
-\begin{compactitem}
-  \item GPU可以在执行Kernel的同时进行页锁内存与GPU内存之间的数据传输
-  \item 某些GPU设备可以直接读取页锁内存从而避免CPU端与GPU端的数据传输
-\end{compactitem}
+在CPU端使用页锁内存可以提供一些性能上的优势FIXME：citehere。
+GPU可以在执行Kernel的同时进行页锁内存与GPU内存之间的数据传输，
+某些GPU设备可以直接读取页锁内存从而避免CPU端与GPU端的数据传输。
 但页锁内存不能被操作系统用来响应正常的页请求，申请过多的页锁内存会导致操作系统性能下降。
 
 基于页锁内存的上述性质，首先要确定一个页锁内存的上限，在程序的运行过程中
@@ -261,8 +258,9 @@ Core语言的向量原语在GPU的实现技术已经比较成熟，这里以广�
   \item 需要传输的数据块只被读写一次
 \end{compactitem}
 
-此外，页锁内存的管理与GPU全局内存还存在一点重要区别，页锁内存管理器不维护空闲的页锁内存，
-一旦页锁内存被释放则立即归还操作系统，这是为了避免占用过多页锁内存影响操作系统性能。
+不同于GPU全局内存的管理，
+页锁内存采用即时分配即时释放的策略，需要使用的时候向操作系统申请，
+一旦使用完毕则立即归还操作系统，这是为了避免占用过多页锁内存影响操作系统性能。
 
 \section{并行任务调度器}\label{sec:task-scheduler}
 并行任务调度器的功能是在程序运行期将编译期生成的任务动态地调度到GPU上运行。
@@ -320,10 +318,11 @@ GPU上可以重叠执行多个Kernel，也可重叠执行Kernel与主机端设�
   \kai{
     观察n-body问题的向量流图\ref{fig:n-body-stream}，从\texttt{cells}出发的单行流共有
     四条，分别是：\\
-    \texttt{cells -> masses}\\
-    \texttt{cells -> t4 -> calcSingleAcc}\\
-    \texttt{cells -> velocities}\\
-    \texttt{cells -> positions}\\
+    \centerline{\texttt{cells -> masses}}\\
+    \centerline{\texttt{cells -> t4 -> calcSingleAcc}}\\
+    \centerline{\texttt{cells -> velocities}}\\
+    \centerline{\texttt{cells -> positions}}\\
+    这四条流代表的任务就可以同时被发送到GPU上执行。
     注意从\texttt{cells}指向\texttt{accelerates}的\texttt{map}操作已经被
     转换为\texttt{foreach}命令。
   }
@@ -334,18 +333,13 @@ GPU上可以重叠执行多个Kernel，也可重叠执行Kernel与主机端设�
 下面给出任务调度器的动态调度算法。
 
 \subsubsection{并行任务动态调度算法}
-任务调度器维护下面几个数据结构：
-\begin{compactitem}
-  \item GPU任务流队列
-  \item 可调度单行流队列
-  \item 待调度任务集合
-  \item 新就绪对象集合
-\end{compactitem}
+任务调度器维护下面几个数据结构：GPU任务流队列、可调度单行流队列、
+待调度任务集合、新就绪对象集合。
 
 在程序开始执行的时候，GPU任务流初始化若干条任务流，任务流的数目在程序运行期不再变化，
 然后任务调度器开始搜索可调度单行流发往相应的任务流。
 
-算法\ref{alg:task-scheduling}给出了并行任务动态调度算法的正规描述。
+在程序开始执行的时候，
 任务调度器首先以输入向量对象为起点开始搜索单行流，将搜索得到的所有可用单行流
 加入可调度单行流队列，然后将该队列中的单行流发送到空闲的GPU任务流。
 当所有GPU任务流都被占用或者可调度单行流队列已经排空时，
@@ -354,6 +348,7 @@ GPU上可以重叠执行多个Kernel，也可重叠执行Kernel与主机端设�
 的从数据为就绪状态转入就绪状态，这时调度器从这些新增的就绪向量对象开始
 搜索单行流加入可调度单行流队列，开始新一轮调度。
 
+算法\ref{alg:task-scheduling}给出了并行任务动态调度算法的正规描述。
 \begin{algorithm}
   \caption{并行任务动态调度算法}
   \label{alg:task-scheduling}
