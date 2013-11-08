@@ -37,7 +37,39 @@
 \ckeywords{并行编程语言, 函数式语言, 流驱动模型, 自动并行化}
 
 \begin{eabstract}
+Currently, the computer hardware system is moving in parallel with the development trend of isomerization . Following the multi-core microprocessor
+Popularity , the graphics processor GPU, a digital signal processor DSP, FPGA and other hardware acceleration
+Are increasingly being applied to the computer system. These hardware acceleration devices different characteristics , and general-purpose processors
+Often compared to specific aspects with outstanding performance advantages , they are composed of general-purpose processors
+Heterogeneous computer system as a general-purpose processor to perform coprocessor auxiliary computing tasks . Composed by the CPU and GPU
+The computer system is the most typical heterogeneous systems at this stage .
 
+Follow parallel computer hardware systems and the development trend of isomerization ,
+Stage parallel software for heterogeneous systems technology in a boom period.
+Maximize the development of heterogeneous systems parallel computing power of the hardware is the primary objective of parallel software technology ,
+Meanwhile , the parallel software technology also take into account ease of use, which should minimize the difficulty of parallel programming .
+
+In this paper, the design of a parallel programming language for data parallel problems , and to develop a
+The language in the CPU / GPU heterogeneous computer systems implementation , taking into account the efficiency and
+Ease of use both requirements for improving computer systems in a heterogeneous software development efficiency,
+Positive significance. The main contribution of this paper is as follows:
+
+First , the language used functional programming language design, high level of abstraction , ability,
+Greatly reduces the difficulty of parallel programming .
+
+Second , the design of an intermediate language Core, the language -based parallel programming model vector primitives ,
+Very suitable for expressing data-parallel problem, use a reduced set of vectors can be constructed many primitives
+The actual parallel program .
+
+Third , the use of flow-driven computing model as the basic task of automatic parallelization techniques ,
+Proposes a data parallel problem into a data stream , the method can be tapped
+Potential problems in parallel , and has nothing to do with the problem , versatility is strong.
+Meanwhile, the computing tasks that a stream of data is provided for GPU itself
+Parallel computing model .
+
+Finally , the design of a run-time system , the system can effectively manage the system
+Memory resources , will be calculated efficiently schedule parallel tasks to the GPU execution.
 \end{eabstract}
-\ekeywords{}
+
+\ekeywords{parallel programming language, functional language, data-flow model, automatical parallelization}
 
