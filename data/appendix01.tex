@@ -1,46 +1,152 @@
-% TeX
-\chapter{模板提供的希腊字母命令列表}
+\chapter{Rat形式语法}
 
-大写希腊字母：
-\begin{table}[htbp]
-\centering
-\begin{tabular}{llll}
-\toprule
-$\Gamma$~\verb|\Gamma| & $\Lambda$~\verb|\Lambda| & $\Sigma$~\verb|\Sigma| & $\Psi$~\verb|\Psi| \\
-$\Delta$~\verb|\Delta| & $\Xi$~\verb|\Xi| & $\Upsilon$~\verb|\Upsilon| & $\Omega$~\verb|\Omega| \\
-$\Theta$~\verb|\Theta| & $\Pi$~\verb|\Pi| & $\Phi$~\verb|\Phi| & \\
-\midrule
-$\varGamma$~\verb|\varGamma| & $\varLambda$~\verb|\varLambda| & $\varSigma$~\verb|\varSigma| & $\varPsi$~\verb|\varPsi| \\
-$\varDelta$~\verb|\varDelta| & $\varXi$~\verb|\varXi| & $\varUpsilon$~\verb|\varUpsilon| & $\varOmega$~\verb|\varOmega| \\
-$\varTheta$~\verb|\varTheta| & $\varPi$~\verb|\varPi| & $\varPhi$~\verb|\varPhi| & \\
-\bottomrule
-\end{tabular}
-\end{table}
+\setlength{\grammarindent}{10em}
+\setlength{\grammarparsep}{5pt}
+\paragraph{Syntax Rules}
+\begin{grammar}
+<program>        ::=    <export>+ <top level unit>*
 
-小写希腊字母：
-\begin{table}[htbp]
-\centering
-\begin{tabular}{llll}
-\toprule
-$\alpha$~\verb|\alpha| & $\theta$~\verb|\theta| & $o$~\verb|o| & $\tau$~\verb|\tau| \\ 
-$\beta$~\verb|\beta| & $\vartheta$~\verb|\vartheta| & $\pi$~\verb|\pi| & $\upsilon$~\verb|\upsilon| \\ 
-$\gamma$~\verb|\gamma| & $\iota$~\verb|\iota| & $\varpi$~\verb|\varpi| & $\phi$~\verb|\phi| \\ 
-$\delta$~\verb|\delta| & $\kappa$~\verb|\kappa| & $\rho$~\verb|\rho| & $\varphi$~\verb|\varphi| \\ 
-$\epsilon$~\verb|\epsilon| & $\lambda$~\verb|\lambda| & $\varrho$~\verb|\varrho| & $\chi$~\verb|\chi| \\ 
-$\varepsilon$~\verb|\varepsilon| & $\mu$~\verb|\mu| & $\sigma$~\verb|\sigma| & $\psi$~\verb|\psi| \\ 
-$\zeta$~\verb|\zeta| & $\nu$~\verb|\nu| & $\varsigma$~\verb|\varsigma| & $\omega$~\verb|\omega| \\ 
-$\eta$~\verb|\eta| & $\xi$~\verb|\xi| & $\varkappa$~\verb|\varkappa| & $\digamma$~\verb|\digamma| \\ 
-\midrule
-$\upalpha$~\verb|\upalpha| & $\uptheta$~\verb|\uptheta| & $\mathrm{o}$~\verb|\mathrm{o}| & $\uptau$~\verb|\uptau| \\ 
-$\upbeta$~\verb|\upbeta| & $\upvartheta$~\verb|\upvartheta| & $\uppi$~\verb|\uppi| & $\upupsilon$~\verb|\upupsilon| \\ 
-$\upgamma$~\verb|\upgamma| & $\upiota$~\verb|\upiota| & $\upvarpi$~\verb|\upvarpi| & $\upphi$~\verb|\upphi| \\ 
-$\updelta$~\verb|\updelta| & $\upkappa$~\verb|\upkappa| & $\uprho$~\verb|\uprho| & $\upvarphi$~\verb|\upvarphi| \\ 
-$\upepsilon$~\verb|\upepsilon| & $\uplambda$~\verb|\uplambda| & $\upvarrho$~\verb|\upvarrho| & $\upchi$~\verb|\upchi| \\ 
-$\upvarepsilon$~\verb|\upvarepsilon| & $\upmu$~\verb|\upmu| & $\upsigma$~\verb|\upsigma| & $\uppsi$~\verb|\uppsi| \\ 
-$\upzeta$~\verb|\upzeta| & $\upnu$~\verb|\upnu| & $\upvarsigma$~\verb|\upvarsigma| & $\upomega$~\verb|\upomega| \\ 
-$\upeta$~\verb|\upeta| & $\upxi$~\verb|\upxi| & & \\ 
-\bottomrule
-\end{tabular}
-\end{table}
+<export>         ::=    'export' <variable>
 
-希腊字母属于数学符号类别，请用\verb|\bm|命令加粗，其余向量、矩阵可用\verb|\mathbf|。
+<top level unit> ::=    <type def>
+                 \alt     <variable decl>
+                 \alt     <variable def>
+
+<type def>       ::=    'newtype' <type name> '=' <constructor> <type spec>
+
+<constructor>    ::=    <variable>
+
+<type spec>      ::=    <primitive type>
+                 \alt     <struct type>
+                 \alt     <vector type>
+                 \alt     <type spec> '$\to$' <type spec>
+
+<primitive type> ::=    'Int8' | 'UInt8' | 'Int16' | 'UInt16' \alt 'Int32' | 'UInt32' | 'Int64' | 'UInt64'
+                 \alt     'Float' | 'Double'
+
+<struct type>    ::=    '\{' <variable decl> (',' <variable decl>)* '\}'
+
+<vector type>    ::=    '[' <type name> ']'
+
+<variable decl>  ::=    <variable> '::' <type name>
+
+<variable def>   ::=    <variable> <variable>* '=' <expression>
+
+<expression>     ::=    <literal>
+                 \alt     <variable ref>
+                 \alt     <function app>
+                 \alt     <lambda exp>
+                 \alt     <vector comprehension>
+                 \alt     <vector element ref>
+                 \alt     <vector slice ref>
+                 \alt     <conditional>
+                 \alt     <let exp>
+                 \alt     <where exp>
+                 \alt     '(' <expression> ')'
+
+<literal>        ::=    <number>
+                 \alt     <boolean>
+                 \alt     <character>
+                 \alt     <tuple literal>
+                 \alt     <vector literal>
+
+<tuple literal>  ::=    '(' <literal> (',' <literal>)+ ')'
+
+<vector literal> ::=    '[' <start> ',' <end> (',' <step>)? ']'
+
+<start>          ::=    <number>
+
+<end>            ::=    <number>
+
+<step>           ::=    <number>
+
+<variable ref>   ::=    <variable>
+
+<function app>   ::=    <function ref> <expression>*
+
+<function ref>   ::=    <variable>
+
+<lambda exp>     ::=    '$\backslash$' <bind var>+ '$\to$' <expression>
+
+<bind var>       ::=    <variable>
+
+<conditional>    ::=    'if' <test> <if clause> <else clause>?
+
+<test>           ::=    <expression>
+
+<if clause>      ::=    <expression>
+
+<else clause>    ::=    <expression>
+
+<vector comprehension>
+                 ::=    '[' <expression> \\('|' <generator> (',' (<generator> | <filter>))+ ']'
+
+<generator>      ::=    <variable> '$\gets$' <variable>
+
+<filter>         ::=    <expression>
+
+<vector element ref>
+                 ::=    <variable> '[' <index> ']'
+
+<index>          ::=    <expression>
+
+<vector slice ref>
+                 ::=    <variable> '[' <index> ':' <index> (',' <index>)? ']'
+
+<let exp>        ::=    'let' <variable decl>+ <variable def>+ 'in' <expression>
+
+<where exp>      ::=    <expression> 'where' <variable decl>+ <variable def>+
+\end{grammar}
+
+\paragraph{Lexical Rules}
+\begin{grammar}
+<variable>       ::=    <lower id> | <special var>
+
+<lower id>       ::=    <lowercase> (<alpha> | <digit> | '\_')*
+
+<special var>    ::=    '+' | '-' | '*' | '/' | '\^'
+
+<class name>     ::=    <upper id>
+
+<type name>      ::=    <upper id>
+
+<upper id>       ::=    <uppercase> (<alpha> | <digit> | '_')*
+
+<alpha>          ::=    <lowercase> | <uppercase>
+
+<lowercase>      ::=    'a' | 'b' | ... | 'z'
+
+<uppercase>      ::=    'A' | 'B' | ... | 'Z'
+
+<number>         ::=    <integer>
+                 \alt     <floating>
+
+<integer>        ::=    <decimal>
+                 ::=    ('0O' | '0o') <octal>
+                 ::=    ('0X' | '0x') <hexadecimal>
+
+<decimal>        ::=    <digit>+
+
+<octal>          ::=    <octit>+
+
+<hexadecimal>    ::=    <hexit>+
+
+<digit>          ::=    '0' | '1' | '2' | '3' | '5' | '6' | '7' | '8' | '9'
+
+<octit>          ::=    '0' | '1' | '2' | '3' | '5' | '6' | '7'
+
+<hexit>          ::=    <digit> | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f'
+
+<floating>       ::=    <decimal> '.' <decimal> <exponent>?
+                 \alt     <decimal> <exponent>
+
+<exponent>       ::=    ('e' | 'E') ('+' | '-')? <decimal>
+
+<boolean>        ::=    'true' | 'false'
+
+<character>      ::=    ''' <ascii> '''
+
+<whitespace>     ::=    <space> | <tab> | <newline> | <comment>
+
+<comment>        ::=    '--' <any character>* <newline>
+\end{grammar}
