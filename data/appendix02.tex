@@ -1,0 +1,103 @@
+\chapter{Core标量原语}\label{chap:core-scalar-primitives}
+
+\begin{longtable}[c]{ccll}
+  \caption[标量原语]{标量原语（注：$x$，$y$，$z$分别表示标量原语的第1、2、3个形式参数）}
+  \label{tbl:scalar-primitives}\\
+  %% \begin{tabularx}{\linewidth}{ccXl}
+  \toprule[1.5pt]
+  \hei{标量原语} & \hei{元数} & \hei{类型声明} & \hei{说明}\\ %可以考虑说明结合性等性质，也可以在附录中说明
+  \midrule[1pt]
+  \endfirsthead
+  \multicolumn{4}{c}{续表~\thetable\hskip1em 标量原语}\\
+  \toprule[1.5pt]
+  \hei{标量原语} & \hei{元数} & \hei{类型声明} & \hei{说明}\\ %可以考虑说明结合性等性质，也可以在附录中说明
+  \midrule[1pt]
+  \endhead
+  \hline
+  \multicolumn{4}{r}{续下页}
+  \endfoot
+  \endlastfoot
+  \texttt{daoshu} & 1 & \texttt{Floating a => a -> a} & $1/x$\\
+  \texttt{+} & 2 & \texttt{Num a => a -> a -> a} & $x+y$\\
+  \texttt{-} & 2 & \texttt{Num a => a -> a -> a} & $x-y$\\
+  \texttt{*} & 2 & \texttt{Num a => a -> a -> a} & $x*y$\\
+  \texttt{/} & 2 & \texttt{Num a => a -> a -> a} & $x/y$\\
+  \texttt{sqrt} & 1 & \texttt{Floating a => a -> a} & $\sqrt{x}$\\
+  \texttt{rsqrt} & 1 & \texttt{Floating a => a -> a} & $1/\sqrt{x}$\\
+  \texttt{cbrt} & 1 & \texttt{Floating a => a -> a} & $\sqrt[3]{x}$\\
+  \texttt{rcbrt} & 1 & \texttt{Floating a => a -> a} & $1/\sqrt[3]{x}$\\
+  \texttt{hypot} & 2 & \texttt{Floating a => a -> a -> a} & $\sqrt{x^2+y^2}$\\
+  \texttt{exp} & 1 & \texttt{Floating a => a -> a} & $e^x$\\
+  \texttt{exp2} & 1 & \texttt{Floating a => a -> a} & $2^x$\\
+  \texttt{exp10} & 1 & \texttt{Floating a => a -> a} & $10^x$\\
+  \texttt{expm1} & 1 & \texttt{Floating a => a -> a} & $e^x-1$\\
+  \texttt{log} & 1 & \texttt{Floating a => a -> a} & $\ln x$\\
+  \texttt{log2} & 1 & \texttt{Floating a => a -> a} & $\log{}_2 x$\\
+  \texttt{log10} & 1 & \texttt{Floating a => a -> a} & $\log{}_{10} x$\\
+  \texttt{log1p} & 1 & \texttt{Floating a => a -> a} & $\ln (x+1)$\\
+  \texttt{sin} & 1 & \texttt{Floating a => a -> a} & $\sin x$\\
+  \texttt{cos} & 1 & \texttt{Floating a => a -> a} & $\cos x$\\
+  \texttt{tan} & 1 & \texttt{Floating a => a -> a} & $\tan x$\\
+  \texttt{sincos} & 1 & \texttt{Floating a => a -> (a, a)} & $(\sin x, \cos x)$\\
+  \texttt{sinpi} & 1 & \texttt{Floating a => a -> a} & $\sin (x\pi)$\\
+  \texttt{cospi} & 1 & \texttt{Floating a => a -> a} & $\cos (x\pi)$\\
+  \texttt{sincospi} & 1 & \texttt{Floating a => a -> (a, a)} & $(\sin (x\pi), \cos (x\pi))$\\
+  \texttt{asin} & 1 & \texttt{Floating a => a -> a} & $\sin^{-1} x$\\
+  \texttt{acos} & 1 & \texttt{Floating a => a -> a} & $\cos^{-1} x$\\
+  \texttt{atan} & 1 & \texttt{Floating a => a -> a} & $\tan^{-1} x$\\
+  \texttt{atan2} & 2 & \texttt{Floating a => a -> a -> a} & $\tan^{-1} (y/x)$\\
+  \texttt{sinh} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
+  \texttt{cosh} & 1 & \texttt{Floating a => a -> a} & $\cosh x$\\
+  \texttt{tanh} & 1 & \texttt{Floating a => a -> a} & $\tanh x$\\
+  \texttt{asinh} & 1 & \texttt{Floating a => a -> a} & $\sinh^{-1} x$\\
+  \texttt{acosh} & 1 & \texttt{Floating a => a -> a} & $\cosh^{-1} x$\\
+  \texttt{atanh} & 1 & \texttt{Floating a => a -> a} & $\tanh^{-1} x$\\
+  \texttt{pow} & 2 & \texttt{Floating a => a -> a -> a} & $x^y$\\
+  \texttt{erf} & 1 & \texttt{Floating a => a -> a} & $\frac{2}{\sqrt{\pi}}\int_0^x e^{-t^2}dt$\\
+  \texttt{erfinv} & 1 & \texttt{Floating a => a -> a} & $erf^{-1}(x)$\\
+  \texttt{erfc} & 1 & \texttt{Floating a => a -> a} & $1-erf(x)$\\
+  \texttt{erfcinv} & 1 & \texttt{Floating a => a -> a} & $erfc^{-1}(x)$\\
+  \texttt{erfcx} & 1 & \texttt{Floating a => a -> a} & $e^{x^2}\cdot{}erfc(x)$\\
+
+  \texttt{normcdf} & 1 & \texttt{Floating a => a -> a} & $\Phi(x)$\\
+  %% $\int_{-\infty}^{x}\frac{1}{\sqrt{2\pi}}\exp(-\frac{t^2}{2\sigma^2})dt$\\
+  \texttt{normcdfinv} & 1 & \texttt{Floating a => a -> a} & $\Phi^{-1}(x)$\\%% $normcdf^{-1} x$\\
+  \texttt{lgamma} & 1 & \texttt{Floating a => a -> a} & $\ln|\int_0^\infty{}e^{-t}t^{x-1}dt|$\\
+  \texttt{tgamma} & 1 & \texttt{Floating a => a -> a} & $\int_0^\infty{}e^{-t}t^{x-1}dt$\\
+  \multirow{2}*{\texttt{fma}} & \multirow{2}*{3} &
+  \texttt{Floating a =>} & \multirow{2}*{$x*y+z$}\\
+  & & \texttt{a -> a -> a -> a} &\\
+  \texttt{frexp} & 1 & \texttt{Floating a => a -> (a, Int)} & \\
+  \texttt{logb} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{ilogb} & 1 & \texttt{Floating a => a -> Int} & \\
+  \multirow{2}*{\texttt{ldexp}} & \multirow{2}*{2} &
+  \texttt{Floating a, Integer i =>} & \multirow{2}*{$x\cdot{}2^y$}\\
+  & & \texttt{a -> i -> a} & \\
+  \multirow{2}*{\texttt{scalbn}} & \multirow{2}*{2} &
+  \texttt{Floating a, Integer i =>} & \multirow{2}*{$x\cdot{}2^y$}\\
+  & & \texttt{a -> i -> a} & \\
+  %% \texttt{scalbln} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
+  \texttt{j0} & 1 & \texttt{Floating a => a -> a} & $J_0(x)$\\
+  \texttt{j1} & 1 & \texttt{Floating a => a -> a} & $J_1(x)$\\
+  \texttt{jn} & 1 & \texttt{Floating a => a -> a} & $J_n(x)$\\
+  \texttt{y1} & 1 & \texttt{Floating a => a -> a} & $Y_1(x)$\\
+  \texttt{yn} & 1 & \texttt{Floating a => a -> a} & $Y_n($)\\
+  \texttt{fmod} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{remainder} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{remquo} & 1 & \texttt{Floating a => a -> (a, Int)} & \\
+  \texttt{modf} & 1 & \texttt{Floating a => a -> (a, a)} & \\
+  \texttt{fdim} & 2 & \texttt{Floating a => a -> a -> a} & $\max(x-y, 0)$\\
+  \texttt{trunc} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{round} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{rint} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{nearbyint} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{ceil} & 1 & \texttt{Floating a => a -> a} & $\lceil x \rceil$\\
+  \texttt{floor} & 1 & \texttt{Floating a => a -> a} & $\lfloor x \rfloor$\\
+  \texttt{lrint} & 1 & \texttt{Floating a => a -> Int} & \\
+  \texttt{lround} & 1 & \texttt{Floating a => a -> Int} & $\sinh x$\\
+  %% \texttt{llrint} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
+  %% \texttt{llround} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
+  \bottomrule[1.5pt]
+  %% \end{tabularx}
+\end{longtable}
+
