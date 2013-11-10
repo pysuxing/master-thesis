@@ -16,8 +16,8 @@
 在程序运行期动态地将队列中的计算任务发送到GPU上，同时在CPU端协同GPU完成一些辅助计算。
 %% 第\ref{sec:vp-driver}节介绍
 向量原语驱动就是向量原语具体硬件上实现，这里采用Nvidia GPU作为硬件平台，
-Core语言的向量原语在GPU的实现技术已经比较成熟，如广泛被使用的程序库CUDPP，
-这里就不再介绍。FIXME：citehere
+Core语言的向量原语在GPU的实现技术已经比较成熟，如广泛被使用的CUDA程序库CUDPP\upcite{Harris2007,Blelloch1990}，
+这里就不再介绍。
 
 \section{内存资源管理器}\label{sec:memory-manager}
 由于Rat运行在CPU/GPU异构硬件系统中，向量操作在GPU端完成，所以向量的数据必须存储在GPU端内存中。
@@ -245,7 +245,7 @@ GPU上的内存分配与回收必须在CPU端通过特定的API调用完成，
 %% \end{algorithm}
 
 \subsection{CPU页锁内存管理}
-在CPU端使用页锁内存可以提供一些性能上的优势FIXME：citehere。
+在CPU端使用页锁内存可以提供一些性能上的优势\upcite{Nvidia2008}
 GPU可以在执行Kernel的同时进行页锁内存与GPU内存之间的数据传输，
 某些GPU设备可以直接读取页锁内存从而避免CPU端与GPU端的数据传输。
 但页锁内存不能被操作系统用来响应正常的页请求，申请过多的页锁内存会导致操作系统性能下降。
