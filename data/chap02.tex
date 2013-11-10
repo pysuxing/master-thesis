@@ -133,7 +133,7 @@ Marlow等\upcite{Marlow2010}提出了一种基于策略（Strategy）的并行�
 使得程序的逻辑功能与实现方式完全分离，这样，串行程序在移植到并行硬件上运行时，
 只需要简单地感边求值策略就可以达到并行执行的效果。该思想来源于\upcite{TRINDER1998}。
 
-Marlow等\upcite{Marlow2011}还提出了一种并行Monad\upcite{Jones2001}，称为Par。
+Marlow等\upcite{Marlow2011}还提出了一种并行Monad\upcite{Wadler1997, Jones2001}，称为Par。
 Par Monad是对多线程模型
 的高层模拟，允许将问题的求解过程表示成数据流，计算在不同的流上执行，
 流之间可以通过MVar通信。虽然这种并行技术和多线程相似，但它具有确定性（deteministic）
