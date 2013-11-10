@@ -11,7 +11,7 @@
 最大程度地开发异构系统中并行硬件的计算能力是并行软件技术的首要目标，
 同时，并行软件技术也要兼顾易用性，即应该尽量降低并行程序设计的难度。
 
-本文采用设计了一门并行程序语言，面向数据并行问题，并制定了
+本文设计了一门并行程序语言，面向数据并行问题，并制定了
 该语言在CPU/GPU异构计算机系统上的实现方案，兼顾了高效性与
 易用性两方面的要求，对于提高在异构计算机系统上的软件开发效率，
 具有积极意义。本文的主要贡献如下：
@@ -37,38 +37,74 @@
 \ckeywords{并行编程语言, 函数式语言, 流驱动模型, 自动并行化}
 
 \begin{eabstract}
-Currently, the computer hardware system is moving in parallel with the development trend of isomerization . Following the multi-core microprocessor
-Popularity , the graphics processor GPU, a digital signal processor DSP, FPGA and other hardware acceleration
-Are increasingly being applied to the computer system. These hardware acceleration devices different characteristics , and general-purpose processors
-Often compared to specific aspects with outstanding performance advantages , they are composed of general-purpose processors
-Heterogeneous computer system as a general-purpose processor to perform coprocessor auxiliary computing tasks . Composed by the CPU and GPU
-The computer system is the most typical heterogeneous systems at this stage .
+%% 当前，计算机硬件系统正朝着并行化与异构化的趋势发展。继多核微处理器
+%% 普及之后，图形处理器GPU、数字信号处理器DSP、FPGA等多种硬件加速设备
+%% 被越来越多地应用到计算机系统。这些硬件加速设备特点各异，与通用处理器
+%% 相比往往在特定方面具备突出的性能优势，它们在与通用处理器组成的
+%% 异构计算机系统中作为协处理器辅助通用处理器执行计算任务。由CPU与GPU组成
+%% 的计算机系统是现阶段最为典型异构系统。
+Currently, the computer system is moving in parallel with the development trend of isomerization .
+Following multi-core microprocessor's popularity ,
+graphics processor unit(GPU), digital signal processors(DSP), FPGA and other hardware accelerators
+are increasingly being added to the computer system.
+These hardware accelerators all have different characteristics and 
+often have outstanding performance compared to general-purpose processors(CPU) in specific aspects.
+They act as coprocessors in heterogeneous computer system and do auxiliary computing tasks.
+Heterogeneous computer system as a general-purpose processor to perform coprocessor auxiliary computing tasks .
+The most typical and popular heterogeneous computer system nowadays are those composed by CPUs and GPUs.
 
-Follow parallel computer hardware systems and the development trend of isomerization ,
-Stage parallel software for heterogeneous systems technology in a boom period.
-Maximize the development of heterogeneous systems parallel computing power of the hardware is the primary objective of parallel software technology ,
-Meanwhile , the parallel software technology also take into account ease of use, which should minimize the difficulty of parallel programming .
+%% 跟随计算机硬件系统并行化与异构化的发展趋势，
+%% 现阶段针对异构系统的并行软件技术也处于蓬勃发展的时期。
+%% 最大程度地开发异构系统中并行硬件的计算能力是并行软件技术的首要目标，
+%% 同时，并行软件技术也要兼顾易用性，即应该尽量降低并行程序设计的难度。
+With the trend of parallel and heterogeneous hardware system,
+parallel software techniques is also enjoying a rapid development.
+The primary target of parallel software techniques is exploiting the computing power of
+parallel hardware maxically. Meanwhile, parallel software must also take usability
+into account, that is, parallel software techniques should minimize the difficulty of parallel programming.
 
-In this paper, the design of a parallel programming language for data parallel problems , and to develop a
-The language in the CPU / GPU heterogeneous computer systems implementation , taking into account the efficiency and
-Ease of use both requirements for improving computer systems in a heterogeneous software development efficiency,
-Positive significance. The main contribution of this paper is as follows:
+%% 本文采用设计了一门并行程序语言，面向数据并行问题，并制定了
+%% 该语言在CPU/GPU异构计算机系统上的实现方案，兼顾了高效性与
+%% 易用性两方面的要求，对于提高在异构计算机系统上的软件开发效率，
+%% 具有积极意义。本文的主要贡献如下：
+In this paper, we propose the design of a new parallel programming language for data parallel problems.
+We also propose the implementation techniques targeting the CPU/GPU heterogeneous computer system in which
+we take into consideration both efficiency and usability.
+Our work is of positive significance to improve productivity in programming the CPU/GPU heterogeneous
+harware. The main contributions of this paper are as follows:
 
-First , the language used functional programming language design, high level of abstraction , ability,
-Greatly reduces the difficulty of parallel programming .
+%% 首先，该语言采用函数式程序语言设计，抽象层次高，表达能力强，
+%% 大大降低了并行编程的难度。
+First , the language is designed to be a functional programming language,
+which has high-level abstraction and powerful expressing ability.
+The functional characteristics can greatly reduce the difficulty of parallel programming .
 
-Second , the design of an intermediate language Core, the language -based parallel programming model vector primitives ,
-Very suitable for expressing data-parallel problem, use a reduced set of vectors can be constructed many primitives
-The actual parallel program .
+%% 第二，设计了一门中间语言Core，该语言采用基于并行向量原语的编程模型，
+%% 非常适合表达数据并行问题，使用一组精简的向量原语就可以构造许多
+%% 实际的并行程序。
+Second , the design of an intermediate language Core.
+Core language offers a parallel programming model with vector primitives,
+which are very suitable for expressing data-parallel problem.
+The reduced set of vector primitives are able to construct many
+actual parallel problems.
 
-Third , the use of flow-driven computing model as the basic task of automatic parallelization techniques ,
-Proposes a data parallel problem into a data stream , the method can be tapped
-Potential problems in parallel , and has nothing to do with the problem , versatility is strong.
-Meanwhile, the computing tasks that a stream of data is provided for GPU itself
-Parallel computing model .
 
-Finally , the design of a run-time system , the system can effectively manage the system
-Memory resources , will be calculated efficiently schedule parallel tasks to the GPU execution.
+%% 第三，采用流驱动计算模型作为任务自动并行化的基本技术，
+%% 提出了将数据并行问题转化为数据流的方法，该方法可以挖掘
+%% 问题中的并行潜力，且与问题无关，通用性较强。
+%% 同时，将计算任务表示成数据流的形式非常适合GPU本身提供的
+%% 并行计算模型。
+Third , the use of data-flow driven computing model as the basic technique of automatic parallelization.
+In our design, data parallel problems are translated into data streams,
+which can exploite potential parallel in task. This the method
+is problem independent so can be applied as a generic method.
+At the same time, using data streams to express computing taskes fits
+the GPU computing model well.
+
+%% 最后，设计了一个运行时系统，该系统能够有效地管理系统
+%% 内存资源，将计算并行任务高效地调度到GPU上执行。
+Finally , we design a runtime system. The runtime system can effectively manage the system's
+memory resources and schedule parallel tasks for execution on GPU devices.
 \end{eabstract}
 
 \ekeywords{parallel programming language, functional language, data-flow model, automatical parallelization}
