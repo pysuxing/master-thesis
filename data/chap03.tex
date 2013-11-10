@@ -187,14 +187,14 @@ Rat采用了函数式语言设计，具备函数式程序语言的一般特点�
 将分别介绍Rat采用的函数式语言特性，并在最后进行总结，说明采用函数式设计带来的优势。
 
 \subsection{函数“一等公民”}
-函数式程序语言采用的计算模型是$\lambda$演算（$\lambda$ Calculus）理论FIXME：citehere，是一种在功能上等价于
-图灵机的计算模型FIXME:citehere。Rat是一种强类型语言，
+函数式程序语言采用的计算模型是$\lambda$演算（$\lambda$ Calculus）理论\upcite{Barendsen1994, Barendsen1985}，
+是一种在功能上等价于图灵机的计算模型\upcite{Turing1937}。Rat是一种强类型语言，
 它的理论基础是$\lambda$演算的一个扩展---类型$\lambda$演算（Typed $\lambda$ Calculus）。
 在$\lambda$演算的形式化系统中，所有公式都可以看作函数，也就是说，常量被看作0元函数。
 命令式语言区分“函数”与“数据”的界限在函数式语言中并不存在，函数与数据是等价的，
 函数式语言中函数是一等公民，下面给出其定义：
 \begin{definition}
-  当程序语言中的函数具备下列性质时，称函数为该语言的“一等公民”（first-class citizen）FIXME：citehere：
+  当程序语言中的函数具备下列性质时，称函数为该语言的“一等公民”（first-class citizen）\upcite{Sussman1985}：
   \begin{compactitem}
     \item 函数可以作为参数传递给其他函数，即支持高阶函数；
     \item 函数可以作为其他函数的返回值；
@@ -289,7 +289,7 @@ Rat语言中的函数（函数与数据的总称）都是恒值对象，所以�
 多个子表达式构成，各个子表达式的求值先于整个表达式的求值。
 
 如果一个表达式中应用的函数都是纯函数，那么由$\lambda$演算理论中的
-Church-Rosser定理（也称为菱形性质）FIXME：citehere可以得到下面的定理：
+Church-Rosser定理（也称为菱形性质）\upcite{Barendsen1994}可以得到下面的定理：
 \begin{theorem}
   一个表达式的求值结果与子表达式的求值顺序无关。
 \end{theorem}
@@ -321,7 +321,7 @@ Church-Rosser定理（也称为菱形性质）FIXME：citehere可以得到下面
 计算结果等等。
 
 如何在保留纯函数特性优势的前提下，允许副作用的发生呢？不同函数式语言有不同做法，
-Lisp系语言与ML系语言不是纯函数式的，允许副作用发生，Haskell采用一种MonadFIXME：citehere
+Lisp系语言与ML系语言不是纯函数式的，允许副作用发生，Haskell采用一种Monad\upcite{Wadler1997}
 技术将程序的纯函数部分与副作用部分严格隔离开来，以便在纯函数部分仍旧能够利用
 纯函数特性带来的优良性质。
 
