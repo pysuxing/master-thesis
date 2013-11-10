@@ -114,7 +114,7 @@ Core语言提供了一组非常精简的并行操作原语，它包括了一些�
 
 这组原语存在于典型的函数式语言中，但一般是针对表（List）定义的，其语义也是串行的，
 但Core语言的向量原语是并行的，这是一个显著区别。
-这组原语的选取受到了MapReduce的启发FIXME：citehere。
+这组原语的选取受到了MapReduce的启发\upcite{Dean2008}
 使用这组精简的原语集可以构建更多更为复杂的向量操作，
 如表\ref{tbl:vector-operations}中列出的\texttt{filter}操作就可以按照如下方式定义：\\
 \centerline{\texttt{filter p v = shrink (scan (map p v)) v}}
@@ -315,7 +315,7 @@ Core语言提供了若干的辅助指令，这部分指令既不属于提供数�
 沿着数据流的方向前进。一旦某个计算任务的所有输入数据
 变成可用状态，那么该计算任务就可以执行，并产生新的数据输出。
 
-Rat程序的并行执行采用流驱动计算模型FIXME：citehere，在研究现状中提及流驱动并行语言。
+Rat程序的并行执行采用流驱动计算模型\upcite{Johnston2004}，在研究现状中提及流驱动并行语言。
 流探测技术是Rat程序并行化的关键技术，是程序自动并行化的基础。
 第\ref{subsec:stream-concept}节将首先结合实例说明流的概念，
 第\ref{subsec:stream-detection-algorithm}给出流探测算法的正规描述。
@@ -377,7 +377,8 @@ Rat程序的并行执行采用流驱动计算模型FIXME：citehere，在研究�
 对比观察\ref{fig:n-body-core}与
 图\ref{fig:n-body-stream}可以发现，表达式树与向量流图都可以反映整个表达式的求值过程，只不过表达式树采用
 自顶向下的求值逻辑，其含义是：如果想要求解某个表达式的值，那么要先求解它依赖的子表达式的值。
-而向量流图采用了流驱动（data-flow driven）方式FIXME：citehere，其含义是：一旦某条流中的某个结点值可用，那么从该结点
+而向量流图采用了流驱动（data-flow driven）方式\upcite{Johnston2004}，
+其含义是：一旦某条流中的某个结点值可用，那么从该结点
 分支出去的所有流都可以继续向前计算。
 
 %% 综上，将程序中的流抽象出来有两方面作用：
@@ -390,7 +391,7 @@ Rat程序的并行执行采用流驱动计算模型FIXME：citehere，在研究�
 算法\ref{alg:stream-detection}给出了流探测算法的正规描述。
 
 流探测算法是一个以
-树的深度优先遍历FIXME：citehere为基础的递归算法，根据Core语法树不同结点类型做不同处理，
+树的深度优先遍历\upcite{Tarjan1972}为基础的递归算法，根据Core语法树不同结点类型做不同处理，
 流探测算法处理的结点类型包括对象引用结点（object-ref）、
 函数应用结点（function-app）、$\lambda$表达式结点（lambda-exp）、
 条件分支结点（conditional），字面量结点（literal）无需处理。
