@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70005" creator="Ipe 7.1.1">
-<info created="D:20131107115433" modified="D:20131107144859"/>
+<info created="D:20131107115433" modified="D:20131111142745"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -304,8 +304,7 @@ h
 176 624 m
 288 624 l
 </path>
-<text matrix="1 0 0 1 -48 96" transformations="translations" pos="160 528" stroke="black" type="label" width="65.736" height="9.803" depth="0" halign="center" valign="baseline" size="Large">CPU Mem</text>
-<text matrix="1 0 0 1 112 96" transformations="translations" pos="160 528" stroke="black" type="label" width="66.613" height="9.803" depth="0" halign="center" valign="baseline" size="Large">GPU Mem</text>
+<text matrix="1 0 0 1 112 96" transformations="translations" pos="160 528" stroke="black" type="label" width="86.513" height="9.803" depth="2.79" halign="center" valign="baseline" size="Large">GPU Memory</text>
 <path matrix="1 0 0 1 -48 48" stroke="black" pen="heavier">
 96 768 m
 96 560 l
@@ -321,6 +320,7 @@ h
 h
 </path>
 <text matrix="1 0 0 1 -48 48" transformations="translations" pos="112 720" stroke="black" type="label" width="14.437" height="9.245" depth="0" valign="center" size="Large">v1</text>
-<text matrix="1 0 0 1 -48 -32" transformations="translations" pos="112 720" stroke="black" type="label" width="14.437" height="9.245" depth="0" valign="center" size="Large">v1</text>
+<text matrix="1 0 0 1 -48 -32" transformations="translations" pos="112 720" stroke="black" type="label" width="14.437" height="9.245" depth="0" valign="center" size="Large">v2</text>
+<text matrix="1 0 0 1 -67 95" transformations="translations" pos="160 528" stroke="black" type="label" width="85.636" height="9.803" depth="2.79" halign="center" valign="baseline" size="Large">CPU Memory</text>
 </page>
 </ipe>
