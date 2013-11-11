@@ -4,7 +4,7 @@ digraph g {
         node[shape=record];
 
         input[shape=record, label="input[0] | ... | <p0> input[m] | ... | <p1> input[n] | ..."];
-        gcopy[label="gcopy\n(m, n, 1, 1)"];
+        gcopy[label="gcopy\n(m, n, 1)"];
         temp[shape=record, label="<p0> input[m] | ... | <p1> input[n]"];
         map[label="f"];
         output[shape=record, label="<p0> output[0] | ... | output[n-m]"];

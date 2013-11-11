@@ -6,7 +6,7 @@ digraph g {
         input[shape=record, label="<p0> input[0] | ... | <p1> input[m] | ... | <p2> input[n] | ..."];
         map[label="f"];
         temp[shape=record, label="<p0> temp[0] | ... | <p1> temp[m] | ... | <p2> temp[n] | ..."];
-        gcopy[label="gcopy\n(m, n, 1, 1)"];
+        gcopy[label="gcopy\n(m, n, 1)"];
         output[shape=record, label="<p0> output[0] | ... | <p1> output[n-m]"];
 
         input:p0 -> map;
