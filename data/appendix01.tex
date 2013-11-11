@@ -45,20 +45,14 @@
                  \alt     '(' <expression> ')'
 
 <literal>        ::=    <number>
-                 \alt     <boolean>
+                 %% \alt     <boolean>
                  \alt     <character>
                  \alt     <tuple literal>
                  \alt     <vector literal>
 
 <tuple literal>  ::=    '(' <literal> (',' <literal>)+ ')'
 
-<vector literal> ::=    '[' <start> ',' <end> (',' <step>)? ']'
-
-<start>          ::=    <number>
-
-<end>            ::=    <number>
-
-<step>           ::=    <number>
+<vector literal> ::=    '[' <number> ':' <number> (':' <number>)? ']'
 
 <variable ref>   ::=    <variable>
 
@@ -122,8 +116,8 @@
                  \alt     <floating>
 
 <integer>        ::=    <decimal>
-                 ::=    ('0O' | '0o') <octal>
-                 ::=    ('0X' | '0x') <hexadecimal>
+                 \alt    ('0O' | '0o') <octal>
+                 \alt    ('0X' | '0x') <hexadecimal>
 
 <decimal>        ::=    <digit>+
 
@@ -148,5 +142,5 @@
 
 <whitespace>     ::=    <space> | <tab> | <newline> | <comment>
 
-<comment>        ::=    '--' <any character>* <newline>
+<comment>        ::=    '- -' <any character>* <newline>
 \end{grammar}

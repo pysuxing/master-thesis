@@ -1,4 +1,6 @@
 \chapter{Core标量原语}\label{chap:core-scalar-primitives}
+表\ref{tbl:scalar-primitives}给出了Core的标量原语，某些原语的功能说明内容较多不适合在表中列出，
+这些原语的具体功能可以参考同名标准C数学函数。
 
 \begin{longtable}[c]{ccll}
   \caption[标量原语]{标量原语（注：$x$，$y$，$z$分别表示标量原语的第1、2、3个形式参数）}
@@ -17,11 +19,17 @@
   \multicolumn{4}{r}{续下页}
   \endfoot
   \endlastfoot
-  \texttt{daoshu} & 1 & \texttt{Floating a => a -> a} & $1/x$\\
   \texttt{+} & 2 & \texttt{Num a => a -> a -> a} & $x+y$\\
   \texttt{-} & 2 & \texttt{Num a => a -> a -> a} & $x-y$\\
   \texttt{*} & 2 & \texttt{Num a => a -> a -> a} & $x*y$\\
   \texttt{/} & 2 & \texttt{Num a => a -> a -> a} & $x/y$\\
+  \texttt{and} & 2 & \texttt{Boolean a => a -> a -> a} & logical and\\
+  \texttt{or} & 2 & \texttt{Boolean a => a -> a -> a} & logical or\\
+  \texttt{xor} & 2 & \texttt{Boolean a => a -> a -> a} & logical xor\\
+  \texttt{\&} & 2 & \texttt{Integer a => a -> a -> a} & bitwise and\\
+  \texttt{|} & 2 & \texttt{Integer a => a -> a -> a} & bitwise or\\
+  \texttt{\^} & 2 & \texttt{Integer a => a -> a -> a} & bitwise xor\\
+  \texttt{reciprocal} & 1 & \texttt{Floating a => a -> a} & $1/x$\\
   \texttt{sqrt} & 1 & \texttt{Floating a => a -> a} & $\sqrt{x}$\\
   \texttt{rsqrt} & 1 & \texttt{Floating a => a -> a} & $1/\sqrt{x}$\\
   \texttt{cbrt} & 1 & \texttt{Floating a => a -> a} & $\sqrt[3]{x}$\\
@@ -59,24 +67,6 @@
   \texttt{erfcinv} & 1 & \texttt{Floating a => a -> a} & $erfc^{-1}(x)$\\
   \texttt{erfcx} & 1 & \texttt{Floating a => a -> a} & $e^{x^2}\cdot{}erfc(x)$\\
 
-  \texttt{normcdf} & 1 & \texttt{Floating a => a -> a} & $\Phi(x)$\\
-  %% $\int_{-\infty}^{x}\frac{1}{\sqrt{2\pi}}\exp(-\frac{t^2}{2\sigma^2})dt$\\
-  \texttt{normcdfinv} & 1 & \texttt{Floating a => a -> a} & $\Phi^{-1}(x)$\\%% $normcdf^{-1} x$\\
-  \texttt{lgamma} & 1 & \texttt{Floating a => a -> a} & $\ln|\int_0^\infty{}e^{-t}t^{x-1}dt|$\\
-  \texttt{tgamma} & 1 & \texttt{Floating a => a -> a} & $\int_0^\infty{}e^{-t}t^{x-1}dt$\\
-  \multirow{2}*{\texttt{fma}} & \multirow{2}*{3} &
-  \texttt{Floating a =>} & \multirow{2}*{$x*y+z$}\\
-  & & \texttt{a -> a -> a -> a} &\\
-  \texttt{frexp} & 1 & \texttt{Floating a => a -> (a, Int)} & \\
-  \texttt{logb} & 1 & \texttt{Floating a => a -> a} & \\
-  \texttt{ilogb} & 1 & \texttt{Floating a => a -> Int} & \\
-  \multirow{2}*{\texttt{ldexp}} & \multirow{2}*{2} &
-  \texttt{Floating a, Integer i =>} & \multirow{2}*{$x\cdot{}2^y$}\\
-  & & \texttt{a -> i -> a} & \\
-  \multirow{2}*{\texttt{scalbn}} & \multirow{2}*{2} &
-  \texttt{Floating a, Integer i =>} & \multirow{2}*{$x\cdot{}2^y$}\\
-  & & \texttt{a -> i -> a} & \\
-  %% \texttt{scalbln} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
   \texttt{j0} & 1 & \texttt{Floating a => a -> a} & $J_0(x)$\\
   \texttt{j1} & 1 & \texttt{Floating a => a -> a} & $J_1(x)$\\
   \texttt{jn} & 1 & \texttt{Floating a => a -> a} & $J_n(x)$\\
@@ -95,6 +85,24 @@
   \texttt{floor} & 1 & \texttt{Floating a => a -> a} & $\lfloor x \rfloor$\\
   \texttt{lrint} & 1 & \texttt{Floating a => a -> Int} & \\
   \texttt{lround} & 1 & \texttt{Floating a => a -> Int} & $\sinh x$\\
+  \texttt{normcdf} & 1 & \texttt{Floating a => a -> a} & $\Phi(x)$\\
+  %% $\int_{-\infty}^{x}\frac{1}{\sqrt{2\pi}}\exp(-\frac{t^2}{2\sigma^2})dt$\\
+  \texttt{normcdfinv} & 1 & \texttt{Floating a => a -> a} & $\Phi^{-1}(x)$\\%% $normcdf^{-1} x$\\
+  \texttt{lgamma} & 1 & \texttt{Floating a => a -> a} & $\ln|\int_0^\infty{}e^{-t}t^{x-1}dt|$\\
+  \texttt{tgamma} & 1 & \texttt{Floating a => a -> a} & $\int_0^\infty{}e^{-t}t^{x-1}dt$\\
+  \multirow{2}*{\texttt{fma}} & \multirow{2}*{3} &
+  \texttt{Floating a =>} & \multirow{2}*{$x*y+z$}\\
+  & & \texttt{a -> a -> a -> a} &\\
+  \texttt{frexp} & 1 & \texttt{Floating a => a -> (a, Int)} & \\
+  \texttt{logb} & 1 & \texttt{Floating a => a -> a} & \\
+  \texttt{ilogb} & 1 & \texttt{Floating a => a -> Int} & \\
+  \multirow{2}*{\texttt{ldexp}} & \multirow{2}*{2} &
+  \texttt{Floating a, Integer i =>} & \multirow{2}*{$x\cdot{}2^y$}\\
+  & & \texttt{a -> i -> a} & \\
+  \multirow{2}*{\texttt{scalbn}} & \multirow{2}*{2} &
+  \texttt{Floating a, Integer i =>} & \multirow{2}*{$x\cdot{}2^y$}\\
+  & & \texttt{a -> i -> a} & \\
+  %% \texttt{scalbln} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
   %% \texttt{llrint} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
   %% \texttt{llround} & 1 & \texttt{Floating a => a -> a} & $\sinh x$\\
   \bottomrule[1.5pt]

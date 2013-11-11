@@ -1,4 +1,4 @@
-\chapter{Rat编译实现技术}\label{chap:compiler}
+\chapter{Rat编译技术}\label{chap:compiler}
 第\ref{chap:frontend}章介绍了Rat语言的语法设计，简洁优雅的语法为编程者提供了
 良好的编程界面，解决了并行编程工具的易用性问题。那么另一方面，
 高效性要依靠语言的编译实现技术解决。
@@ -45,6 +45,7 @@
       \toprule[1.5pt]
       {\hei 结点类型} & {\hei 描述} \\
       \midrule[1pt]
+      export & C语言接口声明\\
       type-define & 类型定义\\
       object-decl & 对象声明\\
       object-def & 对象定义\\
@@ -114,7 +115,7 @@ Core语言提供了一组非常精简的并行操作原语，它包括了一些�
 
 这组原语存在于典型的函数式语言中，但一般是针对表（List）定义的，其语义也是串行的，
 但Core语言的向量原语是并行的，这是一个显著区别。
-这组原语的选取受到了MapReduce的启发\upcite{Dean2008}
+这组原语的选取受到了MapReduce的启发\upcite{Dean2008}。
 使用这组精简的原语集可以构建更多更为复杂的向量操作，
 如表\ref{tbl:vector-operations}中列出的\texttt{filter}操作就可以按照如下方式定义：\\
 \centerline{\texttt{filter p v = shrink (scan (map p v)) v}}
@@ -259,7 +260,7 @@ Core语言标量原语的完整列表。
 \texttt{scan}才可以并行执行，所以，只有满足该性质的标量原语可以作为
 参数传递给\texttt{scan}。表\ref{tbl:monoid-scalar-primitives}列出了所有满足这种性质
 的标量原语。
-\begin{table}
+\begin{table}[htb]
   \centering
   \caption{满足结合律的标量原语}
   \label{tbl:monoid-scalar-primitives}
@@ -283,7 +284,7 @@ Core语言标量原语的完整列表。
 Core语言提供了若干的辅助指令，这部分指令既不属于提供数值计算能力的
 标量原语，也不属于提供并行计算能力的向量原语。
 表\ref{tbl:assist-instruction}列出了他们的名称及功能。
-\begin{table}
+\begin{table}[htb]
   \centering
   \caption{辅助指令}
   \label{tbl:assist-instruction}
@@ -311,12 +312,12 @@ Core语言提供了若干的辅助指令，这部分指令既不属于提供数�
 \texttt{foreach}指令与嵌套循环的处理有关，这将在第\ref{subsec:np-decomposition}节说明。
 
 \section{流探测技术}\label{sec:stream-detection}
-在流驱动计算模型中，问题被表示为数据流图的形式，
+在流驱动计算模型\upcite{Johnston2004}中，问题被表示为数据流图的形式，
 数据之间存在的依赖关系由数据流图显式给出，计算过程
 沿着数据流的方向前进。一旦某个计算任务的所有输入数据
 变成可用状态，那么该计算任务就可以执行，并产生新的数据输出。
 
-Rat程序的并行执行采用流驱动计算模型\upcite{Johnston2004}，在研究现状中提及流驱动并行语言。
+Rat程序的并行执行采用流驱动计算模型。
 流探测技术是Rat程序并行化的关键技术，是程序自动并行化的基础。
 第\ref{subsec:stream-concept}节将首先结合实例说明流的概念，
 第\ref{subsec:stream-detection-algorithm}给出流探测算法的正规描述。
@@ -328,12 +329,6 @@ Rat程序的并行执行采用流驱动计算模型\upcite{Johnston2004}，在�
 %% 同时在单一流上可以实施上一节中提出的高层优化技术。
 
 \subsection{向量流图}\label{subsec:stream-concept}
-第\ref{subsec:functional-advantages}节中提到，纯函数特性使得表达式的求值结果与子表达式求值顺序无关，
-用树的形式表示，就是整个表达式树的求值结果与各个子树的求值顺序无关。用向量流图表示，
-就是不同流的计算过程可以独立执行，他们的执行顺序不影响最终结果。
-同时，将流的概念抽象出来，也为应用第\ref{sec:stream-optimization}节提出的流优化技术
-创造了条件。
-
 我们将连续的向量操作序列与这些操作输出的向量序列称之为“流”，其定义如下：
 \begin{definition}
   称施加在某个数据向量上的向量操作序列为程序中任务流，由这个向量操作序列生成的向量数据序列
@@ -381,6 +376,12 @@ Rat程序的并行执行采用流驱动计算模型\upcite{Johnston2004}，在�
 而向量流图采用了流驱动（data-flow driven）方式\upcite{Johnston2004}，
 其含义是：一旦某条流中的某个结点值可用，那么从该结点
 分支出去的所有流都可以继续向前计算。
+
+第\ref{subsec:functional-advantages}节中提到，纯函数特性使得表达式的求值结果与子表达式求值顺序无关，
+用树的形式表示，就是整个表达式树的求值结果与各个子树的求值顺序无关。用向量流图表示，
+就是不同流的计算过程可以独立执行，他们的执行顺序不影响最终结果。
+同时，将流的概念抽象出来，也为应用第\ref{sec:stream-optimization}节提出的流优化技术
+创造了条件。
 
 %% 综上，将程序中的流抽象出来有两方面作用：
 %% \begin{compactitem}
@@ -495,11 +496,11 @@ Core语法树结点类型参见表\ref{tbl:l2-ast}，
 \end{quotation}
 \begin{figure}
   \centering
-  \subfloat[\texttt{gcopy (m, n, 1, 1) (map f input)}]{
+  \subfloat[\texttt{gcopy (m, n, 1) (map f input)}]{
     \includegraphics[height=4cm]{vp-reorder-1}
   }
   \\
-  \subfloat[\texttt{map f (gcopy (m, n, 1, 1) input)}]{
+  \subfloat[\texttt{map f (gcopy (m, n, 1) input)}]{
     \includegraphics[height=4cm]{vp-reorder-2}
   }
   \caption{向量原语重排示例}
@@ -695,7 +696,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 
 \subsection{嵌套并行分解}\label{subsec:np-decomposition}
 前文节中已经提及，虽然Rat只提供了一维向量原语，但由于支持高阶函数，
-编程者可以使用一维向量原语表达高维的并行操作，即支持嵌套并行。
+编程者可以使用一维向量原语和嵌套向量类型表达高维的并行操作，即支持嵌套并行。
 
 简而言之，嵌套并行是因为在一个标量操作的内部逻辑中引入了向量操作。
 一维并行与嵌套并行的关系类似于串行语言中单层循环与嵌套循环的关系，
@@ -722,7 +723,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 的向量原语，其中\texttt{map}，\texttt{scan}，\texttt{gpermute}，\texttt{sort}
 在参数中引入了标量操作，从而可能引起嵌套并行的出现，而在实践当中，
 一般只有\texttt{map}原语引用的标量操作会在内部会包含向量操作，造成嵌套并行，
-因而，下面我们只分解考虑\texttt{map}原语引入嵌套并行。
+因而，下面我们只考虑\texttt{map}原语引入嵌套并行。
 
 %% 在将程序最终翻译成C程序的时候，向量流图中每一个向量操作都会被封装成一个任务结构发送给任务调度器，
 %% 具体形式就是一个运行时系统API调用。
@@ -732,8 +733,8 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 思路简单，而且支持任意多层嵌套并行的处理，嵌套并行最终被转化成一批等规模的一维向量操作，
 规模等于最内层向量操作的规模。
 
-一般地，对于一个嵌套并行操作\texttt{map sopContainingVop v}
-我们将它转化成下面的形式：\texttt{foreach v sopContainingVop}
+一般地，对于一个嵌套并行操作：\texttt{map sopContainingVop v}，
+我们将它转化成下面的形式：\texttt{foreach v sopContainingVop}。
 正如前面一节所说，\texttt{foreach}指令将生成一个任务队列。
 
 %% 算法\ref{alg:np-decomposition}给出了
@@ -780,7 +781,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 Core语言指令集包括一组向量原语，
 大量标量原语以及少量辅助指令。
 标量原语为Rat提供了数据并行能力，标量原语提供了数值计算能力。
-Core语言适合描述数据并行问题，同时它的标量原语可以在并行硬件上高效实现。
+Core语言适合描述数据并行问题，同时它的向量原语可以在并行硬件上高效实现。
 
 流探测技术是Rat编译实现中另一个关键技术，
 它为程序的自动并行化提供了支持。向量流图与流驱动模型是一种
