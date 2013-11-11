@@ -45,20 +45,14 @@
                  \alt     '(' <expression> ')'
 
 <literal>        ::=    <number>
-                 \alt     <boolean>
+                 %% \alt     <boolean>
                  \alt     <character>
                  \alt     <tuple literal>
                  \alt     <vector literal>
 
 <tuple literal>  ::=    '(' <literal> (',' <literal>)+ ')'
 
-<vector literal> ::=    '[' <start> ',' <end> (',' <step>)? ']'
-
-<start>          ::=    <number>
-
-<end>            ::=    <number>
-
-<step>           ::=    <number>
+<vector literal> ::=    '[' <number> ':' <number> (':' <number>)? ']'
 
 <variable ref>   ::=    <variable>
 
