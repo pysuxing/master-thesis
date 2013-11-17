@@ -1,4 +1,13 @@
-pdf:
+all: anon open
+
+anon:
+	xelatex thesis-anon
+	bibtex thesis-anon
+	bibtex thesis-anon
+	xelatex thesis-anon
+	xelatex thesis-anon
+
+open:
 	xelatex thesis
 	# makeindex -s nomencl.ist -o thesis.nls thesis.nlo
 	bibtex thesis
