@@ -19,7 +19,7 @@
 首先，该语言采用函数式程序语言设计，抽象层次高，表达能力强，
 大大降低了并行编程的难度。
 
-第二，设计了一门中间语言Core，该语言采用基于并行向量原语的编程模型，
+第二，设计了一门中间语言Core，该语言提供了一种基于并行向量原语的编程模型，
 非常适合表达数据并行问题，使用一组精简的向量原语就可以构造许多
 实际的并行程序。
 
@@ -30,11 +30,11 @@
 并行计算模型。
 
 最后，设计了一个运行时系统，该系统能够有效地管理系统
-内存资源，将计算并行任务高效地调度到GPU上执行。
+内存资源，能够动态、高效地将并行计算任务调度到GPU上执行。
 
 
 \end{cabstract}
-\ckeywords{并行编程语言, 函数式语言, 流驱动模型, 自动并行化}
+\ckeywords{并行程序语言, 函数式语言, 流驱动模型, 自动并行化, 运行时系统}
 
 \begin{eabstract}
 %% 当前，计算机硬件系统正朝着并行化与异构化的趋势发展。继多核微处理器
@@ -107,5 +107,6 @@ Finally , we design a runtime system. The runtime system can effectively manage 
 memory resources and schedule parallel tasks for execution on GPU devices.
 \end{eabstract}
 
-\ekeywords{parallel programming language, functional language, data-flow model, automatical parallelization}
+\ekeywords{parallel programming language, functional language, data-flow model, automatical parallelization,
+  runtime system}
 
