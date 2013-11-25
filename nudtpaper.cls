@@ -388,6 +388,12 @@
     \xiaosi
     \@afterheading}
     {\par\vspace{2em}\par}
+\newenvironment{resume2}{%
+    \chapter*{作者在学期间参与的科研项目}
+    \addcontentsline{toc}{chapter}{作者在学期间参与的科研项目}
+    \xiaosi
+    \@afterheading}
+    {\par\vspace{2em}\par}
 \renewtheoremstyle{nonumberplain}%
 {\item[\hspace*{2em} \theorem@headerfont ##1\ \theorem@separator]}%
 {\item[\hspace*{2em} \theorem@headerfont ##1\ (##3)\theorem@separator]}
