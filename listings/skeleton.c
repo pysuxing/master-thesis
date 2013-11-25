@@ -12,6 +12,7 @@ int rat_init()
         t = ...;
         runtime_add_task(t);
     }
+    return 0;
 }
 
 int rat_run()                   /* called by external C routines */
