@@ -2,7 +2,7 @@ digraph G {
         rankdir=LR;
         node[shape=box];
         
-        cells;
+        cells[shape=record, label="<p0> cells[0] | <p1> cells[1] | <p2> .\n.\n.| <pm> cells[n-2] | <pn> cells[n-1]"];
         t0[label=""];
         t1[label=""];
         dots[label=".\n.\n.", shape=plaintext];
@@ -10,11 +10,11 @@ digraph G {
         tn[label=""];
         result[shape=record, label="<p0> acc[0] | <p1> acc[1] | .\n.\n.| <pm> acc[n-2] | <pn> acc[n-1]"];
 
-        cells -> t0[label="map (calcSingleAcc cells[0])"];
-        cells -> t1[label="map (calcSingleAcc cells[1])"];
-        cells -> dots[color=transparent];
-        cells -> tm[label="map (calcSingleAcc cells[n-2])"];
-        cells -> tn[label="map (calcSingleAcc cells[n-1])"];
+        cells:p0 -> t0[label="calcAccelerate"];
+        cells:p1 -> t1[label="calcAccelerate"];
+        cells:p2 -> dots[color=transparent];
+        cells:pm -> tm[label="calcAccelerate"];
+        cells:pn -> tn[label="calcAccelerate"];
         t0 -> result:p0[label="fold +"];
         t1 -> result:p1[label="fold +"];
         tm -> result:pm[label="fold +"];

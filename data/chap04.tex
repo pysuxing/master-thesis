@@ -654,7 +654,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
   \kai{
     在\texttt{n-body}问题的向量流图\ref{fig:n-body-stream}中，有一条用虚线绘制的有向边，
     该边从\texttt{cells}结点指向\texttt{accelerates}结点。
-    \texttt{accelerates}结点的求值表达式为\texttt{map (calcSingleAcc cell) cells}，
+    \texttt{accelerates}结点的求值表达式为\texttt{map calcAccelerate cells}，
     因为\texttt{calcAccelerate}并不是一个向量数据，而是一个函数，
     是一个由\texttt{map}施加在\texttt{cells}之上的标量操作。
     它之所以出现在向量流图中，是因为它的内部引用了两个向量操作\texttt{map}
@@ -709,7 +709,7 @@ C语言中的任务结构\texttt{task}定义在下面的代码中给出,
 
 \begin{quotation}
   \kai{
-    经过嵌套并行分解处理，n-body问题中包含嵌套并行操作的表达式\texttt{map (calcSingleAcc cell) cells}
+    经过嵌套并行分解处理，n-body问题中包含嵌套并行操作的表达式\texttt{map calcAccelerate cells}
     实际上被翻译成一组数量为\texttt{cells}长度的一维向量操作，如图\ref{fig:np-decomposition}。
     从图中可以看出，嵌套并行分解生成了一组新的流，这些流的结构相同，仅存在一些参数上的差异，
     这种参数差异反映了内层并行操作对外层向量数据不同位置元素的引用。
